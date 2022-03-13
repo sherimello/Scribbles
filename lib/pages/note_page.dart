@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
+import 'package:scribbles/pages/home.dart';
 import 'package:scribbles/popup_card/custom_rect_tween.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -81,7 +82,6 @@ class _NotePageState extends State<NotePage> {
             ? insertData(myController2.text, myController.text)
                 .whenComplete(() => {showData(context)})
             : Navigator.pop(context, false);
-
 
         return false;
       },
@@ -272,7 +272,10 @@ class _NotePageState extends State<NotePage> {
       print(list);
     }
 
-    Navigator.pop(context, false);
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const Home()),
+    );
   }
 }
 

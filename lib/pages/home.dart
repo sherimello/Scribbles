@@ -33,7 +33,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     var databasesPath = await getDatabasesPath();
     path = join(databasesPath, 'demo.db');
     // open the database
-    database = await openDatabase(path, version: 1,onCreate: (Database db, int version) async {
+    database = await openDatabase(path, version: 1,
+        onCreate: (Database db, int version) async {
       // When creating the db, create the table
       await db.execute(
           'CREATE TABLE Notes (id INTEGER PRIMARY KEY, title VARCHAR, note VARCHAR)');
@@ -69,6 +70,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         ),
       );
     }
+
     return Scaffold(
       appBar: AppBar(
         elevation: 3,
@@ -100,13 +102,14 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   shrinkWrap: true,
                   crossAxisCount: 2,
                   itemCount:
-                  // list.isEmpty ? 0:
-                  size,
+                      // list.isEmpty ? 0:
+                      size,
                   itemBuilder: (BuildContext context, int index) =>
-                  // list.isEmpty ? Container():
+                      // list.isEmpty ? Container():
                       PreviewCard(
-                    id: index.toString(), title: list[index]["title"].toString(), note: list[index]["note"].toString()
-                  ),
+                          id: index.toString(),
+                          title: list[index]["title"].toString(),
+                          note: list[index]["note"].toString()),
                   // PreviewCard(
                   //   id: list.asMap()["id"].toString(), title: list.asMap()["title"].toString(), note: list.asMap()["note"].toString()
                   // ),

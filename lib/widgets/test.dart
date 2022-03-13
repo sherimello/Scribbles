@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../pages/home.dart';
 import '../pages/note_page.dart';
 import '../popup_card/custom_rect_tween.dart';
 import '../popup_card/hero_dialog_route.dart';
@@ -67,6 +68,12 @@ class Test extends StatelessWidget {
                             ),
                             // settings: const RouteSettings(),
                           ));
+                          // Navigator.removeRoute(
+                          //   context,
+                          //   MaterialPageRoute(
+                          //     builder: (BuildContext context) => const Home(),
+                          //   ),
+                          // );
                         },
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
