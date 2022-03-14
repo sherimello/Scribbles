@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:scribbles/pages/note_page.dart';
 import 'package:scribbles/popup_card/custom_rect_tween.dart';
 import 'package:scribbles/popup_card/hero_dialog_route.dart';
 import 'package:scribbles/popup_card/models.dart';
@@ -8,7 +7,9 @@ import 'package:scribbles/widgets/note_card.dart';
 class PreviewCard extends StatefulWidget {
   final String title, note, id;
 
-  const PreviewCard({Key? key, required this.id, required this.title, required this.note}) : super(key: key);
+  const PreviewCard(
+      {Key? key, required this.id, required this.title, required this.note})
+      : super(key: key);
 
   @override
   State<PreviewCard> createState() => _PreviewCardState();
@@ -50,10 +51,10 @@ class _PreviewCardState extends State<PreviewCard> {
         child: Card(
             elevation: 7,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(9),
+              borderRadius: BorderRadius.circular(19),
             ),
             // color: Colors.teal[200],
-            color: Colors.orangeAccent[200],
+            color: Colors.orangeAccent,
             child: Padding(
               padding: const EdgeInsets.all(11.0),
               child: Column(
@@ -80,22 +81,29 @@ class _PreviewCardState extends State<PreviewCard> {
                       // t1,
                       widget.title,
                       style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 19, fontFamily: 'varela-round.regular'),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 19,
+                          fontFamily: 'varela-round.regular'),
                     ),
-                  ),Text(
-                    // t1,
-                    widget.note,
+                  ),
+                  Text(
+                    date,
                     style: const TextStyle(
-                        fontWeight: FontWeight.w500, fontSize: 15),
+                        fontWeight: FontWeight.bold, color: Colors.black54, fontSize: 13, fontFamily: 'Rounded_Elegance'),
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 8.0),
                     child: Text(
-                      date,
+                      // t1,
+                      widget.note,
+                      maxLines: 7,
                       style: const TextStyle(
-                          fontWeight: FontWeight.bold, color: Colors.black54),
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                          fontFamily: 'Rounded_Elegance',
+                          color: Colors.black54),
                     ),
-                  )
+                  ),
                 ],
               ),
             )),

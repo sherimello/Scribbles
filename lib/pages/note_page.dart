@@ -92,6 +92,24 @@ class _NotePageState extends State<NotePage> {
         },
         child: SafeArea(
           child: Scaffold(
+            appBar:AppBar(
+              automaticallyImplyLeading: false,
+              elevation: 3,
+              backgroundColor: Colors.black,
+              title: const Padding(
+                padding: EdgeInsets.all(0.0),
+                child: Text(
+                  'Scribbles',
+                  style: TextStyle(
+                    // letterSpacing: 2,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 21,
+                    fontFamily: 'varela-round.regular',
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
             // appBar: AppBar(
             //   automaticallyImplyLeading: false,
             //   elevation: 0,
@@ -125,6 +143,7 @@ class _NotePageState extends State<NotePage> {
             //     ),
             //   ),
             // ),
+            backgroundColor: Colors.orangeAccent[100],
             body: CustomPaint(
               foregroundPainter: CustomPage(gap, 0),
               child: SingleChildScrollView(
@@ -148,11 +167,11 @@ class _NotePageState extends State<NotePage> {
                               focusNode: myFocusNode2,
                               controller: myController2,
                               style: TextStyle(
-                                fontSize: 19,
-                                letterSpacing: 1,
+                                fontSize: 17,
+                                // letterSpacing: 1,
                                 height: gap / 17,
                                 fontWeight: FontWeight.bold,
-                                fontFamily: 'PizzaismyFAVORITE',
+                                fontFamily: 'varela-round.regular',
                                 // height: ((height * .045) / (height * .025)),
                                 // ((height * .045) + (height * .01)) /
                                 //     19, // formula: {(distance of the horizontal lines (here 40 px)) + (vertical padding of the TextField (here 9 px))} / fontSize (20 sp);
@@ -160,10 +179,10 @@ class _NotePageState extends State<NotePage> {
                               decoration: InputDecoration(
                                 hintText: ' title here...',
                                 hintStyle: const TextStyle(
-                                  letterSpacing: 1,
-                                  fontFamily: 'PizzaismyFAVORITE',
+                                  // letterSpacing: 1,
+                                  fontFamily: 'varela-round.regular',
                                   // fontStyle: FontStyle.italic,
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.w500,
                                 ),
                                 // fillColor: Colors.red,
                                 // filled: true,
@@ -171,11 +190,11 @@ class _NotePageState extends State<NotePage> {
                                 // isDense: true,
                                 prefixIcon: const Icon(
                                   Icons.drive_file_rename_outline,
-                                  size: 31,
+                                  size: 27,
                                 ),
                                 prefixIconConstraints: const BoxConstraints(
-                                  minWidth: 41,
-                                  minHeight: 31,
+                                  minWidth: 47,
+                                  minHeight: 35,
                                 ),
                                 contentPadding: EdgeInsets.only(
                                     // vertical: 0,
@@ -207,9 +226,11 @@ class _NotePageState extends State<NotePage> {
                                 maxLines: null,
                                 minLines: null,
                                 style: TextStyle(
-                                  fontSize: 17,
-                                  letterSpacing: 0,
+                                  fontSize: 14,
+                                  // letterSpacing: 0,
                                   height: gap / 17,
+                                  fontWeight: FontWeight.w700,
+                                  fontFamily: 'Rounded_Elegance'
                                   // height: ((height * .045) / (height * .025)),
                                   // ((height * .045) + (height * .01)) /
                                   //     19, // formula: {(distance of the horizontal lines (here 40 px)) + (vertical padding of the TextField (here 9 px))} / fontSize (20 sp);
@@ -288,11 +309,11 @@ class CustomPage extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final verticalLine = Paint()
-      ..color = Colors.pinkAccent
-      ..strokeWidth = 2.0;
+      ..color = Colors.black
+      ..strokeWidth = 1.0;
 
     final horizontalLine = Paint()
-      ..color = Colors.blueGrey.withOpacity(0.61)
+      ..color = Colors.black26
       ..strokeWidth = 1.0;
 
     if (i == 0) {

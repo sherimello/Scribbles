@@ -22,7 +22,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       date = '19-3-93';
   late Database database;
   late List<Map> list;
-  List notes = [];
 
 // Get a location using getDatabasesPath
   late String path;
@@ -73,6 +72,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         elevation: 3,
         backgroundColor: Colors.black,
         title: const Padding(
@@ -116,8 +116,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   staggeredTileBuilder: (int index) =>
                       const StaggeredTile.fit(1),
                   // StaggeredTile.coimport 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';unt(2, index.isEven ? 2 : 1),
-                  mainAxisSpacing: 4.0,
-                  crossAxisSpacing: 4.0,
+                  mainAxisSpacing: 9.0,
+                  crossAxisSpacing: 9.0,
                 )),
             Positioned(
                 bottom: 21,

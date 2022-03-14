@@ -16,58 +16,71 @@ class NoteCard extends StatelessWidget {
       },
       child: Card(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(11),
+          borderRadius: BorderRadius.circular(19),
         ),
-        color: Colors.orangeAccent[200],
+        color: Colors.orangeAccent[100],
         child: SizedBox(
           width: MediaQuery.of(context).size.width * .85,
           height: MediaQuery.of(context).size.height * .65,
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(11.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        children: const [
-                          Spacer(),
-                          Icon(
-                            Icons.push_pin_sharp,
-                            color: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(8.0,8.0,8.0,19.0),
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(11.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            children: const [
+                              Spacer(),
+                              Icon(
+                                Icons.push_pin_sharp,
+                                color: Colors.black,
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 5.0),
+                          child: Center(
+                            child: Text(
+                              // t1,
+                              title,
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 23, fontFamily: 'varela-round.regular'),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 0.0),
+                          child: Center(
+                            child: Text(
+                              '(' + date + ')',
+                              style: const TextStyle(
+                                   color: Colors.black87, fontSize: 13, fontFamily: 'Rounded_Elegance'),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 15.0),
+                          child: SelectableText(
+                            // t1,
+                            note,
+                            showCursor: false,
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w700, fontSize: 14, fontFamily: 'Rounded_Elegance'),
+                          ),
+                        )
+                      ],
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 5.0),
-                      child: Text(
-                        // t1,
-                        title,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 19),
-                      ),
-                    ),
-                    Text(
-                      // t1,
-                      note,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.w500, fontSize: 15),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: Text(
-                        date,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold, color: Colors.black54),
-                      ),
-                    )
-                  ],
-                ),
-              )
-            ],
+                  )
+                ],
+              ),
+            ),
           ),
         ),
       ),
