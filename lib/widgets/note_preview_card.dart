@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:scribbles/popup_card/custom_rect_tween.dart';
 import 'package:scribbles/popup_card/hero_dialog_route.dart';
 import 'package:scribbles/popup_card/models.dart';
+import 'package:scribbles/widgets/delete_card.dart';
 import 'package:scribbles/widgets/note_card.dart';
 
 class PreviewCard extends StatefulWidget {
@@ -35,6 +36,14 @@ class _PreviewCardState extends State<PreviewCard> {
   Widget build(BuildContext context) {
     // String id = widget.index.toString();
     return InkWell(
+      onLongPress: () {
+        Navigator.of(context).push(HeroDialogRoute(
+          builder: (context) => Center(
+            child: DeleteCard(widget.id, widget.title, widget.note),
+          ),
+          // settings: const RouteSettings(),
+        ));
+      },
       onTap: () {
         Navigator.of(context).push(HeroDialogRoute(
           builder: (context) => Center(
@@ -55,56 +64,59 @@ class _PreviewCardState extends State<PreviewCard> {
             ),
             // color: Colors.teal[200],
             color: Colors.orangeAccent,
-            child: Padding(
-              padding: const EdgeInsets.all(11.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      children: const [
-                        Spacer(),
-                        RotationTransition(
-                          turns: AlwaysStoppedAnimation(45 / 360),
-                          child: Icon(
-                            Icons.push_pin_sharp,
-                            color: Colors.white,
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(11.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        children: const [
+                          Spacer(),
+                          RotationTransition(
+                            turns: AlwaysStoppedAnimation(45 / 360),
+                            child: Icon(
+                              Icons.push_pin_sharp,
+                              color: Colors.white,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 5.0),
-                    child: Text(
-                      // t1,
-                      widget.title,
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 5.0),
+                      child: Text(
+                        // t1,
+                        widget.title,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 19,
+                            fontFamily: 'varela-round.regular'),
+                      ),
+                    ),
+                    Text(
+                      date,
                       style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 19,
-                          fontFamily: 'varela-round.regular'),
+                          fontWeight: FontWeight.bold, color: Colors.black54, fontSize: 13, fontFamily: 'Rounded_Elegance'),
                     ),
-                  ),
-                  Text(
-                    date,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, color: Colors.black54, fontSize: 13, fontFamily: 'Rounded_Elegance'),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: Text(
-                      // t1,
-                      widget.note,
-                      maxLines: 7,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 13,
-                          fontFamily: 'Rounded_Elegance',
-                          color: Colors.black54),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Text(
+                        // t1,
+                        widget.note,
+                        maxLines: 7,
+                        style: const TextStyle(
+                            overflow: TextOverflow.ellipsis,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13,
+                            fontFamily: 'Rounded_Elegance',
+                            color: Colors.black54),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             )),
       ),

@@ -228,7 +228,7 @@ class _NotePageState extends State<NotePage> {
                                 style: TextStyle(
                                   fontSize: 14,
                                   // letterSpacing: 0,
-                                  height: gap / 17,
+                                  height: gap / 14,
                                   fontWeight: FontWeight.w700,
                                   fontFamily: 'Rounded_Elegance'
                                   // height: ((height * .045) / (height * .025)),
