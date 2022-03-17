@@ -26,6 +26,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 // Get a location using getDatabasesPath
   late String path;
   int size = 0;
+  bool visible = true;
 
   Future<void> initiateDB() async {
     // Get a location using getDatabasesPath
@@ -44,6 +45,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     list = (await database.rawQuery('SELECT * FROM Notes'));
 
     setState(() {
+      if(list.length>0){
+        visible = false;
+      }
       print(list.length);
       size = list.length;
     });
@@ -58,6 +62,10 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+
+    var s = MediaQuery.of(context).size;
+
+
     // initState();
     void _showToast(BuildContext context) {
       final scaffold = ScaffoldMessenger.of(context);
@@ -107,6 +115,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   itemBuilder: (BuildContext context, int index) =>
                       // list.isEmpty ? Container():
                       PreviewCard(
+                          noteID: list[index]["id"].toString(),
                           id: index.toString(),
                           title: list[index]["title"].toString(),
                           note: list[index]["note"].toString()),
@@ -156,7 +165,18 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                       ),
                     ),
                   ),
-                ))
+                )),
+            Visibility(
+              visible: visible,
+              child: Center(
+                child: Image.asset(
+                  "lib/assets/images/empty2.gif",
+                  fit: BoxFit.cover,
+                  height: s.width*.55,
+                  width: s.width*.55,
+                ),
+              ),
+            )
           ]),
         ),
       ),

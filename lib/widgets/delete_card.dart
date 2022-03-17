@@ -1,15 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:path/path.dart';
+import 'package:sqflite/sqflite.dart';
 
+import '../pages/home.dart';
 import '../popup_card/custom_rect_tween.dart';
 
 class DeleteCard extends StatelessWidget {
-  final String string, title, note;
+  final String string, title, note, noteID;
 
-  const DeleteCard(this.string, this.title, this.note, {Key? key})
+  const DeleteCard(this.string, this.title, this.note, this.noteID, {Key? key})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    late String path;
+    Future<void> deleteNote() async {
+      var databasesPath = await getDatabasesPath();
+      path = join(databasesPath, 'demo.db');
+      Database database = await openDatabase(
+        path,
+        version: 1,
+      );
+      database.rawDelete('DELETE FROM Notes WHERE id = ?', [noteID]);
+      print('deleted');
+    }
+
     return Hero(
       tag: string,
       createRectTween: (begin, end) {
@@ -33,9 +48,6 @@ class DeleteCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
                     mainAxisSize: MainAxisSize.min,
-                    // alignment: WrapAlignment.center,
-                    // crossAxisAlignment: WrapCrossAlignment.center,
-                    // direction: Axis.vertical,
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(8.0),
@@ -65,7 +77,14 @@ class DeleteCard extends StatelessWidget {
                       Padding(
                           padding: const EdgeInsets.all(15.0),
                           child: IconButton(
-                            onPressed: () {},
+                            onPressed: () async {
+                              deleteNote();
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const Home()),
+                              );
+                            },
                             icon: const Icon(
                               Icons.delete,
                               color: Colors.white,

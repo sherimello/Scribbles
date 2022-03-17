@@ -2,14 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:scribbles/popup_card/custom_rect_tween.dart';
 import 'package:scribbles/popup_card/hero_dialog_route.dart';
 import 'package:scribbles/popup_card/models.dart';
-import 'package:scribbles/widgets/delete_card.dart';
 import 'package:scribbles/widgets/note_card.dart';
+import 'package:scribbles/widgets/simplified_delete_card.dart';
 
 class PreviewCard extends StatefulWidget {
-  final String title, note, id;
+  final String title, note, id, noteID;
 
   const PreviewCard(
-      {Key? key, required this.id, required this.title, required this.note})
+      {Key? key,
+      required this.id,
+      required this.title,
+      required this.note,
+      required this.noteID})
       : super(key: key);
 
   @override
@@ -39,7 +43,8 @@ class _PreviewCardState extends State<PreviewCard> {
       onLongPress: () {
         Navigator.of(context).push(HeroDialogRoute(
           builder: (context) => Center(
-            child: DeleteCard(widget.id, widget.title, widget.note),
+            child: SimplifiedDeleteCard(widget.noteID, widget.id),
+            // child: DeleteCard(widget.id, widget.title, widget.note, widget.noteID),
           ),
           // settings: const RouteSettings(),
         ));
@@ -99,7 +104,10 @@ class _PreviewCardState extends State<PreviewCard> {
                     Text(
                       date,
                       style: const TextStyle(
-                          fontWeight: FontWeight.bold, color: Colors.black54, fontSize: 13, fontFamily: 'Rounded_Elegance'),
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black54,
+                          fontSize: 13,
+                          fontFamily: 'Rounded_Elegance'),
                     ),
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
@@ -92,21 +93,18 @@ class _NotePageState extends State<NotePage> {
         },
         child: SafeArea(
           child: Scaffold(
-            appBar:AppBar(
+            appBar: AppBar(
               automaticallyImplyLeading: false,
               elevation: 3,
               backgroundColor: Colors.black,
-              title: const Padding(
-                padding: EdgeInsets.all(0.0),
-                child: Text(
-                  'Scribbles',
-                  style: TextStyle(
-                    // letterSpacing: 2,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 21,
-                    fontFamily: 'varela-round.regular',
-                    color: Colors.white,
-                  ),
+              title: const Text(
+                'Scribbles',
+                style: TextStyle(
+                  // letterSpacing: 2,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 21,
+                  fontFamily: 'varela-round.regular',
+                  color: Colors.white,
                 ),
               ),
             ),
@@ -144,64 +142,106 @@ class _NotePageState extends State<NotePage> {
             //   ),
             // ),
             backgroundColor: Colors.orangeAccent[100],
-            body: CustomPaint(
-              foregroundPainter: CustomPage(gap, 0),
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: MediaQuery.of(context).size.height,
-                  ),
-                  child: Stack(fit: StackFit.passthrough, children: [
-                    CustomPaint(
-                      foregroundPainter: CustomPage(gap, 1),
-                      child: Column(
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.fromLTRB(
-                                width * 0.13, ((3.0 * gap) - 31) / 2, 0, 0),
-                            child: TextField(
-                              // keyboardType: TextInputType.multiline,
-                              textAlignVertical: TextAlignVertical.center,
-                              maxLines: 1,
-                              focusNode: myFocusNode2,
-                              controller: myController2,
-                              style: TextStyle(
-                                fontSize: 17,
+            body: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: MediaQuery.of(context).size.height,
+                ),
+                child: Stack(fit: StackFit.passthrough, children: [
+                  CustomPaint(
+                    foregroundPainter: CustomPage(gap, 1),
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.fromLTRB(
+                              0, ((3.0 * gap) - 31) / 2, 17, 0),
+                          child: TextField(
+                            // keyboardType: TextInputType.multiline,
+                            textAlignVertical: TextAlignVertical.center,
+                            maxLines: 1,
+                            focusNode: myFocusNode2,
+                            controller: myController2,
+                            style: TextStyle(
+                              fontSize: 17,
+                              // letterSpacing: 1,
+                              height: gap / 17,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'varela-round.regular',
+                              // height: ((height * .045) / (height * .025)),
+                              // ((height * .045) + (height * .01)) /
+                              //     19, // formula: {(distance of the horizontal lines (here 40 px)) + (vertical padding of the TextField (here 9 px))} / fontSize (20 sp);
+                            ),
+                            decoration: const InputDecoration(
+                              hintText: ' title here...',
+                              hintStyle: TextStyle(
                                 // letterSpacing: 1,
-                                height: gap / 17,
-                                fontWeight: FontWeight.bold,
                                 fontFamily: 'varela-round.regular',
-                                // height: ((height * .045) / (height * .025)),
-                                // ((height * .045) + (height * .01)) /
-                                //     19, // formula: {(distance of the horizontal lines (here 40 px)) + (vertical padding of the TextField (here 9 px))} / fontSize (20 sp);
+                                // fontStyle: FontStyle.italic,
+                                fontWeight: FontWeight.w900,
                               ),
-                              decoration: InputDecoration(
-                                hintText: ' title here...',
-                                hintStyle: const TextStyle(
-                                  // letterSpacing: 1,
-                                  fontFamily: 'varela-round.regular',
-                                  // fontStyle: FontStyle.italic,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                              // fillColor: Colors.red,
+                              // filled: true,
+                              isCollapsed: true,
+                              // isDense: true,
+                              prefixIcon: Icon(
+                                Icons.title,
+                                size: 27,
+                              ),
+                              prefixIconConstraints: BoxConstraints(
+                                minWidth: 47,
+                                minHeight: 35,
+                              ),
+                              contentPadding: EdgeInsets.only(
+                                  // vertical: 0,
+                                  // // (height * .045) - 19,
+                                  // // height*.01,
+                                  // horizontal:
+                                  left: 17),
+                              // EdgeInsets.symmetric(
+                              //     vertical: 0,
+                              //     // (height * .045) - 19,
+                              //     // height*.01,
+                              //     horizontal:
+                              //         MediaQuery.of(context).size.width * 0.13),
+                              border: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(top: ((3.0 * gap) - 31) / 2),
+                          child: Expanded(
+                            flex: 0,
+                            child: TextField(
+                              controller: myController,
+                              focusNode: myFocusNode,
+                              keyboardType: TextInputType.multiline,
+                              textAlignVertical: TextAlignVertical.bottom,
+                              maxLines: null,
+                              minLines: null,
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  // letterSpacing: 0,
+                                  height: gap / 14,
+                                  fontWeight: FontWeight.w700,
+                                  fontFamily: 'Rounded_Elegance'
+                                  // height: ((height * .045) / (height * .025)),
+                                  // ((height * .045) + (height * .01)) /
+                                  //     19, // formula: {(distance of the horizontal lines (here 40 px)) + (vertical padding of the TextField (here 9 px))} / fontSize (20 sp);
+                                  ),
+                              decoration: const InputDecoration(
+                                // hintText: textScale.toString(),
                                 // fillColor: Colors.red,
                                 // filled: true,
                                 isCollapsed: true,
-                                // isDense: true,
-                                prefixIcon: const Icon(
-                                  Icons.drive_file_rename_outline,
-                                  size: 27,
-                                ),
-                                prefixIconConstraints: const BoxConstraints(
-                                  minWidth: 47,
-                                  minHeight: 35,
-                                ),
+                                isDense: true,
                                 contentPadding: EdgeInsets.only(
                                     // vertical: 0,
                                     // // (height * .045) - 19,
                                     // // height*.01,
                                     // horizontal:
-                                    left: width * 0.13),
+                                    left: 17),
                                 // EdgeInsets.symmetric(
                                 //     vertical: 0,
                                 //     // (height * .045) - 19,
@@ -213,49 +253,138 @@ class _NotePageState extends State<NotePage> {
                               ),
                             ),
                           ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(top: 3.0 * gap),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: height - 3.0 * gap,
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            myFocusNode.requestFocus();
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                  Visibility(
+                    visible: false,
+                    child: Container(
+                      width: width,
+                      height: height,
+                      color: Colors.black87,
+                      child: Column(
+                        children: [
                           Padding(
-                            padding:
-                                EdgeInsets.only(top: ((3.0 * gap) - 31) / 2),
-                            child: Expanded(
-                              flex: 0,
-                              child: TextField(
-                                controller: myController,
-                                focusNode: myFocusNode,
-                                keyboardType: TextInputType.multiline,
-                                textAlignVertical: TextAlignVertical.bottom,
-                                maxLines: null,
-                                minLines: null,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  // letterSpacing: 0,
-                                  height: gap / 14,
-                                  fontWeight: FontWeight.w700,
-                                  fontFamily: 'Rounded_Elegance'
-                                  // height: ((height * .045) / (height * .025)),
-                                  // ((height * .045) + (height * .01)) /
-                                  //     19, // formula: {(distance of the horizontal lines (here 40 px)) + (vertical padding of the TextField (here 9 px))} / fontSize (20 sp);
-                                ),
-                                decoration: InputDecoration(
-                                  // hintText: textScale.toString(),
-                                  // fillColor: Colors.red,
-                                  // filled: true,
-                                  isCollapsed: true,
-                                  isDense: true,
-                                  contentPadding: EdgeInsets.only(
-                                      // vertical: 0,
-                                      // // (height * .045) - 19,
-                                      // // height*.01,
-                                      // horizontal:
-                                      left: MediaQuery.of(context).size.width *
-                                          0.13),
-                                  // EdgeInsets.symmetric(
-                                  //     vertical: 0,
-                                  //     // (height * .045) - 19,
-                                  //     // height*.01,
-                                  //     horizontal:
-                                  //         MediaQuery.of(context).size.width * 0.13),
-                                  border: InputBorder.none,
-                                  focusedBorder: InputBorder.none,
+                            padding: EdgeInsets.fromLTRB(
+                                23, (height * .5) - 3.0 * gap- AppBar().preferredSize.height, 23, 0),
+                            child: Card(
+                              elevation: 11,
+                              shape: const RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(11)),
+                              ),
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.fromLTRB(0, 8.0, 0, 8.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  children: [
+                                    const Padding(
+                                      padding: EdgeInsets.all(11.0),
+                                      child: Text('select note color:'
+                                        ,textAlign: TextAlign.center
+                                      , style: TextStyle(
+                                          fontSize: 19,
+                                          fontFamily: 'varela-round.regular',
+                                          fontWeight: FontWeight.bold
+                                        ),),
+                                    ),
+                                    Padding(
+                                      padding:
+                                          const EdgeInsets.fromLTRB(0, 8.0, 0, 8),
+                                      child: Center(
+                                        child: SingleChildScrollView(
+                                          scrollDirection: Axis.horizontal,
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Padding(
+                                                padding: const EdgeInsets.all(8.0),
+                                                child: Container(
+                                                  width: width * 0.13,
+                                                  height: width * 0.13,
+                                                  decoration: const BoxDecoration(
+                                                      color: Color(0xFFFF9100),
+                                                      borderRadius:
+                                                          BorderRadius.all(
+                                                              Radius.circular(
+                                                                  1000))),
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding: const EdgeInsets.all(8.0),
+                                                child: Container(
+                                                  width: width * 0.13,
+                                                  height: width * 0.13,
+                                                  decoration: const BoxDecoration(
+                                                      color: Color(0xFF16DDFF),
+                                                      borderRadius:
+                                                          BorderRadius.all(
+                                                              Radius.circular(
+                                                                  1000))),
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding: const EdgeInsets.all(8.0),
+                                                child: Container(
+                                                  width: width * 0.13,
+                                                  height: width * 0.13,
+                                                  decoration: const BoxDecoration(
+                                                      color: Color(0xFFD887FA),
+                                                      borderRadius:
+                                                          BorderRadius.all(
+                                                              Radius.circular(
+                                                                  1000))),
+                                                ),
+                                              ),
+                                              // Padding(
+                                              //   padding: const EdgeInsets.all(8.0),
+                                              //   child: Container(
+                                              //     width: width * 0.13,
+                                              //     height: width * 0.13,
+                                              //     decoration: const BoxDecoration(
+                                              //         color: Color(0xFFFF5454),
+                                              //         borderRadius:
+                                              //             BorderRadius.all(
+                                              //                 Radius.circular(
+                                              //                     1000))),
+                                              //   ),
+                                              // ),
+                                              // Padding(
+                                              //   padding: const EdgeInsets.all(8.0),
+                                              //   child: Container(
+                                              //     width: width * 0.13,
+                                              //     height: width * 0.13,
+                                              //     decoration: const BoxDecoration(
+                                              //         color: Color(0xFFB9FF81),
+                                              //         borderRadius:
+                                              //             BorderRadius.all(
+                                              //                 Radius.circular(
+                                              //                     1000))),
+                                              //   ),
+                                              // ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                  ],
                                 ),
                               ),
                             ),
@@ -263,22 +392,8 @@ class _NotePageState extends State<NotePage> {
                         ],
                       ),
                     ),
-                    Padding(
-                      padding: EdgeInsets.only(top: 3.0 * gap),
-                      child: SizedBox(
-                        width: double.infinity,
-                        height: height - 3.0 * gap,
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              myFocusNode.requestFocus();
-                            });
-                          },
-                        ),
-                      ),
-                    )
-                  ]),
-                ),
+                  )
+                ]),
               ),
             ),
           ),
@@ -317,8 +432,8 @@ class CustomPage extends CustomPainter {
       ..strokeWidth = 1.0;
 
     if (i == 0) {
-      canvas.drawLine(Offset(size.width * 0.1, 0),
-          Offset(size.width * 0.1, size.height), verticalLine);
+      // canvas.drawLine(Offset(size.width * 0.1, 0),
+      //     Offset(size.width * 0.1, size.height), verticalLine);
       return;
     }
 
