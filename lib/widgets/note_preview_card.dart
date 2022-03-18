@@ -52,7 +52,7 @@ class _PreviewCardState extends State<PreviewCard> {
       onTap: () {
         Navigator.of(context).push(HeroDialogRoute(
           builder: (context) => Center(
-            child: NoteCard(widget.id, widget.title, widget.note, date),
+            child: NoteCard(widget.noteID, widget.id, widget.title, widget.note, date),
           ),
           // settings: const RouteSettings(),
         ));

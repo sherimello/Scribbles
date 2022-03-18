@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../pages/note_page.dart';
 import '../popup_card/custom_rect_tween.dart';
+import '../popup_card/hero_dialog_route.dart';
 
 class NoteCard extends StatelessWidget {
-  final String string, title, note, date;
+  final String id, string, title, note, date;
 
-  const NoteCard(this.string, this.title, this.note, this.date, {Key? key}) : super(key: key);
+  const NoteCard(this.id, this.string, this.title, this.note, this.date, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -35,11 +37,21 @@ class NoteCard extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Row(
-                            children: const [
-                              Spacer(),
-                              Icon(
-                                Icons.push_pin_sharp,
-                                color: Colors.black,
+                            children:  [
+                              const Spacer(),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).push(HeroDialogRoute(
+                                    builder: (context) => Center(
+                                      child: NotePage(id, string),
+                                    ),
+                                    // settings: const RouteSettings(),
+                                  ));
+                                },
+                                child: const Icon(
+                                  Icons.edit,
+                                  color: Colors.black,
+                                ),
                               ),
                             ],
                           ),

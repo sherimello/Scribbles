@@ -7,9 +7,9 @@ import 'package:scribbles/popup_card/custom_rect_tween.dart';
 import 'package:sqflite/sqflite.dart';
 
 class NotePage extends StatefulWidget {
-  final String string;
+  final String string, id;
 
-  const NotePage(this.string, {Key? key}) : super(key: key);
+  const NotePage(this.id, this.string, {Key? key}) : super(key: key);
 
   @override
   State<NotePage> createState() => _NotePageState();
@@ -23,7 +23,6 @@ class _NotePageState extends State<NotePage> {
   TextEditingController myController2 = TextEditingController();
   late Database database;
 
-// Get a location using getDatabasesPath
   late String path;
 
   @override
@@ -45,19 +44,31 @@ class _NotePageState extends State<NotePage> {
       await db.execute(
           'CREATE TABLE IF NOT EXISTS Notes (id INTEGER PRIMARY KEY, title VARCHAR, note VARCHAR)');
     });
+    if (widget.id != "000") {
+      List<Map> note = await database
+          .rawQuery('SELECT * FROM Notes WHERE id = ?', [widget.id]);
+      myController.text = note[0]['note'].toString();
+      myController2.text = note[0]['title'].toString();
+    }
+  }
+
+  Future<void> updateData() async {
+    await database.transaction((txn) async {
+      database.rawUpdate('UPDATE Notes SET note = ?, title = ? WHERE id = ?',
+          [myController.text, myController2.text, widget.id]);
+    });
   }
 
   Future<void> insertData(String title, String note) async {
-    // Insert some records in a transaction
+    if (widget.id != "000") {
+      updateData();
+      return;
+    }
+
     await database.transaction((txn) async {
       int id1 = await txn.rawInsert(
           'INSERT INTO Notes(title, note) VALUES(?, ?)', [title, note]);
-      // database.close();
       print('inserted1: $id1');
-      // int id2 = await txn.rawInsert(
-      //     'INSERT INTO Test(name, value, num) VALUES(?, ?, ?)',
-      //     ['another name', 12345678, 3.1416]);
-      // print('inserted2: $id2');
     });
   }
 
@@ -81,7 +92,12 @@ class _NotePageState extends State<NotePage> {
       onWillPop: () async {
         myController.text.isNotEmpty
             ? insertData(myController2.text, myController.text)
-                .whenComplete(() => {showData(context)})
+                .whenComplete(() => {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const Home()),
+                      )
+                    })
             : Navigator.pop(context, false);
 
         return false;
@@ -108,39 +124,6 @@ class _NotePageState extends State<NotePage> {
                 ),
               ),
             ),
-            // appBar: AppBar(
-            //   automaticallyImplyLeading: false,
-            //   elevation: 0,
-            //   titleSpacing: 0,
-            //   backgroundColor: Colors.orangeAccent,
-            //   title: Padding(
-            //     padding: EdgeInsets.only(left: width * 0.1),
-            //     child: const TextField(
-            //       textAlignVertical: TextAlignVertical.center,
-            //       cursorColor: Colors.black,
-            //       decoration: InputDecoration(
-            //         // isCollapsed: true,
-            //         focusColor: Colors.white,
-            //         iconColor: Colors.black,
-            //         fillColor: Colors.white,
-            //         isDense: true,
-            //         hintText: 'title here...',
-            //         prefixIcon: Icon(
-            //           Icons.assignment_rounded,
-            //           size: 23,
-            //         ),
-            //         prefixIconColor: Colors.black,
-            //         hintStyle: TextStyle(
-            //           fontStyle: FontStyle.italic,
-            //           fontWeight: FontWeight.bold,
-            //           // color: Colors.white60,
-            //         ),
-            //         border: InputBorder.none,
-            //         focusedBorder: InputBorder.none,
-            //       ),
-            //     ),
-            //   ),
-            // ),
             backgroundColor: Colors.orangeAccent[100],
             body: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
@@ -164,26 +147,17 @@ class _NotePageState extends State<NotePage> {
                             controller: myController2,
                             style: TextStyle(
                               fontSize: 17,
-                              // letterSpacing: 1,
                               height: gap / 17,
                               fontWeight: FontWeight.bold,
                               fontFamily: 'varela-round.regular',
-                              // height: ((height * .045) / (height * .025)),
-                              // ((height * .045) + (height * .01)) /
-                              //     19, // formula: {(distance of the horizontal lines (here 40 px)) + (vertical padding of the TextField (here 9 px))} / fontSize (20 sp);
                             ),
                             decoration: const InputDecoration(
                               hintText: ' title here...',
                               hintStyle: TextStyle(
-                                // letterSpacing: 1,
                                 fontFamily: 'varela-round.regular',
-                                // fontStyle: FontStyle.italic,
                                 fontWeight: FontWeight.w900,
                               ),
-                              // fillColor: Colors.red,
-                              // filled: true,
                               isCollapsed: true,
-                              // isDense: true,
                               prefixIcon: Icon(
                                 Icons.title,
                                 size: 27,
@@ -192,18 +166,7 @@ class _NotePageState extends State<NotePage> {
                                 minWidth: 47,
                                 minHeight: 35,
                               ),
-                              contentPadding: EdgeInsets.only(
-                                  // vertical: 0,
-                                  // // (height * .045) - 19,
-                                  // // height*.01,
-                                  // horizontal:
-                                  left: 17),
-                              // EdgeInsets.symmetric(
-                              //     vertical: 0,
-                              //     // (height * .045) - 19,
-                              //     // height*.01,
-                              //     horizontal:
-                              //         MediaQuery.of(context).size.width * 0.13),
+                              contentPadding: EdgeInsets.only(left: 17),
                               border: InputBorder.none,
                               focusedBorder: InputBorder.none,
                             ),
@@ -225,29 +188,11 @@ class _NotePageState extends State<NotePage> {
                                   // letterSpacing: 0,
                                   height: gap / 14,
                                   fontWeight: FontWeight.w700,
-                                  fontFamily: 'Rounded_Elegance'
-                                  // height: ((height * .045) / (height * .025)),
-                                  // ((height * .045) + (height * .01)) /
-                                  //     19, // formula: {(distance of the horizontal lines (here 40 px)) + (vertical padding of the TextField (here 9 px))} / fontSize (20 sp);
-                                  ),
+                                  fontFamily: 'Rounded_Elegance'),
                               decoration: const InputDecoration(
-                                // hintText: textScale.toString(),
-                                // fillColor: Colors.red,
-                                // filled: true,
                                 isCollapsed: true,
                                 isDense: true,
-                                contentPadding: EdgeInsets.only(
-                                    // vertical: 0,
-                                    // // (height * .045) - 19,
-                                    // // height*.01,
-                                    // horizontal:
-                                    left: 17),
-                                // EdgeInsets.symmetric(
-                                //     vertical: 0,
-                                //     // (height * .045) - 19,
-                                //     // height*.01,
-                                //     horizontal:
-                                //         MediaQuery.of(context).size.width * 0.13),
+                                contentPadding: EdgeInsets.only(left: 17),
                                 border: InputBorder.none,
                                 focusedBorder: InputBorder.none,
                               ),
@@ -281,7 +226,12 @@ class _NotePageState extends State<NotePage> {
                         children: [
                           Padding(
                             padding: EdgeInsets.fromLTRB(
-                                23, (height * .5) - 3.0 * gap- AppBar().preferredSize.height, 23, 0),
+                                23,
+                                (height * .5) -
+                                    3.0 * gap -
+                                    AppBar().preferredSize.height,
+                                23,
+                                0),
                             child: Card(
                               elevation: 11,
                               shape: const RoundedRectangleBorder(
@@ -292,21 +242,23 @@ class _NotePageState extends State<NotePage> {
                                 padding:
                                     const EdgeInsets.fromLTRB(0, 8.0, 0, 8.0),
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
                                   children: [
                                     const Padding(
                                       padding: EdgeInsets.all(11.0),
-                                      child: Text('select note color:'
-                                        ,textAlign: TextAlign.center
-                                      , style: TextStyle(
-                                          fontSize: 19,
-                                          fontFamily: 'varela-round.regular',
-                                          fontWeight: FontWeight.bold
-                                        ),),
+                                      child: Text(
+                                        'select note color:',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                            fontSize: 19,
+                                            fontFamily: 'varela-round.regular',
+                                            fontWeight: FontWeight.bold),
+                                      ),
                                     ),
                                     Padding(
-                                      padding:
-                                          const EdgeInsets.fromLTRB(0, 8.0, 0, 8),
+                                      padding: const EdgeInsets.fromLTRB(
+                                          0, 8.0, 0, 8),
                                       child: Center(
                                         child: SingleChildScrollView(
                                           scrollDirection: Axis.horizontal,
@@ -315,7 +267,8 @@ class _NotePageState extends State<NotePage> {
                                                 MainAxisAlignment.spaceBetween,
                                             children: [
                                               Padding(
-                                                padding: const EdgeInsets.all(8.0),
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
                                                 child: Container(
                                                   width: width * 0.13,
                                                   height: width * 0.13,
@@ -328,7 +281,8 @@ class _NotePageState extends State<NotePage> {
                                                 ),
                                               ),
                                               Padding(
-                                                padding: const EdgeInsets.all(8.0),
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
                                                 child: Container(
                                                   width: width * 0.13,
                                                   height: width * 0.13,
@@ -341,7 +295,8 @@ class _NotePageState extends State<NotePage> {
                                                 ),
                                               ),
                                               Padding(
-                                                padding: const EdgeInsets.all(8.0),
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
                                                 child: Container(
                                                   width: width * 0.13,
                                                   height: width * 0.13,
@@ -353,32 +308,6 @@ class _NotePageState extends State<NotePage> {
                                                                   1000))),
                                                 ),
                                               ),
-                                              // Padding(
-                                              //   padding: const EdgeInsets.all(8.0),
-                                              //   child: Container(
-                                              //     width: width * 0.13,
-                                              //     height: width * 0.13,
-                                              //     decoration: const BoxDecoration(
-                                              //         color: Color(0xFFFF5454),
-                                              //         borderRadius:
-                                              //             BorderRadius.all(
-                                              //                 Radius.circular(
-                                              //                     1000))),
-                                              //   ),
-                                              // ),
-                                              // Padding(
-                                              //   padding: const EdgeInsets.all(8.0),
-                                              //   child: Container(
-                                              //     width: width * 0.13,
-                                              //     height: width * 0.13,
-                                              //     decoration: const BoxDecoration(
-                                              //         color: Color(0xFFB9FF81),
-                                              //         borderRadius:
-                                              //             BorderRadius.all(
-                                              //                 Radius.circular(
-                                              //                     1000))),
-                                              //   ),
-                                              // ),
                                             ],
                                           ),
                                         ),

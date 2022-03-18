@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../pages/home.dart';
 import '../pages/note_page.dart';
 import '../popup_card/custom_rect_tween.dart';
 import '../popup_card/hero_dialog_route.dart';
@@ -64,7 +63,7 @@ class Test extends StatelessWidget {
                         onTap: () {
                           Navigator.of(context).push(HeroDialogRoute(
                             builder: (context) => const Center(
-                              child: NotePage('000'),
+                              child: NotePage('000', '000'),
                             ),
                             // settings: const RouteSettings(),
                           ));
