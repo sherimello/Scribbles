@@ -39,6 +39,8 @@ dependencies:
   nine_grid_view: ^2.0.0
   device_preview: ^1.0.0
   sqflite: ^2.0.2
+  path_provider: ^2.0.9
+#  flutter_quill: ^4.0.10
 
 dev_dependencies:
   flutter_test:

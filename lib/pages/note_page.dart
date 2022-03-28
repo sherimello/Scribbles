@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
@@ -23,7 +22,7 @@ class _NotePageState extends State<NotePage> {
   TextEditingController myController2 = TextEditingController();
   late Database database;
 
-  late String path;
+  late String path, initNote, initTitle;
 
   @override
   void initState() {
@@ -42,13 +41,13 @@ class _NotePageState extends State<NotePage> {
         onCreate: (Database db, int version) async {
       // When creating the db, create the table
       await db.execute(
-          'CREATE TABLE IF NOT EXISTS Notes (id INTEGER PRIMARY KEY, title VARCHAR, note VARCHAR)');
+          'CREATE TABLE IF NOT EXISTS Notes (id INTEGER PRIMARY KEY, title NVARCHAR(MAX), note NVARCHAR(MAX))');
     });
     if (widget.id != "000") {
       List<Map> note = await database
           .rawQuery('SELECT * FROM Notes WHERE id = ?', [widget.id]);
-      myController.text = note[0]['note'].toString();
-      myController2.text = note[0]['title'].toString();
+      initNote = myController.text = note[0]['note'].toString();
+      initTitle = myController2.text = note[0]['title'].toString();
     }
   }
 
@@ -90,15 +89,20 @@ class _NotePageState extends State<NotePage> {
 
     return WillPopScope(
       onWillPop: () async {
-        myController.text.isNotEmpty
-            ? insertData(myController2.text, myController.text)
-                .whenComplete(() => {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const Home()),
-                      )
-                    })
-            : Navigator.pop(context, false);
+        widget.id != "000"
+            ? (initNote != myController.text || initTitle != myController2.text)
+                ? updateData()
+                : Navigator.pop(context, false)
+            : myController.text.isNotEmpty
+                ? insertData(myController2.text, myController.text)
+                    .whenComplete(() => {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const Home()),
+                          )
+                        })
+                : Navigator.pop(context, false);
 
         return false;
       },

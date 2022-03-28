@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:path/path.dart';
 import 'package:scribbles/widgets/note_preview_card.dart';
-import 'package:scribbles/widgets/test.dart';
+import 'package:scribbles/widgets/bottom_sheet.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../popup_card/custom_rect_tween.dart';
@@ -37,7 +37,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         onCreate: (Database db, int version) async {
       // When creating the db, create the table
       await db.execute(
-          'CREATE TABLE Notes (id INTEGER PRIMARY KEY, title VARCHAR, note VARCHAR)');
+          'CREATE TABLE IF NOT EXISTS Notes (id INTEGER PRIMARY KEY, title NVARCHAR(MAX), note NVARCHAR(MAX))');
     });
   }
 
@@ -45,7 +45,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     list = (await database.rawQuery('SELECT * FROM Notes'));
 
     setState(() {
-      if(list.length>0){
+      if(list.isNotEmpty){
         visible = false;
       }
       print(list.length);

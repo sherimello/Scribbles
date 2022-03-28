@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:scribbles/pages/sync_file.dart';
 
 import '../pages/note_page.dart';
 import '../popup_card/custom_rect_tween.dart';
@@ -104,7 +105,14 @@ class Test extends StatelessWidget {
                       child: GestureDetector(
                         // splashColor: Colors.white,
                         // radius: 100,
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.of(context).push(HeroDialogRoute(
+                            builder: (context) => const Center(
+                              child: SyncFile('000'),
+                            ),
+                            // settings: const RouteSettings(),
+                          ));
+                        },
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: RichText(
