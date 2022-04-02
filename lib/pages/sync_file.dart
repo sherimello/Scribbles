@@ -1,18 +1,22 @@
 import 'dart:async';
+import 'dart:convert' show LineSplitter, utf8;
 import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
-import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:scribbles/pages/upload_emo.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../classes/GoogleAuthClient.dart';
 import '../popup_card/custom_rect_tween.dart';
+import '../popup_card/hero_dialog_route.dart';
 
 class SyncFile extends StatefulWidget {
   final String string;
@@ -100,12 +104,60 @@ class _SyncFileState extends State<SyncFile> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.all(11.0),
                         child: GestureDetector(
                           // splashColor: Colors.white,
                           // radius: 100,
-                          onTap: () {
-                            _download();
+                          onTap: () async {
+                            list = (await database
+                                .rawQuery('SELECT * FROM Notes'));
+
+                            for (int i = 0; i < list.length; i++) {
+                              allNotes += '\n\n' +
+                                  list[i]["title"]
+                                      .toString()
+                                      .replaceAll('\n', "endL") +
+                                  '\n' +
+                                  list[i]["note"]
+                                      .toString()
+                                      .replaceAll('\n', "endL");
+                            }
+                            if (allNotes.isNotEmpty) {
+                              print(allNotes);
+                              final box =
+                                  context.findRenderObject() as RenderBox?;
+                              await Share.share(allNotes,
+                                  subject: 'cloud.txt',
+                                  sharePositionOrigin:
+                                      box!.localToGlobal(Offset.zero) &
+                                          box.size);
+                            } else
+                              print("empty");
+
+                            List<String> title = [], note = [];
+
+                            LineSplitter ls = const LineSplitter();
+                            List<String> lines = ls.convert(allNotes);
+
+                            for (int i = 2; i < lines.length; i++) {
+                              if (lines[i - 1] == '\n' &&
+                                  lines[i - 2] == '\n') {
+                                title.add(lines[i]);
+                                continue;
+                              }
+                              if (lines[i - 1] == '\n') note.add(lines[i]);
+                            }
+
+                            String s = "";
+
+                            for (int i = 0; i < title.length; i++) {
+                              s += title[i] + note[i];
+                            }
+
+                            print(s);
+
+                            // _downloadGoogleDriveFile("fName", "gdID");
+                            // _download();
                             // _showList(context);
                           },
                           child: Padding(
@@ -135,38 +187,120 @@ class _SyncFileState extends State<SyncFile> {
                         ),
                       ),
                       Padding(
+                        padding: const EdgeInsets.only(top:8.0),
+                        child: RichText(
+                          textAlign: TextAlign.center,
+                          text: const TextSpan(
+                            children: [
+                              WidgetSpan(
+                                child: Icon(
+                                  Icons.sync,
+                                  size: 17,
+                                  color: Colors.orangeAccent,
+                                ),
+                              ),
+                              TextSpan(
+                                  text: "  sync notes:",
+                                  style: TextStyle(
+                                      color: Colors.orangeAccent,
+                                      fontFamily: 'varela-round.regular',
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: GestureDetector(
-                          // splashColor: Colors.white,
-                          // radius: 100,
-                          onTap: () async {
-
-                            final googleUser = await googleSignIn.signOut();
-                            // _write(allNotes, context);
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: RichText(
-                              textAlign: TextAlign.center,
-                              text: const TextSpan(
-                                children: [
-                                  WidgetSpan(
-                                    child: Icon(
-                                      Icons.sync,
-                                      size: 19,
-                                      color: Colors.black,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: GestureDetector(
+                                  onTap: () {},
+                                  child: RichText(
+                                    textAlign: TextAlign.center,
+                                    text: const TextSpan(
+                                      children: [
+                                        WidgetSpan(
+                                          child: Icon(
+                                            Icons.data_usage,
+                                            size: 21,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                        TextSpan(
+                                            text: "  from app data",
+                                            style: TextStyle(
+                                                color: Colors.black,
+                                                fontFamily:
+                                                    'varela-round.regular',
+                                                fontSize: 21,
+                                                fontWeight: FontWeight.bold)),
+                                      ],
                                     ),
                                   ),
-                                  TextSpan(
-                                      text: "  sync notes",
-                                      style: TextStyle(
-                                          color: Colors.black,
-                                          fontFamily: 'varela-round.regular',
-                                          fontSize: 21,
-                                          fontWeight: FontWeight.bold)),
-                                ],
+                                ),
                               ),
-                            ),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 3.0),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Navigator.of(context).push(HeroDialogRoute(
+                                      builder: (context) => Center(
+                                        child: UploadDemo(string: widget.string)
+                                      ),
+                                      // settings: const RouteSettings(),
+                                    ));
+                                  },
+                                  child: RichText(
+                                    textAlign: TextAlign.center,
+                                    text: const TextSpan(
+                                      children: [
+                                        WidgetSpan(
+                                          child: Icon(
+                                            Icons.folder_open,
+                                            size: 21,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                        TextSpan(
+                                            text: "  choose file",
+                                            style: TextStyle(
+                                                color: Colors.black,
+                                                fontFamily:
+                                                    'varela-round.regular',
+                                                fontSize: 21,
+                                                fontWeight: FontWeight.bold)),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              // RichText(
+                              //   textAlign: TextAlign.center,
+                              //   text: const TextSpan(
+                              //     children: [
+                              //       WidgetSpan(
+                              //         child: Icon(
+                              //           Icons.sync,
+                              //           size: 19,
+                              //           color: Colors.black,
+                              //         ),
+                              //       ),
+                              //       TextSpan(
+                              //           text: "  sync notes",
+                              //           style: TextStyle(
+                              //               color: Colors.black,
+                              //               fontFamily: 'varela-round.regular',
+                              //               fontSize: 21,
+                              //               fontWeight: FontWeight.bold)),
+                              //     ],
+                              //   ),
+                              // ),
+                            ],
                           ),
                         ),
                       ),
@@ -193,22 +327,11 @@ class _SyncFileState extends State<SyncFile> {
   }
 
   Future<void> _signInForDrive(File file1, BuildContext context) async {
-    // final googleSignIn =
-    //     signIn.GoogleSignIn.standard(scopes: [drive.DriveApi.driveScope]);
-    // final signIn.GoogleSignInAccount? account = await googleSignIn.signIn();
-    // print("User account $account");
-    // final authHeaders = await account?.authHeaders;
-    // final authenticateClient = GoogleAuthClient(authHeaders!);
-    // final driveApi = drive.DriveApi(authenticateClient);
     final googleSignIn = GoogleSignIn.standard(scopes: [
       drive.DriveApi.driveAppdataScope,
     ]);
     final googleUser = await googleSignIn.signIn();
     final headers = await googleUser?.authHeaders;
-    // if (headers == null) {
-    //   await showMessage(context, "Sign-in first", "Error");
-    //   return null;
-    // }
 
     final client = GoogleAuthClient(headers!);
     final driveApi = drive.DriveApi(client);
@@ -246,28 +369,6 @@ class _SyncFileState extends State<SyncFile> {
       // Remove a dialog
       Navigator.pop(context);
     }
-
-    // var client = GoogleHttpClient(await googleSignInAccount.authHeaders);
-    // var drive = ga.DriveApi(client);
-    // ga.File fileToUpload = ga.File();
-    // var file = await FilePicker.getFile();
-    // fileToUpload.parents = ["appDataFolder"];
-    // fileToUpload.name = path.basename(file.absolute.path);
-
-    // var meta = GoogleDriveFileUploadMetaData(name: 'testing');
-    // print(await client.create(meta, file));
-
-    // var driveFile = drive.File();
-    // driveFile.name = "hello_world.txt";
-    // final Directory? directory = Platform.isAndroid
-    //     ? await getExternalStorageDirectory() //FOR ANDROID
-    //     : await getApplicationSupportDirectory(); //FOR iOS
-    // final File file = File('${directory?.path}/my_file.txt');
-    // var response = await driveApi.files.create(
-    //   driveFile,
-    //   uploadMedia: drive.Media(file.openRead(), allNotes.length),
-    // );
-    // print(file.readAsLinesSync());
   }
 
   final googleSignIn = GoogleSignIn.standard(scopes: [
@@ -332,9 +433,65 @@ class _SyncFileState extends State<SyncFile> {
     final googleUser = await googleSignIn.signIn();
     final headers = await googleUser?.authHeaders;
     final url = 'https://www.googleapis.com/drive/v3/files/$fileId?alt=media';
-    final response = await get(Uri.parse(url), headers: headers);
-    // print(response.body);
-    print('https://www.googleapis.com/drive/v3/files/$fileId?alt=media');
+
+    var httpClient = HttpClient();
+    var request = await httpClient.getUrl(Uri.parse(url));
+    var response = await request.close();
+    var bytes = await consolidateHttpClientResponseBytes(response);
+    var decoded = utf8.decode(bytes);
+    print(decoded);
+  }
+
+  // _uploadFileToGoogleDrive() async {
+  //   var client = GoogleHttpClient(await googleSignInAccount.authHeaders);
+  //   var driveApi = drive.DriveApi(client);
+  //   drive.File fileToUpload = drive.File();
+  //   final Directory? directory = Platform.isAndroid
+  //       ? await getExternalStorageDirectory() //FOR ANDROID
+  //       : await getApplicationSupportDirectory();
+  //   final File file = File('${directory?.path}/my_file.txt');
+  //   fileToUpload.parents = ["appDataFolder"];
+  //   fileToUpload.name = path.(file.absolute.path);
+  //   var response = await drive.files.create(
+  //     fileToUpload,
+  //     uploadMedia: ga.Media(file.openRead(), file.lengthSync()),
+  //   );
+  //   print(response);
+  //   _listGoogleDriveFiles();
+  // }
+  Future<void> _downloadGoogleDriveFile(String fName, String gdID) async {
+    final driveApi = await _getDriveApi();
+    if (driveApi == null) {
+      return;
+    }
+    final fileList = await driveApi.files.list(
+        spaces: 'appDataFolder', $fields: 'files(id, name, modifiedTime)');
+    final files = fileList.files;
+
+    final fileId = files?.asMap()[0]?.id;
+    final googleUser = await googleSignIn.signIn();
+    final headers = await googleUser?.authHeaders;
+    var client = GoogleAuthClient(headers!);
+    var _drive = drive.DriveApi(client);
+    Object file = await _drive.files
+        .get(fileId!, downloadOptions: drive.DownloadOptions.fullMedia);
+    print((file as drive.Media).stream);
+
+    final directory = await getExternalStorageDirectory();
+    print(directory?.path);
+    final saveFile = File(
+        '${directory?.path}/${new DateTime.now().millisecondsSinceEpoch}$fName');
+    List<int> dataStore = [];
+    file.stream.listen((data) {
+      print("DataReceived: ${data.length}");
+      dataStore.insertAll(dataStore.length, data);
+    }, onDone: () {
+      print("Task Done");
+      saveFile.writeAsBytes(dataStore);
+      print("File saved at ${saveFile.path}");
+    }, onError: (error) {
+      print("Some Error");
+    });
   }
 
   Future<String?> _getAuthToken() async {

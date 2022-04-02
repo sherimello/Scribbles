@@ -47,6 +47,8 @@ dependencies:
   googleapis_auth: ^1.3.0
   firebase_auth: ^3.3.11
   http: ^0.13.4
+  file_picker: ^1.3.8
+  share_plus: ^4.0.3
 #  flutter_quill: ^4.0.10
 
 dev_dependencies:
@@ -80,6 +82,7 @@ flutter:
 
     - lib/assets/images/empty.gif
     - lib/assets/images/empty2.gif
+    - lib/assets/images/screenshot.jpeg
 
       # An image asset can refer to one or more resolution-specific "variants", see
       # https://flutter.dev/assets-and-images/#resolution-aware.
