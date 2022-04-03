@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:scribbles/pages/home.dart';
 import 'package:scribbles/pages/test_page.dart';
 import 'package:scribbles/widgets/bottom_sheet.dart';
+import 'package:scribbles/widgets/test.dart';
 
 void main() {
   var kReleaseMode = true;

@@ -11,7 +11,6 @@ import 'package:intl/intl.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:scribbles/pages/upload_emo.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../classes/GoogleAuthClient.dart';
@@ -109,6 +108,53 @@ class _SyncFileState extends State<SyncFile> {
                           // splashColor: Colors.white,
                           // radius: 100,
                           onTap: () async {
+                            // list = (await database
+                            //     .rawQuery('SELECT * FROM Notes'));
+                            //
+                            // for (int i = 0; i < list.length; i++) {
+                            //   allNotes += '\n\n' +
+                            //       list[i]["title"]
+                            //           .toString()
+                            //           .replaceAll('\n', "endL") +
+                            //       '\n' +
+                            //       list[i]["note"]
+                            //           .toString()
+                            //           .replaceAll('\n', "endL");
+                            // }
+                            // if (allNotes.isNotEmpty) {
+                            //   print(allNotes);
+                            //   final box =
+                            //       context.findRenderObject() as RenderBox?;
+                            //   await Share.share(allNotes,
+                            //       subject: 'cloud.txt',
+                            //       sharePositionOrigin:
+                            //           box!.localToGlobal(Offset.zero) &
+                            //               box.size);
+                            // } else
+                            //   print("empty");
+                            //
+                            // List<String> title = [], note = [];
+                            //
+                            // LineSplitter ls = const LineSplitter();
+                            // List<String> lines = ls.convert(allNotes);
+                            //
+                            // for (int i = 2; i < lines.length; i++) {
+                            //   if (lines[i - 1] == '\n' &&
+                            //       lines[i - 2] == '\n') {
+                            //     title.add(lines[i]);
+                            //     continue;
+                            //   }
+                            //   if (lines[i - 1] == '\n') note.add(lines[i]);
+                            // }
+                            //
+                            // String s = "";
+                            //
+                            // for (int i = 0; i < title.length; i++) {
+                            //   s += title[i] + note[i];
+                            // }
+                            //
+                            // print(s);
+
                             list = (await database
                                 .rawQuery('SELECT * FROM Notes'));
 
@@ -122,39 +168,14 @@ class _SyncFileState extends State<SyncFile> {
                                       .toString()
                                       .replaceAll('\n', "endL");
                             }
-                            if (allNotes.isNotEmpty) {
-                              print(allNotes);
-                              final box =
-                                  context.findRenderObject() as RenderBox?;
-                              await Share.share(allNotes,
-                                  subject: 'cloud.txt',
-                                  sharePositionOrigin:
-                                      box!.localToGlobal(Offset.zero) &
-                                          box.size);
-                            } else
-                              print("empty");
-
-                            List<String> title = [], note = [];
-
-                            LineSplitter ls = const LineSplitter();
-                            List<String> lines = ls.convert(allNotes);
-
-                            for (int i = 2; i < lines.length; i++) {
-                              if (lines[i - 1] == '\n' &&
-                                  lines[i - 2] == '\n') {
-                                title.add(lines[i]);
-                                continue;
-                              }
-                              if (lines[i - 1] == '\n') note.add(lines[i]);
-                            }
-
-                            String s = "";
-
-                            for (int i = 0; i < title.length; i++) {
-                              s += title[i] + note[i];
-                            }
-
-                            print(s);
+                            Navigator.of(context).push(HeroDialogRoute(
+                              builder: (context) => Center(
+                                  child: UploadDemo(
+                                      string: widget.string, allNotes: allNotes)
+                                  // child: WidTest()
+                                  ),
+                              // settings: const RouteSettings(),
+                            ));
 
                             // _downloadGoogleDriveFile("fName", "gdID");
                             // _download();
@@ -187,7 +208,7 @@ class _SyncFileState extends State<SyncFile> {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.only(top:8.0),
+                        padding: const EdgeInsets.only(top: 8.0),
                         child: RichText(
                           textAlign: TextAlign.center,
                           text: const TextSpan(
@@ -247,13 +268,28 @@ class _SyncFileState extends State<SyncFile> {
                               Padding(
                                 padding: const EdgeInsets.only(top: 3.0),
                                 child: GestureDetector(
-                                  onTap: () {
-                                    Navigator.of(context).push(HeroDialogRoute(
-                                      builder: (context) => Center(
-                                        child: UploadDemo(string: widget.string)
-                                      ),
-                                      // settings: const RouteSettings(),
-                                    ));
+                                  onTap: () async {
+                                    //   list = (await database
+                                    //     .rawQuery('SELECT * FROM Notes'));
+                                    //
+                                    // for (int i = 0; i < list.length; i++) {
+                                    // allNotes += '\n\n' +
+                                    // list[i]["title"]
+                                    //     .toString()
+                                    //     .replaceAll('\n', "endL") +
+                                    // '\n' +
+                                    // list[i]["note"]
+                                    //     .toString()
+                                    //     .replaceAll('\n', "endL");
+                                    // }
+                                    //   Navigator.of(context).push(HeroDialogRoute(
+                                    //     builder: (context) => Center(
+                                    //       child: UploadDemo(string: widget.string, allNotes: allNotes)
+                                    //       // child: WidTest()
+                                    //     ),
+                                    //     // settings: const RouteSettings(),
+                                    //   ));
+                                    // },
                                   },
                                   child: RichText(
                                     textAlign: TextAlign.center,
@@ -279,27 +315,6 @@ class _SyncFileState extends State<SyncFile> {
                                   ),
                                 ),
                               ),
-                              // RichText(
-                              //   textAlign: TextAlign.center,
-                              //   text: const TextSpan(
-                              //     children: [
-                              //       WidgetSpan(
-                              //         child: Icon(
-                              //           Icons.sync,
-                              //           size: 19,
-                              //           color: Colors.black,
-                              //         ),
-                              //       ),
-                              //       TextSpan(
-                              //           text: "  sync notes",
-                              //           style: TextStyle(
-                              //               color: Colors.black,
-                              //               fontFamily: 'varela-round.regular',
-                              //               fontSize: 21,
-                              //               fontWeight: FontWeight.bold)),
-                              //     ],
-                              //   ),
-                              // ),
                             ],
                           ),
                         ),
