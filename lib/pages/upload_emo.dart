@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../popup_card/custom_rect_tween.dart';
@@ -37,6 +39,17 @@ class UploadDemo extends StatefulWidget {
 
   @override
   State<UploadDemo> createState() => _UploadDemoState();
+}
+
+_write(String text, BuildContext context) async {
+  final Directory? directory = Platform.isAndroid
+      ? await getExternalStorageDirectory() //FOR ANDROID
+      : await getApplicationSupportDirectory(); //FOR iOS
+  final File file = File('${directory?.path}/cloud.txt');
+  print('${directory?.path}/cloud.txt');
+  if (file.existsSync()) {
+    file.delete().whenComplete(() async => await file.writeAsString(text));
+  }
 }
 
 class _UploadDemoState extends State<UploadDemo> {
@@ -87,8 +100,7 @@ class _UploadDemoState extends State<UploadDemo> {
                                 ],
                               ),
                               clipBehavior: Clip.antiAlias,
-                              child: Image.asset(
-                                  'lib/assets/images/demo.gif'),
+                              child: Image.asset('lib/assets/images/demo.gif'),
                             ),
                           ),
                           const Padding(
@@ -107,6 +119,7 @@ class _UploadDemoState extends State<UploadDemo> {
                             child: GestureDetector(
                               onTap: () async {
                                 if (widget.allNotes.isNotEmpty) {
+                                  _write(widget.allNotes, context);
                                   print(widget.allNotes);
                                   final box =
                                       context.findRenderObject() as RenderBox?;
