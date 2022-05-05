@@ -1,7 +1,8 @@
 import 'dart:async';
-import 'dart:convert' show LineSplitter, utf8;
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:csv/csv.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -95,6 +96,7 @@ class _SyncFileState extends State<SyncFile> {
   }
 
   bool v = false;
+
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
@@ -125,7 +127,7 @@ class _SyncFileState extends State<SyncFile> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Padding(
-                            padding: const EdgeInsets.fromLTRB(8,19.0, 8, 8),
+                            padding: const EdgeInsets.fromLTRB(8, 19.0, 8, 8),
                             child: RichText(
                               textAlign: TextAlign.center,
                               text: const TextSpan(
@@ -197,8 +199,11 @@ class _SyncFileState extends State<SyncFile> {
                               // splashColor: Colors.white,
                               // radius: 100,
                               onTap: () async {
-                                allNotes = "";
-                                getAllNotes().whenComplete(() => _write(allNotes, context));
+                                // allNotes = "";
+                                // getAllNotes().whenComplete(() => _write(allNotes, context));
+
+                                makeCSVAndSaveIt();
+
                                 setState(() {
                                   v = true;
                                 });
@@ -269,8 +274,20 @@ class _SyncFileState extends State<SyncFile> {
                                   Padding(
                                     padding: const EdgeInsets.all(8.0),
                                     child: GestureDetector(
-                                      onTap: () {
-                                        readFromAppData(context);
+                                      onTap: () async {
+                                        final Directory? directory = Platform
+                                                .isAndroid
+                                            ? await getExternalStorageDirectory() //FOR ANDROID
+                                            : await getApplicationSupportDirectory(); //FOR iOS
+                                        final File file = File(
+                                            '${directory?.path}/notes.csv');
+                                        if (file.existsSync()) {
+                                          copyCSVToDB(
+                                              '${directory?.path}/notes.csv',
+                                              context);
+                                        } else {
+                                          print("null");
+                                        }
                                       },
                                       child: RichText(
                                         textAlign: TextAlign.center,
@@ -298,18 +315,24 @@ class _SyncFileState extends State<SyncFile> {
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsets.fromLTRB(8, 3.0, 8, 19),
+                                    padding: const EdgeInsets.fromLTRB(
+                                        8, 3.0, 8, 19),
                                     child: GestureDetector(
                                       onTap: () async {
                                         FilePickerResult? result =
                                             await FilePicker.platform
                                                 .pickFiles(type: FileType.any);
                                         if (result != null) {
-                                          File file =
-                                              File(result.files.single.path!);
-                                          fetchedNotes =
-                                              file.readAsStringSync();
-                                          writeDataToDB(file, context);
+                                          // File file =
+                                          //     File(result.files.single.path!);
+                                          // fetchedNotes =
+                                          //     file.readAsStringSync();
+                                          // writeDataToDB(file, context);
+
+                                          // final csvFile = File(result.files.single.path!).openRead();
+
+                                          copyCSVToDB(result.files.single.path!,
+                                              context);
                                         } else {
                                           if (kDebugMode) {
                                             print('no file picked!');
@@ -412,10 +435,26 @@ class _SyncFileState extends State<SyncFile> {
     print('${directory?.path}/cloud.txt');
     if (file.existsSync()) {
       file.delete().whenComplete(() async => await file.writeAsString(text));
-    }
-    else {
+    } else {
       await file.writeAsString(text);
     }
+  }
+
+  Future<void> copyCSVToDB(String filePath, BuildContext context) async {
+    List<String> title = [], note = [];
+    List<List<dynamic>> temp = [];
+    final csvFile = File(path).openRead();
+    temp = await csvFile
+        .transform(base64.decoder)
+        .transform(
+          const CsvToListConverter(),
+        )
+        .toList();
+    for (int i = 0; i < temp.length; i++) {
+      title.add(temp[i][1].toString());
+      note.add(temp[i][2].toString());
+    }
+    uploadData(context, title, note);
   }
 
   void writeDataToDB(File file, BuildContext context) {
@@ -461,32 +500,54 @@ class _SyncFileState extends State<SyncFile> {
     uploadData(context, title, note);
   }
 
-  void readFromAppData(BuildContext context) async{
+  void readFromAppData(BuildContext context) async {
     final Directory? directory = Platform.isAndroid
-    ? await getExternalStorageDirectory() //FOR ANDROID
+        ? await getExternalStorageDirectory() //FOR ANDROID
         : await getApplicationSupportDirectory(); //FOR iOS
     final File file = File('${directory?.path}/cloud.txt');
-    if(file.existsSync()){
+    if (file.existsSync()) {
       fetchedNotes = file.readAsStringSync();
       writeDataToDB(file, context);
     }
   }
 
   Future<void> getAllNotes() async {
-    list = (await database
-        .rawQuery('SELECT * FROM Notes'));
+    list = (await database.rawQuery('SELECT * FROM Notes'));
 
     for (int i = 0; i < list.length; i++) {
-    allNotes += '\n' +
-    list[i]["title"]
-        .toString()
-        .replaceAll('\n', "endL") +
-    '\n' +
-    list[i]["note"]
-        .toString()
-        .replaceAll('\n', "endL") +
-    '\n';
+      allNotes += '\n' +
+          list[i]["title"].toString().replaceAll('\n', "endL") +
+          '\n' +
+          list[i]["note"].toString().replaceAll('\n', "endL") +
+          '\n';
     }
   }
 
+  var fileAddress = "";
+  late List<List<dynamic>> temp;
+
+  void makeCSVAndSaveIt() async {
+    List<List<dynamic>> rows = [];
+    for (int i = 0; i < list.length; i++) {
+//row refer to each column of a row in csv file and rows refer to each row in a file
+      List<dynamic> row = [];
+      row.add(list[i]["id"].toString());
+      row.add(list[i]["title"].toString());
+      row.add(list[i]["note"].toString());
+      rows.add(row);
+    }
+
+    String csv = const ListToCsvConverter().convert(rows);
+    temp = const CsvToListConverter().convert(csv);
+
+    print(temp[0][2].toString());
+    final Directory? directory = Platform.isAndroid
+        ? await getExternalStorageDirectory() //FOR ANDROID
+        : await getApplicationSupportDirectory(); //FOR iOS
+
+    final File file = File('${directory?.path}/notes.csv');
+    fileAddress = '${directory?.path}/notes.csv';
+
+    file.writeAsString(csv);
+  }
 }

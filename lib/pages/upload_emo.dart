@@ -1,17 +1,22 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
+import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:sqflite/sqflite.dart';
 
 import '../popup_card/custom_rect_tween.dart';
 
 class UploadDemo extends StatefulWidget {
   final String string, allNotes;
+  final bool visible = false;
 
   const UploadDemo({Key? key, required this.string, required this.allNotes})
       : super(key: key);
+
   static final snackBar = SnackBar(
     content: RichText(
       textAlign: TextAlign.center,
@@ -54,6 +59,40 @@ _write(String text, BuildContext context) async {
 
 class _UploadDemoState extends State<UploadDemo> {
   bool v = false;
+
+  late Database database;
+  late List<Map<String, Object?>> list;
+
+// Get a location using getDatabasesPath
+  late String path;
+  int size = 0;
+  bool visible = true;
+
+  Future<void> initiateDB() async {
+    // Get a location using getDatabasesPath
+    var databasesPath = await getDatabasesPath();
+    path = join(databasesPath, 'demo.db');
+    // open the database
+    database = await openDatabase(path, version: 1,
+        onCreate: (Database db, int version) async {
+      // When creating the db, create the table
+      await db.execute(
+          'CREATE TABLE IF NOT EXISTS Notes (id INTEGER PRIMARY KEY, title NVARCHAR(MAX), note NVARCHAR(MAX))');
+    });
+    list = (await database.rawQuery('SELECT * FROM Notes'));
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    initiateDB().whenComplete(() => makeCSVAndSaveIt().whenComplete(() {
+      setState(() {
+        visible = true;
+      });
+    }));
+    makeCSVAndSaveIt();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -118,16 +157,24 @@ class _UploadDemoState extends State<UploadDemo> {
                             padding: const EdgeInsets.all(8.0),
                             child: GestureDetector(
                               onTap: () async {
-                                if (widget.allNotes.isNotEmpty) {
-                                  _write(widget.allNotes, context);
-                                  print(widget.allNotes);
+                                if (list.isNotEmpty) {
                                   final box =
                                       context.findRenderObject() as RenderBox?;
-                                  await Share.share(widget.allNotes,
-                                      subject: 'cloud.txt',
+                                  Share.shareFiles([fileAddress],
+                                      subject: 'notes.csv',
                                       sharePositionOrigin:
                                           box!.localToGlobal(Offset.zero) &
                                               box.size);
+
+                                  // _write(widget.allNotes, context);
+                                  // print(widget.allNotes);
+                                  // final box =
+                                  //     context.findRenderObject() as RenderBox?;
+                                  // await Share.share(widget.allNotes,
+                                  //     subject: 'cloud.txt',
+                                  //     sharePositionOrigin:
+                                  //         box!.localToGlobal(Offset.zero) &
+                                  //             box.size);
                                 } else {
                                   setState(() {
                                     v = true;
@@ -157,12 +204,15 @@ class _UploadDemoState extends State<UploadDemo> {
                                     ),
                                   ],
                                 ),
-                                child: const Center(
-                                  child: Text(
-                                    'continue',
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontFamily: "varela-round.regular"),
+                                child: Visibility(
+                                  visible: visible,
+                                  child: const Center(
+                                    child: Text(
+                                      'continue',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: "varela-round.regular"),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -219,5 +269,33 @@ class _UploadDemoState extends State<UploadDemo> {
             ),
           ),
         ));
+  }
+
+  var fileAddress = "";
+  late List<List<dynamic>> temp;
+
+  Future<void> makeCSVAndSaveIt() async {
+    List<List<dynamic>> rows = [];
+    for (int i = 0; i < list.length; i++) {
+//row refer to each column of a row in csv file and rows refer to each row in a file
+      List<dynamic> row = [];
+      row.add(list[i]["id"].toString());
+      row.add(list[i]["title"].toString());
+      row.add(list[i]["note"].toString());
+      rows.add(row);
+    }
+
+    String csv = const ListToCsvConverter().convert(rows);
+    temp = const CsvToListConverter().convert(csv);
+
+    print(temp[0][2].toString());
+    final Directory? directory = Platform.isAndroid
+        ? await getExternalStorageDirectory() //FOR ANDROID
+        : await getApplicationSupportDirectory(); //FOR iOS
+
+    final File file = File('${directory?.path}/notes.csv');
+    fileAddress = '${directory?.path}/notes.csv';
+
+    file.writeAsString(csv);
   }
 }
