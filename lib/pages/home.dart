@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:path/path.dart';
@@ -37,7 +38,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         onCreate: (Database db, int version) async {
       // When creating the db, create the table
       await db.execute(
-          'CREATE TABLE IF NOT EXISTS Notes (id INTEGER PRIMARY KEY, title NVARCHAR(MAX), note NVARCHAR(MAX))');
+          'CREATE TABLE IF NOT EXISTS Notes (id INTEGER PRIMARY KEY, title NVARCHAR, note NVARCHAR)');
     });
   }
 
@@ -48,7 +49,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       if(list.isNotEmpty){
         visible = false;
       }
-      print(list.length);
+      if (kDebugMode) {
+        print(list.length);
+      }
       size = list.length;
     });
   }
@@ -65,18 +68,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
     var s = MediaQuery.of(context).size;
 
-
-    // initState();
-    void _showToast(BuildContext context) {
-      final scaffold = ScaffoldMessenger.of(context);
-      scaffold.showSnackBar(
-        SnackBar(
-          content: const Text('Added to favorite'),
-          action: SnackBarAction(
-              label: 'UNDO', onPressed: scaffold.hideCurrentSnackBar),
-        ),
-      );
-    }
 
     return Scaffold(
       appBar: AppBar(

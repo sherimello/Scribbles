@@ -1,4 +1,5 @@
 import 'package:csv/csv.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_share/flutter_share.dart';
 import 'package:path/path.dart';
@@ -171,6 +172,12 @@ class _TestWidgetState extends State<TestWidget> {
         : await getApplicationSupportDirectory(); //FOR iOS
     final File file = File('${directory?.path}/notes.csv');
     fileAddress = '${directory?.path}/notes.csv';
+
+    // FilePickerResult? result = await FilePicker.platform
+    // .pickFiles(
+    //   allowedExtensions: ['csv'],
+    //   type: FileType.custom,
+    // );
 
 // convert rows to String and write as csv file
 

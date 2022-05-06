@@ -42,7 +42,7 @@ class _SyncFileState extends State<SyncFile> {
         onCreate: (Database db, int version) async {
       // When creating the db, create the table
       await db.execute(
-          'CREATE TABLE IF NOT EXISTS Notes (id INTEGER PRIMARY KEY, title NVARCHAR(MAX), note NVARCHAR(MAX))');
+          'CREATE TABLE Notes (id INTEGER PRIMARY KEY, title NVARCHAR(MAX), note NVARCHAR(MAX))');
     });
   }
 
@@ -282,9 +282,7 @@ class _SyncFileState extends State<SyncFile> {
                                         final File file = File(
                                             '${directory?.path}/notes.csv');
                                         if (file.existsSync()) {
-                                          copyCSVToDB(
-                                              '${directory?.path}/notes.csv',
-                                              context);
+                                          copyCSVToDB("1", context);
                                         } else {
                                           print("null");
                                         }
@@ -319,27 +317,7 @@ class _SyncFileState extends State<SyncFile> {
                                         8, 3.0, 8, 19),
                                     child: GestureDetector(
                                       onTap: () async {
-                                        FilePickerResult? result =
-                                            await FilePicker.platform
-                                                .pickFiles(type: FileType.any);
-                                        if (result != null) {
-                                          // File file =
-                                          //     File(result.files.single.path!);
-                                          // fetchedNotes =
-                                          //     file.readAsStringSync();
-                                          // writeDataToDB(file, context);
-
-                                          // final csvFile = File(result.files.single.path!).openRead();
-
-                                          copyCSVToDB(result.files.single.path!,
-                                              context);
-                                        } else {
-                                          if (kDebugMode) {
-                                            print('no file picked!');
-                                            // User canceled the picker
-
-                                          }
-                                        }
+                                        copyCSVToDB("2", context);
                                       },
                                       child: RichText(
                                         textAlign: TextAlign.center,
@@ -440,75 +418,54 @@ class _SyncFileState extends State<SyncFile> {
     }
   }
 
-  Future<void> copyCSVToDB(String filePath, BuildContext context) async {
+  Future<void> copyCSVToDB(String key, BuildContext context) async {
     List<String> title = [], note = [];
     List<List<dynamic>> temp = [];
-    final csvFile = File(path).openRead();
-    temp = await csvFile
-        .transform(base64.decoder)
-        .transform(
-          const CsvToListConverter(),
-        )
-        .toList();
+
+    if (key == "1") {
+      final Directory? directory = Platform.isAndroid
+          ? await getExternalStorageDirectory() //FOR ANDROID
+          : await getApplicationSupportDirectory(); //FOR iOS
+      final File file = File('${directory?.path}/notes.csv');
+
+      temp = await file
+          .openRead()
+          .transform(utf8.decoder)
+          .transform(
+            const CsvToListConverter(),
+          )
+          .toList();
+    }
+    if (key == "2") {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        allowedExtensions: ['csv'],
+        type: FileType.custom,
+      );
+      // if (result != null) {
+        String? path1 = result?.files.first.path;
+        final file = File(path1!).openRead();
+
+        temp = await file
+            .transform(utf8.decoder)
+            .transform(
+              const CsvToListConverter(),
+            )
+            .toList();
+      // }
+      // else {
+      //   if (kDebugMode) {
+      //     print('no file picked!');
+      //     // User canceled the picker
+      //
+      //   }
+      // }
+    }
     for (int i = 0; i < temp.length; i++) {
       title.add(temp[i][1].toString());
       note.add(temp[i][2].toString());
     }
-    uploadData(context, title, note);
-  }
 
-  void writeDataToDB(File file, BuildContext context) {
-    List<String> title = [], note = [];
-    // print(fetchedNotes);
-    LineSplitter ls = const LineSplitter();
-    List<String> lines = ls.convert(fetchedNotes);
-
-    if (lines.isEmpty) {
-      print('lines is empty');
-    }
-
-    var temp = "";
-
-    for (int i = 0; i < lines.length; i++) {
-      // print('in');
-
-      if (i > 0) {
-        if (lines[i - 1] == '') {
-          title.add(lines[i].replaceAll('endL', '\n'));
-        } else {
-          if ((lines[i] != "")) {
-            temp += lines[i].replaceAll('endL', '\n');
-            if (i == lines.length - 1) {
-              note.add(temp);
-              temp = "";
-            }
-          } else {
-            note.add(temp);
-            temp = "";
-          }
-        }
-      }
-    }
-
-    if (kDebugMode) {
-      print(title.length.toString() + " " + note.length.toString());
-    }
-    var x = "";
-    for (int i = 0; i < note.length; i++) {
-      print(title[i] + '\n' + note[i] + '\n\n');
-    }
-    uploadData(context, title, note);
-  }
-
-  void readFromAppData(BuildContext context) async {
-    final Directory? directory = Platform.isAndroid
-        ? await getExternalStorageDirectory() //FOR ANDROID
-        : await getApplicationSupportDirectory(); //FOR iOS
-    final File file = File('${directory?.path}/cloud.txt');
-    if (file.existsSync()) {
-      fetchedNotes = file.readAsStringSync();
-      writeDataToDB(file, context);
-    }
+    initiateDB().whenComplete(() => uploadData(context, title, note));
   }
 
   Future<void> getAllNotes() async {
