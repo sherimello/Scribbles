@@ -49,12 +49,15 @@ class PreviewCard extends StatelessWidget {
           return CustomRectTween(begin: begin!, end: end!);
         },
         child: Card(
-            elevation: 7,
+            elevation: 0,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(19),
+              borderRadius: BorderRadius.circular(25),
             ),
             // color: Colors.teal[200],
-            color: Colors.orangeAccent,
+            // color: Colors.pink.withOpacity(.31),
+            // color: Colors.orange.withOpacity(.31),
+            // color: Colors.red.withOpacity(.31),
+            color: Colors.lightGreenAccent.withOpacity(.31),
             child: SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.all(11.0),
@@ -70,7 +73,7 @@ class PreviewCard extends StatelessWidget {
                             turns: AlwaysStoppedAnimation(45 / 360),
                             child: Icon(
                               Icons.push_pin_sharp,
-                              color: Colors.white,
+                              color: Colors.black,
                             ),
                           ),
                         ],

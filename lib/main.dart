@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:scribbles/pages/home.dart';
 import 'package:scribbles/classes/map_list_to_csv.dart';
+import 'package:scribbles/pages/new_note_page_design.dart';
 import 'package:scribbles/widgets/bottom_sheet.dart';
 import 'package:scribbles/widgets/test.dart';
 import '../pages/test.dart';
@@ -77,7 +78,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return const Home();
+    return const NewNotePage();
     // return const Test(Icons.post_add, Icons.camera_alt_outlined,
     //     Icons.place_outlined, Icons.menu);
   }

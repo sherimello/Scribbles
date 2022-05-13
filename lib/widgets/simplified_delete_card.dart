@@ -47,7 +47,7 @@ class SimplifiedDeleteCard extends StatelessWidget {
             color: Colors.red,
             elevation: 11,
             shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(7)),
+              borderRadius: BorderRadius.all(Radius.circular(25)),
             ),
             child: Icon(
               Icons.delete,
