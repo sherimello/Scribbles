@@ -52,6 +52,7 @@ dependencies:
   fluttertoast: ^8.0.9
   csv: ^5.0.1
   flutter_share: ^2.0.0
+  avatar_glow: ^2.0.2
 #  flutter_quill: ^4.0.10
 
 dev_dependencies:
@@ -87,6 +88,7 @@ flutter:
     - lib/assets/images/empty2.gif
     - lib/assets/images/demo.gif
     - lib/assets/images/screenshot.jpeg
+    - lib/assets/images/
 
       # An image asset can refer to one or more resolution-specific "variants", see
       # https://flutter.dev/assets-and-images/#resolution-aware.

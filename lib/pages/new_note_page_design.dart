@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class NewNotePage extends StatefulWidget {
   const NewNotePage({Key? key}) : super(key: key);
@@ -10,17 +9,18 @@ class NewNotePage extends StatefulWidget {
 
 class _NewNotePageState extends State<NewNotePage> {
   double saveButtonDimen = 0;
-  Color searchBarColor = Color(0xfffccd89);
+  Color searchBarColor = const Color(0xfff7a221);
   bool _isVisible = false, _isNoteCardActive = false;
   final _searchFieldController = TextEditingController(),
       _noteFieldController = TextEditingController();
+  late FocusNode myFocusNode, myFocusNode2;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _noteFieldController.addListener(() {});
-    _searchFieldController.addListener(() {});
+    myFocusNode = FocusNode();
+    myFocusNode2 = FocusNode();
   }
 
   @override
@@ -35,6 +35,13 @@ class _NewNotePageState extends State<NewNotePage> {
     var size = MediaQuery.of(context).size;
     double newDimen = size.height * .055;
     // double newDimen = 55;
+
+    noteCardActiveStatus(bool _isActive) {
+      setState(() {
+        _isVisible = true;
+        newDimen > 55 ? saveButtonDimen = newDimen : saveButtonDimen = 55;
+      });
+    }
 
     changeSaveButtonSize() {
       setState(() {
@@ -91,18 +98,6 @@ class _NewNotePageState extends State<NewNotePage> {
             borderRadius: BorderRadius.circular(100),
             border: Border.all(color: Colors.grey.shade100, width: 1),
             color: Colors.white,
-            // boxShadow: [
-            //   BoxShadow(
-            //     blurRadius: 7,
-            //     offset: const Offset(3, 3),
-            //     color: Colors.grey.withOpacity(.75),
-            //   ),
-            //   const BoxShadow(
-            //     blurRadius: 3,
-            //     offset: Offset(-5, -3),
-            //     color: Colors.white,
-            //   ),
-            // ]
           ),
         ),
       );
@@ -149,20 +144,21 @@ class _NewNotePageState extends State<NewNotePage> {
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: AnimatedContainer(
-                                  curve: Curves.easeOut,
+                                  curve: Curves.fastOutSlowIn,
                                   duration: const Duration(milliseconds: 351),
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(55),
-                                    color: searchBarColor.withOpacity(.35),
+                                    color: searchBarColor,
                                   ),
                                   // boxShadow: boxShadow(21, 3, 3, Colors.grey.shade300, Colors.grey.shade300)),
                                   child: Center(
                                     child: TextField(
+                                      focusNode: myFocusNode2,
                                       controller: _searchFieldController,
                                       textAlign: TextAlign.center,
                                       decoration: const InputDecoration(
                                           hintStyle: TextStyle(
-                                              color: Colors.black,
+                                              color: Colors.white,
                                               fontFamily: "Rounded_Elegance",
                                               fontSize: 15,
                                               fontWeight: FontWeight.bold),
@@ -190,7 +186,7 @@ class _NewNotePageState extends State<NewNotePage> {
                               child: AnimatedContainer(
                                 width: saveButtonDimen,
                                 height: saveButtonDimen,
-                                curve: Curves.easeIn,
+                                curve: Curves.fastOutSlowIn,
                                 child: Visibility(
                                     visible: _isVisible,
                                     child: const Center(
@@ -237,18 +233,18 @@ class _NewNotePageState extends State<NewNotePage> {
                   child: Container(
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(17),
-                        border: Border.all(color: Colors.grey)),
+                        border: Border.all(color: searchBarColor)),
                     child: Padding(
                       padding: const EdgeInsets.all(11.0),
                       child: SingleChildScrollView(
                           child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          InkWell(child: colorPalette(0xfff8c3c3)),
-                          colorPalette(0xfffdb19e),
-                          colorPalette(0xffffb8d6),
-                          colorPalette(0xffb6fde6),
-                          colorPalette(0xfffccd89),
+                          InkWell(child: colorPalette(0xffe78848)),
+                          colorPalette(0xffb44c4b),
+                          colorPalette(0xffd2ad7e),
+                          colorPalette(0xfff7a221),
+                          colorPalette(0xff02708b),
                         ],
                       )),
                     ),
@@ -278,13 +274,15 @@ class _NewNotePageState extends State<NewNotePage> {
                     child: GestureDetector(
                   onTap: () {
                     setState(() {
+                      _isNoteCardActive = true;
+                      myFocusNode.requestFocus();
                       _noteFieldController.addListener(() {
                         _searchFieldController.addListener(() {
                           if (_noteFieldController.text.isNotEmpty &&
                               _searchFieldController.text.isNotEmpty) {
                             changeSaveButtonSize();
                           }
-                          if(_searchFieldController.text.isEmpty){
+                          if (_searchFieldController.text.isEmpty) {
                             hideSaveButton();
                           }
                         });
@@ -292,21 +290,48 @@ class _NewNotePageState extends State<NewNotePage> {
                             _searchFieldController.text.isNotEmpty) {
                           changeSaveButtonSize();
                         }
-                        if(_noteFieldController.text.isEmpty){
+                        if (_noteFieldController.text.isEmpty) {
                           hideSaveButton();
                         }
+                        if (!myFocusNode.hasFocus) {
+                          _isNoteCardActive = false;
+                        }
+                        myFocusNode.addListener(() {
+                          if (!myFocusNode.hasFocus &&
+                              _noteFieldController.text.isEmpty) {
+                            setState(() {
+                              _isNoteCardActive = false;
+                            });
+                            // FocusManager.instance.primaryFocus?.unfocus();
+                          }if(_noteFieldController.text.isNotEmpty) {
+                            setState(() {
+                              print("1");
+                              _isNoteCardActive = true;
+                            });
+                          }
+                        });
+
+                        myFocusNode2.addListener(() {
+                          if (myFocusNode2.hasFocus &&
+                              _noteFieldController.text.isEmpty) {
+                            setState(() {
+                              _isNoteCardActive = false;
+                            });
+                          } if(_noteFieldController.text.isNotEmpty) {
+                            setState(() {
+                              print("1");
+                              _isNoteCardActive = true;
+                            });
+                          }
+                        });
                       });
-                      _isNoteCardActive = true;
-                      // if (_searchFieldController.text.isNotEmpty) {
-                      //   _isNoteCardActive = true;
-                      // }
                     });
                   },
                   child: AnimatedContainer(
-                    curve: Curves.easeOut,
+                    curve: Curves.fastOutSlowIn,
                     duration: const Duration(milliseconds: 751),
                     decoration: BoxDecoration(
-                        color: searchBarColor.withOpacity(.35),
+                        color: searchBarColor,
                         borderRadius: BorderRadius.circular(25),
                         border:
                             Border.all(color: Colors.grey.shade300, width: 1.5)
@@ -319,12 +344,13 @@ class _NewNotePageState extends State<NewNotePage> {
                           child: Visibility(
                             visible: _isNoteCardActive,
                             child: TextField(
+                              focusNode: myFocusNode,
                               controller: _noteFieldController,
                               keyboardType: TextInputType.multiline,
                               maxLines: 1000000,
                               decoration: const InputDecoration(
                                   hintStyle: TextStyle(
-                                      color: Colors.grey,
+                                      color: Colors.white54,
                                       fontFamily: "Rounded_Elegance",
                                       fontSize: 13,
                                       fontStyle: FontStyle.italic,
@@ -342,14 +368,32 @@ class _NewNotePageState extends State<NewNotePage> {
                         ),
                         Visibility(
                           visible: !_isNoteCardActive,
-                          child: const Expanded(
+                          child: Expanded(
                             child: Center(
-                              child: Text(
-                                "Tap to start writing!",
-                                style: TextStyle(
-                                    fontSize: 21,
-                                    fontFamily: "Rounded_Elegance",
-                                    color: Colors.grey),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(13.0),
+                                    child: ClipRRect(
+                                        borderRadius:
+                                            BorderRadius.circular(1000.0),
+                                        child: Image.asset(
+                                          "lib/assets/images/tap.gif",
+                                          width: size.width * .15,
+                                          height: size.width * .15,
+                                          fit: BoxFit.cover,
+                                        )),
+                                  ),
+                                  const Text(
+                                    "Tap to start writing!",
+                                    style: TextStyle(
+                                        fontSize: 17,
+                                        fontFamily: "Rounded_Elegance",
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
