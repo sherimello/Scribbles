@@ -78,7 +78,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return const NewNotePage();
+    // return const NewNotePage("","");
+    return const Home();
     // return const Test(Icons.post_add, Icons.camera_alt_outlined,
     //     Icons.place_outlined, Icons.menu);
   }

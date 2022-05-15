@@ -2,8 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:path/path.dart';
-import 'package:scribbles/widgets/note_preview_card.dart';
 import 'package:scribbles/widgets/bottom_sheet.dart';
+import 'package:scribbles/widgets/note_preview_card.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../popup_card/custom_rect_tween.dart';
@@ -38,7 +38,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         onCreate: (Database db, int version) async {
       // When creating the db, create the table
       await db.execute(
-          'CREATE TABLE IF NOT EXISTS Notes (id INTEGER PRIMARY KEY, title NVARCHAR, note NVARCHAR)');
+          'CREATE TABLE IF NOT EXISTS Notes (id INTEGER PRIMARY KEY, title NVARCHAR, note NVARCHAR, theme NVARCHAR, time NVARCHAR)');
     });
   }
 
@@ -46,7 +46,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     list = (await database.rawQuery('SELECT * FROM Notes'));
 
     setState(() {
-      if(list.isNotEmpty){
+      if (list.isNotEmpty) {
         visible = false;
       }
       if (kDebugMode) {
@@ -65,9 +65,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-
     var s = MediaQuery.of(context).size;
-
 
     return Scaffold(
       appBar: AppBar(
@@ -106,6 +104,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   itemBuilder: (BuildContext context, int index) =>
                       // list.isEmpty ? Container():
                       PreviewCard(
+                          time: list[index]['time'].toString(),
+                          theme: list[index]["theme"].toString(),
                           noteID: list[index]["id"].toString(),
                           id: index.toString(),
                           title: list[index]["title"].toString(),
@@ -140,11 +140,12 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                         onPressed: () {
                           Navigator.of(context).push(HeroDialogRoute(
                             builder: (context) => const Center(
-                              child: Test(
-                                  Icons.post_add,
-                                  Icons.camera_alt_outlined,
-                                  Icons.place_outlined,
-                                  Icons.menu),
+                              // child: Test(
+                              //     Icons.post_add,
+                              //     Icons.camera_alt_outlined,
+                              //     Icons.place_outlined,
+                              //     Icons.menu),
+                              child: Test(),
                             ),
                             // settings: const RouteSettings(),
                           ));
@@ -163,8 +164,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                 child: Image.asset(
                   "lib/assets/images/empty2.gif",
                   fit: BoxFit.cover,
-                  height: s.width*.55,
-                  width: s.width*.55,
+                  height: s.width * .55,
+                  width: s.width * .55,
                 ),
               ),
             )

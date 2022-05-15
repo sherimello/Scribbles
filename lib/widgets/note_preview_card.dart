@@ -6,15 +6,16 @@ import 'package:scribbles/widgets/note_card.dart';
 import 'package:scribbles/widgets/simplified_delete_card.dart';
 
 class PreviewCard extends StatelessWidget {
-
-  final String title, note, id, noteID;
+  final String title, note, id, noteID, theme, time;
 
   const PreviewCard(
       {Key? key,
-        required this.id,
-        required this.title,
-        required this.note,
-        required this.noteID})
+      required this.id,
+      required this.time,
+      required this.title,
+      required this.note,
+      required this.noteID,
+      required this.theme})
       : super(key: key);
 
   @override
@@ -22,7 +23,7 @@ class PreviewCard extends StatelessWidget {
     late String t1, t2, date;
     late Todo todo;
     t1 =
-    'jhasjkhdiuiashiudyhiausdoijasiojdojoasjioljdoiaiojsiodjoiasjiodjioajoidajsoijdojasiodjojaosjdojoias';
+        'jhasjkhdiuiashiudyhiausdoijasiojdojoasjioljdoiaiojsiodjoiasjiodjioajoidajsoijdojasiodjojaosjdojoias';
     t2 = "hello";
     date = '19-3-93';
     return InkWell(
@@ -38,7 +39,7 @@ class PreviewCard extends StatelessWidget {
       onTap: () {
         Navigator.of(context).push(HeroDialogRoute(
           builder: (context) => Center(
-            child: NoteCard(noteID, id, title, note, date),
+            child: NoteCard(noteID, id, title, note, time, theme),
           ),
           // settings: const RouteSettings(),
         ));
@@ -57,7 +58,7 @@ class PreviewCard extends StatelessWidget {
             // color: Colors.pink.withOpacity(.31),
             // color: Colors.orange.withOpacity(.31),
             // color: Colors.red.withOpacity(.31),
-            color: Colors.lightGreenAccent.withOpacity(.31),
+            color: Color(int.parse(theme)),
             child: SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.all(11.0),
@@ -91,15 +92,15 @@ class PreviewCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      date,
+                      time,
                       style: const TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: Colors.black54,
-                          fontSize: 13,
+                          color: Colors.white54,
+                          fontSize: 11,
                           fontFamily: 'Rounded_Elegance'),
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
+                      padding: const EdgeInsets.fromLTRB(0,13,0,8),
                       child: Text(
                         // t1,
                         note,
@@ -109,7 +110,7 @@ class PreviewCard extends StatelessWidget {
                             fontWeight: FontWeight.w700,
                             fontSize: 13,
                             fontFamily: 'Rounded_Elegance',
-                            color: Colors.black54),
+                            color: Colors.black),
                       ),
                     ),
                   ],
@@ -121,143 +122,13 @@ class PreviewCard extends StatelessWidget {
   }
 }
 
-
-
-// class PreviewCard extends StatefulWidget {
-//   final String title, note, id, noteID;
-//
-//   const PreviewCard(
-//       {Key? key,
-//       required this.id,
-//       required this.title,
-//       required this.note,
-//       required this.noteID})
-//       : super(key: key);
-//
-//   @override
-//   State<PreviewCard> createState() => _PreviewCardState();
-// }
-//
-// class _PreviewCardState extends State<PreviewCard> {
-//   late String t1, t2, date;
-//   late Todo todo;
-//
-//   // late Key key;
-//   @override
-//   void initState() {
-//     t1 =
-//         'jhasjkhdiuiashiudyhiausdoijasiojdojoasjioljdoiaiojsiodjoiasjiodjioajoidajsoijdojasiodjojaosjdojoias';
-//     t2 = "hello";
-//     date = '19-3-93';
-//     // todo = Todo(id: '');
-//     // key = const Key();
-//     super.initState();
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     // String id = widget.index.toString();
-//     return InkWell(
-//       onLongPress: () {
-//         Navigator.of(context).push(HeroDialogRoute(
-//           builder: (context) => Center(
-//             child: SimplifiedDeleteCard(widget.noteID, widget.id),
-//             // child: DeleteCard(widget.id, widget.title, widget.note, widget.noteID),
-//           ),
-//           // settings: const RouteSettings(),
-//         ));
-//       },
-//       onTap: () {
-//         Navigator.of(context).push(HeroDialogRoute(
-//           builder: (context) => Center(
-//             child: NoteCard(widget.noteID, widget.id, widget.title, widget.note, date),
-//           ),
-//           // settings: const RouteSettings(),
-//         ));
-//       },
-//       child: Hero(
-//         tag: widget.id,
-//         createRectTween: (begin, end) {
-//           return CustomRectTween(begin: begin!, end: end!);
-//         },
-//         child: Card(
-//             elevation: 7,
-//             shape: RoundedRectangleBorder(
-//               borderRadius: BorderRadius.circular(19),
-//             ),
-//             // color: Colors.teal[200],
-//             color: Colors.orangeAccent,
-//             child: SingleChildScrollView(
-//               child: Padding(
-//                 padding: const EdgeInsets.all(11.0),
-//                 child: Column(
-//                   crossAxisAlignment: CrossAxisAlignment.start,
-//                   children: [
-//                     Padding(
-//                       padding: const EdgeInsets.all(8.0),
-//                       child: Row(
-//                         children: const [
-//                           Spacer(),
-//                           RotationTransition(
-//                             turns: AlwaysStoppedAnimation(45 / 360),
-//                             child: Icon(
-//                               Icons.push_pin_sharp,
-//                               color: Colors.white,
-//                             ),
-//                           ),
-//                         ],
-//                       ),
-//                     ),
-//                     Padding(
-//                       padding: const EdgeInsets.only(bottom: 5.0),
-//                       child: Text(
-//                         // t1,
-//                         widget.title,
-//                         style: const TextStyle(
-//                             fontWeight: FontWeight.bold,
-//                             fontSize: 19,
-//                             fontFamily: 'varela-round.regular'),
-//                       ),
-//                     ),
-//                     Text(
-//                       date,
-//                       style: const TextStyle(
-//                           fontWeight: FontWeight.bold,
-//                           color: Colors.black54,
-//                           fontSize: 13,
-//                           fontFamily: 'Rounded_Elegance'),
-//                     ),
-//                     Padding(
-//                       padding: const EdgeInsets.only(top: 8.0),
-//                       child: Text(
-//                         // t1,
-//                         widget.note,
-//                         maxLines: 7,
-//                         style: const TextStyle(
-//                             overflow: TextOverflow.ellipsis,
-//                             fontWeight: FontWeight.w700,
-//                             fontSize: 13,
-//                             fontFamily: 'Rounded_Elegance',
-//                             color: Colors.black54),
-//                       ),
-//                     ),
-//                   ],
-//                 ),
-//               ),
-//             )),
-//       ),
-//     );
-//   }
-// }
-
 class _TodoPopupCard extends StatefulWidget {
   // const _TodoPopupCard({Key key, required this.todo}) : super(key: key);
   // final Todo todo;
 
   // const _TodoPopupCard(this.todo);
 
-  @override
-  State<_TodoPopupCard> createState() => _TodoPopupCardState();
+  @override  State<_TodoPopupCard> createState() => _TodoPopupCardState();
 }
 
 class _TodoPopupCardState extends State<_TodoPopupCard> {

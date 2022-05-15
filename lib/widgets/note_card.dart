@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 
+import '../pages/new_note_page_design.dart';
 import '../pages/note_page.dart';
 import '../popup_card/custom_rect_tween.dart';
 import '../popup_card/hero_dialog_route.dart';
 
 class NoteCard extends StatelessWidget {
-  final String id, string, title, note, date;
+  final String id, string, title, note, date, theme;
 
-  const NoteCard(this.id, this.string, this.title, this.note, this.date, {Key? key}) : super(key: key);
+  const NoteCard(this.id, this.string, this.title, this.note, this.date, this.theme, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -18,9 +19,9 @@ class NoteCard extends StatelessWidget {
       },
       child: Card(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(19),
+          borderRadius: BorderRadius.circular(25),
         ),
-        color: Colors.orangeAccent[100],
+        color: Color(int.parse(theme)),
         child: SizedBox(
           width: MediaQuery.of(context).size.width * .85,
           height: MediaQuery.of(context).size.height * .65,
@@ -43,7 +44,7 @@ class NoteCard extends StatelessWidget {
                                 onTap: () {
                                   Navigator.of(context).push(HeroDialogRoute(
                                     builder: (context) => Center(
-                                      child: NotePage(id, string),
+                                      child: NewNotePage(id, string, theme),
                                     ),
                                     // settings: const RouteSettings(),
                                   ));
@@ -72,8 +73,9 @@ class NoteCard extends StatelessWidget {
                           child: Center(
                             child: Text(
                               '(' + date + ')',
+                              textAlign: TextAlign.center,
                               style: const TextStyle(
-                                   color: Colors.black87, fontSize: 13, fontFamily: 'Rounded_Elegance'),
+                                   color: Colors.white54, fontSize: 13, fontFamily: 'Rounded_Elegance'),
                             ),
                           ),
                         ),
