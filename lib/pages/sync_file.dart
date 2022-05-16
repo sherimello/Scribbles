@@ -42,48 +42,50 @@ class _SyncFileState extends State<SyncFile> {
         onCreate: (Database db, int version) async {
       // When creating the db, create the table
       await db.execute(
-          'CREATE TABLE Notes (id INTEGER PRIMARY KEY, title NVARCHAR(MAX), note NVARCHAR(MAX))');
+          'CREATE TABLE IF NOT EXISTS Notes (id INTEGER PRIMARY KEY, title NVARCHAR, note NVARCHAR, theme NVARCHAR, time NVARCHAR)');
     });
+    list = (await database.rawQuery('SELECT * FROM Notes'));
   }
 
   String allNotes = '', divider = ",.,.,.,;';';';,.,.,.,";
 
-  showData(BuildContext context) async {
-    list = (await database.rawQuery('SELECT * FROM Notes'));
-
-    for (int i = 0; i < list.length; i++) {
-      allNotes += divider +
-          '\n' +
-          list[i]["title"].toString() +
-          '\n' +
-          list[i]["note"].toString() +
-          '\n';
-    }
-
-    if (list.isNotEmpty) {}
-    print(allNotes);
-    size = list.length;
-    _write(allNotes, context);
-  }
-
-  Future<void> _signOut() async {
-    await FirebaseAuth.instance.signOut();
-  }
+  // showData(BuildContext context) async {
+  //   list = (await database.rawQuery('SELECT * FROM Notes'));
+  //
+  //   for (int i = 0; i < list.length; i++) {
+  //     allNotes += divider +
+  //         '\n' +
+  //         list[i]["title"].toString() +
+  //         '\n' +
+  //         list[i]["note"].toString() +
+  //         '\n';
+  //   }
+  //
+  //   if (list.isNotEmpty) {}
+  //   print(allNotes);
+  //   size = list.length;
+  //   _write(allNotes, context);
+  // }
+  //
+  // Future<void> _signOut() async {
+  //   await FirebaseAuth.instance.signOut();
+  // }
 
   @override
   void initState() {
     // TODO: implement initState
     initiateDB();
+    getAllNotes();
     // _signOut();
     super.initState();
   }
 
   Future<void> uploadData(
-      BuildContext context, List<String> title, List<String> note) async {
+      BuildContext context, List<String> title, List<String> note, List<String> theme, List<String> time) async {
     await database.transaction((txn) async {
       for (int i = 0; i < title.length; i++) {
         int id1 = await txn.rawInsert(
-            'INSERT INTO Notes(title, note) VALUES(?, ?)', [title[i], note[i]]);
+            'INSERT INTO Notes(title, note, theme, time) VALUES(?, ?, ?, ?)', [title[i], note[i], theme[i], time[i]]);
         if (kDebugMode) {
           print('inserted1: $id1');
         }
@@ -404,22 +406,22 @@ class _SyncFileState extends State<SyncFile> {
     );
   }
 
-  _write(String text, BuildContext context) async {
-    print(allNotes);
-    final Directory? directory = Platform.isAndroid
-        ? await getExternalStorageDirectory() //FOR ANDROID
-        : await getApplicationSupportDirectory(); //FOR iOS
-    final File file = File('${directory?.path}/cloud.txt');
-    print('${directory?.path}/cloud.txt');
-    if (file.existsSync()) {
-      file.delete().whenComplete(() async => await file.writeAsString(text));
-    } else {
-      await file.writeAsString(text);
-    }
-  }
+  // _write(String text, BuildContext context) async {
+  //   print(allNotes);
+  //   final Directory? directory = Platform.isAndroid
+  //       ? await getExternalStorageDirectory() //FOR ANDROID
+  //       : await getApplicationSupportDirectory(); //FOR iOS
+  //   final File file = File('${directory?.path}/cloud.txt');
+  //   print('${directory?.path}/cloud.txt');
+  //   if (file.existsSync()) {
+  //     file.delete().whenComplete(() async => await file.writeAsString(text));
+  //   } else {
+  //     await file.writeAsString(text);
+  //   }
+  // }
 
   Future<void> copyCSVToDB(String key, BuildContext context) async {
-    List<String> title = [], note = [];
+    List<String> title = [], note = [], theme = [], time = [];
     List<List<dynamic>> temp = [];
 
     if (key == "1") {
@@ -463,9 +465,11 @@ class _SyncFileState extends State<SyncFile> {
     for (int i = 0; i < temp.length; i++) {
       title.add(temp[i][1].toString());
       note.add(temp[i][2].toString());
+      theme.add(temp[i][3].toString());
+      time.add(temp[i][4].toString());
     }
 
-    initiateDB().whenComplete(() => uploadData(context, title, note));
+    initiateDB().whenComplete(() => uploadData(context, title, note, theme, time));
   }
 
   Future<void> getAllNotes() async {
@@ -491,6 +495,8 @@ class _SyncFileState extends State<SyncFile> {
       row.add(list[i]["id"].toString());
       row.add(list[i]["title"].toString());
       row.add(list[i]["note"].toString());
+      row.add(list[i]["theme"]);
+      row.add(list[i]["time"].toString());
       rows.add(row);
     }
 

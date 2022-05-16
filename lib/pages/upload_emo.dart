@@ -77,7 +77,7 @@ class _UploadDemoState extends State<UploadDemo> {
         onCreate: (Database db, int version) async {
       // When creating the db, create the table
       await db.execute(
-          'CREATE TABLE IF NOT EXISTS Notes (id INTEGER PRIMARY KEY, title NVARCHAR(MAX), note NVARCHAR(MAX))');
+          'CREATE TABLE IF NOT EXISTS Notes (id INTEGER PRIMARY KEY, title NVARCHAR, note NVARCHAR, theme NVARCHAR, time NVARCHAR)');
     });
     list = (await database.rawQuery('SELECT * FROM Notes'));
   }
@@ -282,6 +282,8 @@ class _UploadDemoState extends State<UploadDemo> {
       row.add(list[i]["id"].toString());
       row.add(list[i]["title"].toString());
       row.add(list[i]["note"].toString());
+      row.add(list[i]["theme"].toString());
+      row.add(list[i]["time"].toString());
       rows.add(row);
     }
 

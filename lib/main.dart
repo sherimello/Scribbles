@@ -1,10 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:scribbles/pages/home.dart';
-import 'package:scribbles/classes/map_list_to_csv.dart';
-import 'package:scribbles/pages/new_note_page_design.dart';
-import 'package:scribbles/widgets/bottom_sheet.dart';
-import 'package:scribbles/widgets/test.dart';
-import '../pages/test.dart';
 
 void main() {
   var kReleaseMode = true;
@@ -25,6 +20,11 @@ void main() {
   //   builder: (context) => const MyApp(),
   // ),
   // );
+}
+
+@override
+void initState() {
+  // TODO: implement initState
 }
 
 class MyApp extends StatelessWidget {
@@ -53,7 +53,11 @@ class MyApp extends StatelessWidget {
               primary: Colors.black,
             ),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: Container(
+          width: double.infinity,
+          height: double.infinity,
+          color: Colors.black,
+          child: const MyHomePage(title: 'Flutter Demo Home Page')),
     );
   }
 }
@@ -79,7 +83,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     // return const NewNotePage("","");
-    return const Home();
+    return Container(color: Colors.black, child: const Home());
     // return const Test(Icons.post_add, Icons.camera_alt_outlined,
     //     Icons.place_outlined, Icons.menu);
   }
