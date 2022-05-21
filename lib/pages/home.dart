@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -33,7 +35,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 // Get a location using getDatabasesPath
   late String path;
   int size = 0;
-  bool visible = true;
+  bool visible = true, _isLoading = true;
 
   Future<void> initiateDB() async {
     // Get a location using getDatabasesPath
@@ -65,6 +67,12 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     // TODO: implement initState
+    Timer(const Duration(seconds: 3), () {
+      // 5 seconds have past, you can do your work
+      setState(() {
+        _isLoading = false;
+      });
+    });
     Firebase.initializeApp();
     _googleSignIn.onCurrentUserChanged.listen((event) {
       setState(() {
@@ -76,113 +84,173 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     initiateDB().whenComplete(() => showData());
   }
 
+  Widget cloudBackupLoadingCard() {
+    return const Center(
+      child: CircularProgressIndicator(),
+    );
+  }
+
+  Widget title() {
+    return const Padding(
+      padding: EdgeInsets.all(8.0),
+      child: Center(
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: Padding(
+            padding: EdgeInsets.only(left: 8.0),
+            child: Text(
+              'Scribbles',
+              textAlign: TextAlign.left,
+              style: TextStyle(
+                // letterSpacing: 2,
+                fontWeight: FontWeight.w900,
+                fontSize: 21,
+                fontFamily: 'varela-round.regular',
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     var s = MediaQuery.of(context).size;
 
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        elevation: 3,
-        backgroundColor: Colors.black,
-        title: const Padding(
-          padding: EdgeInsets.all(0.0),
-          child: Text(
-            'Scribbles',
-            style: TextStyle(
-              // letterSpacing: 2,
-              fontWeight: FontWeight.w900,
-              fontSize: 21,
-              fontFamily: 'varela-round.regular',
-              color: Colors.white,
-            ),
-          ),
-        ),
-      ),
+      // appBar: AppBar(
+      //   automaticallyImplyLeading: true,
+      //   elevation: 0,
+      //   backgroundColor: Colors.white,
+      //   title: AnimatedContainer(
+      //     width: (!_isLoading) ? double.infinity : null,
+      //       color: (!_isLoading) ? Colors.black: Colors.white,
+      //       duration: const Duration(milliseconds: 750),
+      //       child: _isLoading?cloudBackupLoadingCard():title()),
+      // ),
       body: Container(
         height: double.infinity,
         width: double.infinity,
         color: Colors.white,
         child: SafeArea(
-          child: Stack(children: [
-            Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: StaggeredGridView.countBuilder(
-                  physics: const BouncingScrollPhysics(),
-                  shrinkWrap: true,
-                  crossAxisCount: 2,
-                  itemCount:
-                      // list.isEmpty ? 0:
-                      size,
-                  itemBuilder: (BuildContext context, int index) =>
-                      // list.isEmpty ? Container():
-                      PreviewCard(
-                          time: list[index]['time'].toString(),
-                          theme: list[index]["theme"].toString(),
-                          noteID: list[index]["id"].toString(),
-                          id: index.toString(),
-                          title: list[index]["title"].toString(),
-                          note: list[index]["note"].toString()),
-                  // PreviewCard(
-                  //   id: list.asMap()["id"].toString(), title: list.asMap()["title"].toString(), note: list.asMap()["note"].toString()
-                  // ),
-                  staggeredTileBuilder: (int index) =>
-                      const StaggeredTile.fit(1),
-                  // StaggeredTile.coimport 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';unt(2, index.isEven ? 2 : 1),
-                  mainAxisSpacing: 9.0,
-                  crossAxisSpacing: 9.0,
-                )),
-            Positioned(
-                bottom: 21,
-                right: 11,
-                child: Hero(
-                  tag: '000',
-                  createRectTween: (begin, end) {
-                    return CustomRectTween(begin: begin!, end: end!);
-                  },
-                  child: Material(
-                    color: Colors.black,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(100000),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(5.0, 5.0, 5.0, 0.0),
+                child: AnimatedContainer(
+                    width: (!_isLoading) ? MediaQuery.of(context).size.width : 31,
+                    height: (!_isLoading) ? AppBar().preferredSize.height : 31,
+                    curve: Curves.easeInCirc,
+                    decoration: BoxDecoration(
+                      color: (!_isLoading) ? Colors.black: Colors.blueGrey,
+                      borderRadius: BorderRadius.circular(_isLoading? 1000 : 13)
                     ),
-                    child: SizedBox(
-                      width: 71,
-                      height: 71,
-                      child: IconButton(
-                        color: Colors.black,
-                        onPressed: () {
-                          Navigator.of(context).push(HeroDialogRoute(
-                            builder: (context) => Center(
-                              // child: Test(
-                              //     Icons.post_add,
-                              //     Icons.camera_alt_outlined,
-                              //     Icons.place_outlined,
-                              //     Icons.menu),
-                              child: Test(list),
-                            ),
-                            // settings: const RouteSettings(),
-                          ));
-                        },
-                        icon: const Icon(
-                          Icons.menu,
-                          color: Colors.white,
+                    duration: const Duration(milliseconds: 550),
+                    child: Stack(
+                      children: [
+                        Positioned(
+
+                          child: Visibility(
+                              visible: !_isLoading,
+                              child: title()),
                         ),
-                      ),
+                        Padding(
+                          padding: const EdgeInsets.all(5.0),
+                          child: Visibility(
+                              visible: _isLoading,
+                              child: cloudBackupLoadingCard()),
+                        )
+                      ],
                     ),
-                  ),
-                )),
-            Visibility(
-              visible: visible,
-              child: Center(
-                child: Image.asset(
-                  "lib/assets/images/empty2.gif",
-                  fit: BoxFit.cover,
-                  height: s.width * .55,
-                  width: s.width * .55,
+                    // child: _isLoading?cloudBackupLoadingCard():SingleChildScrollView(child: title())
                 ),
               ),
-            )
-          ]),
+              Expanded(
+                child: Stack(children: [
+                  Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: StaggeredGridView.countBuilder(
+                        physics: const BouncingScrollPhysics(),
+                        shrinkWrap: true,
+                        crossAxisCount: 2,
+                        itemCount:
+                            // list.isEmpty ? 0:
+                            size,
+                        itemBuilder: (BuildContext context, int index) =>
+                            // list.isEmpty ? Container():
+                            PreviewCard(
+                                time: list[index]['time'].toString(),
+                                theme: list[index]["theme"].toString(),
+                                noteID: list[index]["id"].toString(),
+                                id: index.toString(),
+                                title: list[index]["title"].toString(),
+                                note: list[index]["note"].toString()),
+                        // PreviewCard(
+                        //   id: list.asMap()["id"].toString(), title: list.asMap()["title"].toString(), note: list.asMap()["note"].toString()
+                        // ),
+                        staggeredTileBuilder: (int index) =>
+                            const StaggeredTile.fit(1),
+                        // StaggeredTile.coimport 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';unt(2, index.isEven ? 2 : 1),
+                        mainAxisSpacing: 9.0,
+                        crossAxisSpacing: 9.0,
+                      )),
+                  Positioned(
+                      bottom: 21,
+                      right: 11,
+                      child: Hero(
+                        tag: '000',
+                        createRectTween: (begin, end) {
+                          return CustomRectTween(begin: begin!, end: end!);
+                        },
+                        child: Material(
+                          color: Colors.black,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(100000),
+                          ),
+                          child: SizedBox(
+                            width: 71,
+                            height: 71,
+                            child: IconButton(
+                              color: Colors.black,
+                              onPressed: () {
+                                Navigator.of(context).push(HeroDialogRoute(
+                                  builder: (context) => Center(
+                                    // child: Test(
+                                    //     Icons.post_add,
+                                    //     Icons.camera_alt_outlined,
+                                    //     Icons.place_outlined,
+                                    //     Icons.menu),
+                                    child: Test(list),
+                                  ),
+                                  // settings: const RouteSettings(),
+                                ));
+                              },
+                              icon: const Icon(
+                                Icons.menu,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      )),
+                  Visibility(
+                    visible: visible,
+                    child: Center(
+                      child: Image.asset(
+                        "lib/assets/images/empty2.gif",
+                        fit: BoxFit.cover,
+                        height: s.width * .55,
+                        width: s.width * .55,
+                      ),
+                    ),
+                  )
+                ]),
+              ),
+            ],
+          ),
         ),
       ),
     );

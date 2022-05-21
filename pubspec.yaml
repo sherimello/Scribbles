@@ -51,22 +51,7 @@ dependencies:
   firebase_database: ^9.0.14
   firebase_core: ^1.17.0
   google_sign_in: ^5.3.1
-#  flutter_native_splash: ^2.2.0+1
-#  flutter_launcher_icons: "^0.9.2"
-
-#flutter_icons:
-#  android: true
-#  ios: true
-#  color: ffffff
-#  image_path: lib/assets/images/note.png
-#
-#flutter_native_splash:
-#  color: ffffff
-#  image: lib/assets/images/note.png
-#  android_12:
-#  flutter_quill: ^4.0.10
-
-
+  shared_preferences: ^2.0.15
 
 dev_dependencies:
   flutter_test:
@@ -111,7 +96,7 @@ flutter:
 
       # To add custom fonts to your application, add a fonts section here,
       # in this "flutter" section. Each entry in this list should have a
-      # "family" key with the font family name, and a "fonts" key with a
+    # "family" key with the font family name, and a "fonts" key with a
     # list giving the asset and other descriptors for the font. For
     # example:
   fonts:
