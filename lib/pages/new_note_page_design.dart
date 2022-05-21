@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
-import  'package:intl/intl.dart';
+import 'package:intl/intl.dart';
 
 import '../popup_card/custom_rect_tween.dart';
 import 'home.dart';
@@ -33,7 +33,8 @@ class _NewNotePageState extends State<NewNotePage> {
       initNote,
       initTitle,
       selectedColor = "0xfff7a221",
-      initColor, time;
+      initColor,
+      time;
 
   @override
   void initState() {
@@ -84,13 +85,14 @@ class _NewNotePageState extends State<NewNotePage> {
   Future<void> updateData() async {
     await database.transaction((txn) async {
       database.rawUpdate(
-          'UPDATE Notes SET note = ?, title = ?, theme = ?, time = ? WHERE id = ?', [
-        _noteFieldController.text,
-        _searchFieldController.text,
-        selectedColor,
-        time,
-        widget.id
-      ]);
+          'UPDATE Notes SET note = ?, title = ?, theme = ?, time = ? WHERE id = ?',
+          [
+            _noteFieldController.text,
+            _searchFieldController.text,
+            selectedColor,
+            time,
+            widget.id
+          ]);
     });
   }
 
@@ -301,10 +303,13 @@ class _NewNotePageState extends State<NewNotePage> {
                                 onTap: () {
                                   // hideSaveButton();
 
-                                  String cdate2 = DateFormat("EEEEE, MMMM dd, yyyy").format(DateTime.now());
+                                  String cdate2 =
+                                      DateFormat("EEEEE, MMMM dd, yyyy")
+                                          .format(DateTime.now());
                                   //output:  August, 27, 2021
 
-                                  String tdata = DateFormat("hh:mm:ss a").format(DateTime.now());
+                                  String tdata = DateFormat("hh:mm:ss a")
+                                      .format(DateTime.now());
                                   // output: 07:38:57 PM
                                   time = cdate2 + "\n" + tdata;
                                   if (kDebugMode) {
@@ -442,147 +447,150 @@ class _NewNotePageState extends State<NewNotePage> {
                                 fontSize: 13)),
                       ]),
                     )),
-                Expanded(
-                    child: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _isNoteCardActive = true;
-                      myFocusNode.requestFocus();
-                      _noteFieldController.addListener(() {
-                        _searchFieldController.addListener(() {
-                          if (_noteFieldController.text.isNotEmpty &&
-                              _searchFieldController.text.isNotEmpty) {
-                            changeSaveButtonSize();
-                          }
-                          if (_searchFieldController.text.isEmpty) {
-                            hideSaveButton();
-                          }
-                        });
-                        if (_noteFieldController.text.isNotEmpty &&
-                            _searchFieldController.text.isNotEmpty) {
-                          changeSaveButtonSize();
-                        }
-                        if (_noteFieldController.text.isEmpty) {
-                          hideSaveButton();
-                        }
-                        if (!myFocusNode.hasFocus) {
-                          _isNoteCardActive = false;
-                        }
-                        myFocusNode.addListener(() {
-                          if (!myFocusNode.hasFocus &&
-                              _noteFieldController.text.isEmpty) {
-                            setState(() {
-                              _isNoteCardActive = false;
-                            });
-                            // FocusManager.instance.primaryFocus?.unfocus();
-                          }
-                          if (_noteFieldController.text.isNotEmpty) {
-                            setState(() {
-                              print("1");
-                              _isNoteCardActive = true;
-                            });
-                          }
-                        });
-
-                        myFocusNode2.addListener(() {
-                          if (myFocusNode2.hasFocus &&
-                              _noteFieldController.text.isEmpty) {
-                            setState(() {
-                              _isNoteCardActive = false;
-                            });
-                          }
-                          if (_noteFieldController.text.isNotEmpty) {
-                            setState(() {
-                              print("1");
-                              _isNoteCardActive = true;
-                            });
-                          }
-                        });
-                      });
-                    });
-                  },
+                Flexible(
+                  fit: FlexFit.tight,
+                    child: SizedBox(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(11, 0, 11, 11),
-                    child: AnimatedContainer(
-                      curve: Curves.fastOutSlowIn,
-                      duration: const Duration(milliseconds: 751),
-                      decoration: BoxDecoration(
-                        color: searchBarColor,
-                        borderRadius: BorderRadius.circular(25),
-                        // boxShadow: boxShadow(7, 7, 7, Colors.grey, Colors.white)
-                      ),
-                      child: Stack(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(9.5),
-                            child: Visibility(
-                              visible: _isNoteCardActive,
-                              child: TextField(
-                                focusNode: myFocusNode,
-                                controller: _noteFieldController,
-                                keyboardType: TextInputType.multiline,
-                                maxLines: 1000000,
-                                style: const TextStyle(
-                                    color: Colors.white,
-                                    fontFamily: "Rounded_Elegance",
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 13),
-                                decoration: const InputDecoration(
-                                    hintStyle: TextStyle(
-                                        color: Colors.white54,
-                                        fontFamily: "Rounded_Elegance",
-                                        fontSize: 13,
-                                        fontStyle: FontStyle.italic,
-                                        fontWeight: FontWeight.bold),
-                                    border: InputBorder.none,
-                                    focusedBorder: InputBorder.none,
-                                    enabledBorder: InputBorder.none,
-                                    errorBorder: InputBorder.none,
-                                    disabledBorder: InputBorder.none,
-                                    contentPadding: EdgeInsets.only(
-                                        left: 15,
-                                        bottom: 11,
-                                        top: 11,
-                                        right: 15),
-                                    hintText: "so it was 19/3/1993..."),
-                              ),
-                            ),
-                          ),
-                          Visibility(
-                            visible: !_isNoteCardActive,
-                            child: Expanded(
-                              child: Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.all(13.0),
-                                      child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(1000.0),
-                                          child: Image.asset(
-                                            "lib/assets/images/tap.gif",
-                                            color: searchBarColor,
-                                            colorBlendMode: BlendMode.screen,
-                                            width: size.width * .15,
-                                            height: size.width * .15,
-                                            fit: BoxFit.cover,
-                                          )),
-                                    ),
-                                    const Text(
-                                      "Tap to start writing!",
-                                      style: TextStyle(
-                                          fontSize: 17,
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _isNoteCardActive = true;
+                          myFocusNode.requestFocus();
+                          _noteFieldController.addListener(() {
+                            _searchFieldController.addListener(() {
+                              if (_noteFieldController.text.isNotEmpty &&
+                                  _searchFieldController.text.isNotEmpty) {
+                                changeSaveButtonSize();
+                              }
+                              if (_searchFieldController.text.isEmpty) {
+                                hideSaveButton();
+                              }
+                            });
+                            if (_noteFieldController.text.isNotEmpty &&
+                                _searchFieldController.text.isNotEmpty) {
+                              changeSaveButtonSize();
+                            }
+                            if (_noteFieldController.text.isEmpty) {
+                              hideSaveButton();
+                            }
+                            if (!myFocusNode.hasFocus) {
+                              _isNoteCardActive = false;
+                            }
+                            myFocusNode.addListener(() {
+                              if (!myFocusNode.hasFocus &&
+                                  _noteFieldController.text.isEmpty) {
+                                setState(() {
+                                  _isNoteCardActive = false;
+                                });
+                                // FocusManager.instance.primaryFocus?.unfocus();
+                              }
+                              if (_noteFieldController.text.isNotEmpty) {
+                                setState(() {
+                                  print("1");
+                                  _isNoteCardActive = true;
+                                });
+                              }
+                            });
+
+                            myFocusNode2.addListener(() {
+                              if (myFocusNode2.hasFocus &&
+                                  _noteFieldController.text.isEmpty) {
+                                setState(() {
+                                  _isNoteCardActive = false;
+                                });
+                              }
+                              if (_noteFieldController.text.isNotEmpty) {
+                                setState(() {
+                                  print("1");
+                                  _isNoteCardActive = true;
+                                });
+                              }
+                            });
+                          });
+                        });
+                      },
+                      child: AnimatedContainer(
+                        curve: Curves.fastOutSlowIn,
+                        duration: const Duration(milliseconds: 751),
+                        decoration: BoxDecoration(
+                          color: searchBarColor,
+                          borderRadius: BorderRadius.circular(25),
+                          // boxShadow: boxShadow(7, 7, 7, Colors.grey, Colors.white)
+                        ),
+                        child: Stack(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(9.5),
+                              child: Visibility(
+                                visible: _isNoteCardActive,
+                                child: TextField(
+                                  focusNode: myFocusNode,
+                                  controller: _noteFieldController,
+                                  keyboardType: TextInputType.multiline,
+                                  maxLines: 1000000,
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontFamily: "Rounded_Elegance",
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13),
+                                  decoration: const InputDecoration(
+                                      hintStyle: TextStyle(
+                                          color: Colors.white54,
                                           fontFamily: "Rounded_Elegance",
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white),
-                                    ),
-                                  ],
+                                          fontSize: 13,
+                                          fontStyle: FontStyle.italic,
+                                          fontWeight: FontWeight.bold),
+                                      border: InputBorder.none,
+                                      focusedBorder: InputBorder.none,
+                                      enabledBorder: InputBorder.none,
+                                      errorBorder: InputBorder.none,
+                                      disabledBorder: InputBorder.none,
+                                      contentPadding: EdgeInsets.only(
+                                          left: 15,
+                                          bottom: 11,
+                                          top: 11,
+                                          right: 15),
+                                      hintText: "so it was 19/3/1993..."),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
+                            Visibility(
+                              visible: !_isNoteCardActive,
+                              child: SizedBox.expand(
+                                child: Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.all(13.0),
+                                        child: ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(1000.0),
+                                            child: Image.asset(
+                                              "lib/assets/images/tap.gif",
+                                              color: searchBarColor,
+                                              colorBlendMode: BlendMode.screen,
+                                              width: size.width * .15,
+                                              height: size.width * .15,
+                                              fit: BoxFit.cover,
+                                            )),
+                                      ),
+                                      const Text(
+                                        "Tap to start writing!",
+                                        style: TextStyle(
+                                            fontSize: 17,
+                                            fontFamily: "Rounded_Elegance",
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),

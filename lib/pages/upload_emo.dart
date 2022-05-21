@@ -59,6 +59,7 @@ _write(String text, BuildContext context) async {
 
 class _UploadDemoState extends State<UploadDemo> {
   bool v = false;
+  String errorMessage = "";
 
   late Database database;
   late List<Map<String, Object?>> list;
@@ -87,11 +88,11 @@ class _UploadDemoState extends State<UploadDemo> {
     // TODO: implement initState
     super.initState();
     initiateDB().whenComplete(() => makeCSVAndSaveIt().whenComplete(() {
-      setState(() {
-        visible = true;
-      });
-    }));
-    makeCSVAndSaveIt();
+          setState(() {
+            visible = true;
+          });
+        }));
+    // makeCSVAndSaveIt();
   }
 
   @override
@@ -165,18 +166,10 @@ class _UploadDemoState extends State<UploadDemo> {
                                       sharePositionOrigin:
                                           box!.localToGlobal(Offset.zero) &
                                               box.size);
-
-                                  // _write(widget.allNotes, context);
-                                  // print(widget.allNotes);
-                                  // final box =
-                                  //     context.findRenderObject() as RenderBox?;
-                                  // await Share.share(widget.allNotes,
-                                  //     subject: 'cloud.txt',
-                                  //     sharePositionOrigin:
-                                  //         box!.localToGlobal(Offset.zero) &
-                                  //             box.size);
                                 } else {
                                   setState(() {
+                                    errorMessage =
+                                        " sorry no note(s) to backup...";
                                     v = true;
                                   });
                                   Timer(const Duration(seconds: 3), () {
@@ -252,7 +245,7 @@ class _UploadDemoState extends State<UploadDemo> {
                                     ),
                                   ),
                                   TextSpan(
-                                      text: "  sorry! no notes were found...",
+                                      text: errorMessage,
                                       style: TextStyle(
                                           color: Colors.red,
                                           fontFamily: 'varela-round.regular',
@@ -275,6 +268,19 @@ class _UploadDemoState extends State<UploadDemo> {
   late List<List<dynamic>> temp;
 
   Future<void> makeCSVAndSaveIt() async {
+    if (list.isEmpty) {
+      setState(() {
+        errorMessage = " sorry no note(s) to backup...";
+        v = true;
+      });
+      Timer(const Duration(seconds: 3), () {
+        // 5 seconds have past, you can do your work
+        setState(() {
+          v = false;
+        });
+      });
+      return;
+    }
     List<List<dynamic>> rows = [];
     for (int i = 0; i < list.length; i++) {
 //row refer to each column of a row in csv file and rows refer to each row in a file

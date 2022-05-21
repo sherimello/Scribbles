@@ -1,6 +1,8 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:path/path.dart';
 import 'package:scribbles/widgets/bottom_sheet.dart';
 import 'package:scribbles/widgets/note_preview_card.dart';
@@ -16,6 +18,8 @@ class Home extends StatefulWidget {
   _HomeState createState() => _HomeState();
 }
 
+final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email']);
+
 class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   var t1 =
           'jhasjkhdiuiashiudyhiausdoijasiojdojoasjioljdoiaiojsiodjoiasjiodjioajoidajsoijdojasiodjojaosjdojoias',
@@ -23,6 +27,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       date = '19-3-93';
   late Database database;
   late List<Map> list;
+
+  late GoogleSignInAccount _currentUser;
 
 // Get a location using getDatabasesPath
   late String path;
@@ -59,6 +65,13 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     // TODO: implement initState
+    Firebase.initializeApp();
+    _googleSignIn.onCurrentUserChanged.listen((event) {
+      setState(() {
+        _currentUser = event!;
+      });
+    });
+    _googleSignIn.signInSilently();
     super.initState();
     initiateDB().whenComplete(() => showData());
   }
@@ -139,13 +152,13 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                         color: Colors.black,
                         onPressed: () {
                           Navigator.of(context).push(HeroDialogRoute(
-                            builder: (context) => const Center(
+                            builder: (context) => Center(
                               // child: Test(
                               //     Icons.post_add,
                               //     Icons.camera_alt_outlined,
                               //     Icons.place_outlined,
                               //     Icons.menu),
-                              child: Test(),
+                              child: Test(list),
                             ),
                             // settings: const RouteSettings(),
                           ));

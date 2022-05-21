@@ -4,7 +4,6 @@ import 'dart:io';
 
 import 'package:csv/csv.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
@@ -48,28 +47,7 @@ class _SyncFileState extends State<SyncFile> {
   }
 
   String allNotes = '', divider = ",.,.,.,;';';';,.,.,.,";
-
-  // showData(BuildContext context) async {
-  //   list = (await database.rawQuery('SELECT * FROM Notes'));
-  //
-  //   for (int i = 0; i < list.length; i++) {
-  //     allNotes += divider +
-  //         '\n' +
-  //         list[i]["title"].toString() +
-  //         '\n' +
-  //         list[i]["note"].toString() +
-  //         '\n';
-  //   }
-  //
-  //   if (list.isNotEmpty) {}
-  //   print(allNotes);
-  //   size = list.length;
-  //   _write(allNotes, context);
-  // }
-  //
-  // Future<void> _signOut() async {
-  //   await FirebaseAuth.instance.signOut();
-  // }
+  String message = "";
 
   @override
   void initState() {
@@ -80,12 +58,13 @@ class _SyncFileState extends State<SyncFile> {
     super.initState();
   }
 
-  Future<void> uploadData(
-      BuildContext context, List<String> title, List<String> note, List<String> theme, List<String> time) async {
+  Future<void> uploadData(BuildContext context, List<String> title,
+      List<String> note, List<String> theme, List<String> time) async {
     await database.transaction((txn) async {
       for (int i = 0; i < title.length; i++) {
         int id1 = await txn.rawInsert(
-            'INSERT INTO Notes(title, note, theme, time) VALUES(?, ?, ?, ?)', [title[i], note[i], theme[i], time[i]]);
+            'INSERT INTO Notes(title, note, theme, time) VALUES(?, ?, ?, ?)',
+            [title[i], note[i], theme[i], time[i]]);
         if (kDebugMode) {
           print('inserted1: $id1');
         }
@@ -205,16 +184,6 @@ class _SyncFileState extends State<SyncFile> {
                                 // getAllNotes().whenComplete(() => _write(allNotes, context));
 
                                 makeCSVAndSaveIt();
-
-                                setState(() {
-                                  v = true;
-                                });
-                                Timer(const Duration(seconds: 3), () {
-                                  // 5 seconds have past, you can do your work
-                                  setState(() {
-                                    v = false;
-                                  });
-                                });
                               },
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
@@ -286,7 +255,9 @@ class _SyncFileState extends State<SyncFile> {
                                         if (file.existsSync()) {
                                           copyCSVToDB("1", context);
                                         } else {
-                                          print("null");
+                                          message =
+                                              " sorry no note(s) found to be synced...";
+                                          showCustomSnackBar();
                                         }
                                       },
                                       child: RichText(
@@ -382,7 +353,7 @@ class _SyncFileState extends State<SyncFile> {
                                         ),
                                       ),
                                       TextSpan(
-                                          text: "  local backup successful...",
+                                          text: message,
                                           style: TextStyle(
                                               color: Colors.white,
                                               fontFamily:
@@ -444,15 +415,15 @@ class _SyncFileState extends State<SyncFile> {
         type: FileType.custom,
       );
       // if (result != null) {
-        String? path1 = result?.files.first.path;
-        final file = File(path1!).openRead();
+      String? path1 = result?.files.first.path;
+      final file = File(path1!).openRead();
 
-        temp = await file
-            .transform(utf8.decoder)
-            .transform(
-              const CsvToListConverter(),
-            )
-            .toList();
+      temp = await file
+          .transform(utf8.decoder)
+          .transform(
+            const CsvToListConverter(),
+          )
+          .toList();
       // }
       // else {
       //   if (kDebugMode) {
@@ -469,7 +440,8 @@ class _SyncFileState extends State<SyncFile> {
       time.add(temp[i][4].toString());
     }
 
-    initiateDB().whenComplete(() => uploadData(context, title, note, theme, time));
+    initiateDB()
+        .whenComplete(() => uploadData(context, title, note, theme, time));
   }
 
   Future<void> getAllNotes() async {
@@ -488,6 +460,11 @@ class _SyncFileState extends State<SyncFile> {
   late List<List<dynamic>> temp;
 
   void makeCSVAndSaveIt() async {
+    if (list.isEmpty) {
+      message = " sorry no note(s) to backup...";
+      showCustomSnackBar();
+      return;
+    }
     List<List<dynamic>> rows = [];
     for (int i = 0; i < list.length; i++) {
 //row refer to each column of a row in csv file and rows refer to each row in a file
@@ -512,5 +489,19 @@ class _SyncFileState extends State<SyncFile> {
     fileAddress = '${directory?.path}/notes.csv';
 
     file.writeAsString(csv);
+    message = "  local backup successful...";
+    showCustomSnackBar();
+  }
+
+  void showCustomSnackBar() {
+    setState(() {
+      v = true;
+    });
+    Timer(const Duration(seconds: 3), () {
+      // 5 seconds have past, you can do your work
+      setState(() {
+        v = false;
+      });
+    });
   }
 }

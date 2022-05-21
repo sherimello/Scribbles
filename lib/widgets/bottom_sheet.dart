@@ -1,13 +1,23 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:scribbles/pages/new_note_page_design.dart';
 import 'package:scribbles/pages/sync_file.dart';
 
 import '../popup_card/custom_rect_tween.dart';
 import '../popup_card/hero_dialog_route.dart';
 
-class Test extends StatelessWidget {
-  const Test({Key? key}) : super(key: key);
+class Test extends StatefulWidget {
+  final List<Map<dynamic, dynamic>> list;
 
+  const Test(this.list, {Key? key}) : super(key: key);
+
+  @override
+  State<Test> createState() => _TestState();
+}
+
+class _TestState extends State<Test> {
   double getRadiansFromDegree(double degree) {
     double unitRadian = 57.295779513;
     return degree / unitRadian;
@@ -15,6 +25,47 @@ class Test extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isSwitched = false;
+    final fb = FirebaseDatabase.instance;
+    final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email']);
+    final ref = fb.ref().child('notes');
+    String userNode = "";
+    GoogleSignInAccount _currentUser;
+    void signOut() {
+      _googleSignIn.disconnect();
+    }
+
+    Future<void> signIn() async {
+      try {
+        await _googleSignIn.signIn();
+        _currentUser = _googleSignIn.currentUser!;
+        userNode =
+            _currentUser.email.substring(0, _currentUser.email.indexOf('@'));
+        print(userNode);
+        _googleSignIn.onCurrentUserChanged.listen((event) {
+          _currentUser = event!;
+        });
+        _googleSignIn.signInSilently();
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text("error signing in : $e"),
+        ));
+      }
+    }
+
+    uploadDataToFirebase() {
+      Firebase.initializeApp();
+
+      for (int i = 0; i < widget.list.length; i++) {
+        ref.child(userNode).push().set({
+          'title': widget.list[i]['title'].toString(),
+          'note': widget.list[i]['title'].toString(),
+          'theme': widget.list[i]['theme'].toString(),
+          'time': widget.list[i]['time'].toString(),
+        }).asStream();
+      }
+    }
+
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(11.0),
@@ -31,10 +82,10 @@ class Test extends StatelessWidget {
               decoration: const BoxDecoration(
                   color: Colors.black,
                   borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(29),
-                      topRight: Radius.circular(29),
-                      bottomLeft: Radius.circular(29),
-                      bottomRight: Radius.circular(29))),
+                      topLeft: Radius.circular(35),
+                      topRight: Radius.circular(35),
+                      bottomLeft: Radius.circular(35),
+                      bottomRight: Radius.circular(35))),
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(11, 11, 11, 41),
                 child: SingleChildScrollView(
@@ -165,6 +216,47 @@ class Test extends StatelessWidget {
                                 ],
                               ),
                             ),
+                          ),
+                        ),
+                      ),
+                      Center(
+                        child: Material(
+                          color: Colors.black,
+                          child: Row(
+                            children: [
+                              Switch(
+                                  value: isSwitched,
+                                  onChanged: (isSwitched) {
+                                    if (isSwitched) {
+                                      setState(() {
+                                        isSwitched = true;
+                                      });
+                                      signIn().whenComplete(
+                                          () => uploadDataToFirebase());
+                                    }
+                                  }),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: const [
+                                    Text("Cloud Backup",
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                            fontFamily: 'varela-round.regular',
+                                            fontSize: 19,
+                                            fontWeight: FontWeight.bold)),
+                                    Text(
+                                        "(automatically backs up notes everytime you open the app)",
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                            fontFamily: 'varela-round.regular',
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.bold)),
+                                  ],
+                                ),
+                              )
+                            ],
                           ),
                         ),
                       ),
