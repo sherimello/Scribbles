@@ -515,7 +515,7 @@ class _NewNotePageState extends State<NewNotePage> {
                         duration: const Duration(milliseconds: 751),
                         decoration: BoxDecoration(
                           color: searchBarColor,
-                          borderRadius: BorderRadius.circular(25),
+                          borderRadius: BorderRadius.circular(31),
                           // boxShadow: boxShadow(7, 7, 7, Colors.grey, Colors.white)
                         ),
                         child: Stack(

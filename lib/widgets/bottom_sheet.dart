@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:scribbles/classes/MySharedPreferences.dart';
 import 'package:scribbles/pages/new_note_page_design.dart';
 import 'package:scribbles/pages/sync_file.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -23,6 +24,13 @@ class _TestState extends State<Test> {
   double getRadiansFromDegree(double degree) {
     double unitRadian = 57.295779513;
     return degree / unitRadian;
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    checkIfSwitchIsOn();
+    super.initState();
   }
 
   @override
@@ -246,7 +254,9 @@ class _TestState extends State<Test> {
                                           setState(() {
                                             isSwitched = value;
                                           });
-                                          save(isSwitched);
+                                          value?
+                                          MySharedPreferences().setStringValue("isCloudBackupOn", "1") : MySharedPreferences().setStringValue("isCloudBackupOn", "0");
+                                          save(value);
                                           if (value) {
                                             signIn().whenComplete(
                                                     () => uploadDataToFirebase());
@@ -300,5 +310,13 @@ class _TestState extends State<Test> {
   void save(bool value) async{
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     await sharedPreferences.setBool("isNight", value);
+  }
+
+  Future<void> checkIfSwitchIsOn() async {
+    await MySharedPreferences().getStringValue("isCloudBackupOn") == "0" ? setState((){
+      isSwitched = false;
+    }) : setState((){
+      isSwitched = true;
+    });
   }
 }

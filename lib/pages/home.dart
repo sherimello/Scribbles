@@ -94,21 +94,15 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     return const Padding(
       padding: EdgeInsets.all(8.0),
       child: Center(
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: Padding(
-            padding: EdgeInsets.only(left: 8.0),
-            child: Text(
-              'Scribbles',
-              textAlign: TextAlign.left,
-              style: TextStyle(
-                // letterSpacing: 2,
-                fontWeight: FontWeight.w900,
-                fontSize: 21,
-                fontFamily: 'varela-round.regular',
-                color: Colors.white,
-              ),
-            ),
+        child: Text(
+          'Scribbles',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            // letterSpacing: 2,
+            fontWeight: FontWeight.w900,
+            fontSize: 21,
+            fontFamily: 'varela-round.regular',
+            color: Colors.white,
           ),
         ),
       ),
@@ -133,22 +127,22 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       body: Container(
         height: double.infinity,
         width: double.infinity,
-        color: Colors.white,
+        color: const Color(0xffF8F0E3),
         child: SafeArea(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(5.0, 5.0, 5.0, 0.0),
+                padding: EdgeInsets.fromLTRB(9.0, 9.0, 9.0, _isLoading ? 11.0 : 0.0),
                 child: AnimatedContainer(
                     width: (!_isLoading) ? MediaQuery.of(context).size.width : 31,
                     height: (!_isLoading) ? AppBar().preferredSize.height : 31,
                     curve: Curves.easeInCirc,
                     decoration: BoxDecoration(
-                      color: (!_isLoading) ? Colors.black: Colors.blueGrey,
-                      borderRadius: BorderRadius.circular(_isLoading? 1000 : 13)
+                      color: (!_isLoading) ? Colors.black: Colors.white,
+                      borderRadius: BorderRadius.circular(_isLoading? 1000 : 19)
                     ),
-                    duration: const Duration(milliseconds: 550),
+                    duration: const Duration(milliseconds: 350),
                     child: Stack(
                       children: [
                         Positioned(
@@ -157,12 +151,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                               visible: !_isLoading,
                               child: title()),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.all(5.0),
-                          child: Visibility(
-                              visible: _isLoading,
-                              child: cloudBackupLoadingCard()),
-                        )
+                        Visibility(
+                            visible: _isLoading,
+                            child: cloudBackupLoadingCard())
                       ],
                     ),
                     // child: _isLoading?cloudBackupLoadingCard():SingleChildScrollView(child: title())

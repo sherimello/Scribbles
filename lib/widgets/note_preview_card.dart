@@ -52,7 +52,7 @@ class PreviewCard extends StatelessWidget {
         child: Card(
             elevation: 0,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(25),
+              borderRadius: BorderRadius.circular(31),
             ),
             // color: Colors.teal[200],
             // color: Colors.pink.withOpacity(.31),

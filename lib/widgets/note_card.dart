@@ -19,7 +19,7 @@ class NoteCard extends StatelessWidget {
       },
       child: Card(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(25),
+          borderRadius: BorderRadius.circular(31),
         ),
         color: Color(int.parse(theme)),
         child: SizedBox(
