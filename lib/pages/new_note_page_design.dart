@@ -329,7 +329,7 @@ class _NewNotePageState extends State<NewNotePage> {
                                                     context,
                                                     MaterialPageRoute(
                                                         builder: (context) =>
-                                                            const Home()),
+                                                            const Home(false)),
                                                   ))
                                           : Navigator.pop(context, false)
                                       : _noteFieldController.text.isNotEmpty &&
@@ -343,7 +343,7 @@ class _NewNotePageState extends State<NewNotePage> {
                                                       context,
                                                       MaterialPageRoute(
                                                           builder: (context) =>
-                                                              const Home()),
+                                                              const Home(false)),
                                                     )
                                                   })
                                           : Navigator.pop(context, false);

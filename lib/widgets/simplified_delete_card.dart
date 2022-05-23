@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
@@ -22,13 +23,10 @@ class SimplifiedDeleteCard extends StatelessWidget {
         version: 1,
       );
       database.rawDelete('DELETE FROM Notes WHERE id = ?', [noteID]);
-      print('deleted');
-      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const Home()), (route) => false);
-      // Navigator.push(
-      //   context,
-      //   MaterialPageRoute(
-      //       builder: (context) => const Home()),
-      // );
+      if (kDebugMode) {
+        print('deleted');
+      }
+      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const Home(true)), (route) => false);
     }
 
     var size = MediaQuery.of(context).size;

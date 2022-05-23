@@ -2,7 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:scribbles/classes/MySharedPreferences.dart';
+import 'package:scribbles/classes/my_sharedpreferences.dart';
 import 'package:scribbles/pages/new_note_page_design.dart';
 import 'package:scribbles/pages/sync_file.dart';
 import 'package:shared_preferences/shared_preferences.dart';

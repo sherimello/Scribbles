@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:path/path.dart';
+import 'package:scribbles/classes/my_sharedpreferences.dart';
 import 'package:scribbles/widgets/bottom_sheet.dart';
 import 'package:scribbles/widgets/note_preview_card.dart';
 import 'package:sqflite/sqflite.dart';
@@ -14,7 +15,9 @@ import '../popup_card/custom_rect_tween.dart';
 import '../popup_card/hero_dialog_route.dart';
 
 class Home extends StatefulWidget {
-  const Home({Key? key}) : super(key: key);
+  final bool shouldCloudSync;
+
+  const Home(this.shouldCloudSync, {Key? key}) : super(key: key);
 
   @override
   _HomeState createState() => _HomeState();
@@ -35,7 +38,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 // Get a location using getDatabasesPath
   late String path;
   int size = 0;
-  bool visible = true, _isLoading = true;
+  bool visible = true, _isLoading = false;
 
   Future<void> initiateDB() async {
     // Get a location using getDatabasesPath
@@ -65,8 +68,17 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   }
 
   @override
-  void initState() {
+  void initState() async {
     // TODO: implement initState
+    widget.shouldCloudSync
+        ? await MySharedPreferences().getStringValue("isCloudBackupOn") == "0"
+            ? setState(() {
+                _isLoading = false;
+              })
+            : setState(() {
+                _isLoading = true;
+              })
+        : null;
     Timer(const Duration(seconds: 3), () {
       // 5 seconds have past, you can do your work
       setState(() {
@@ -114,16 +126,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     var s = MediaQuery.of(context).size;
 
     return Scaffold(
-      // appBar: AppBar(
-      //   automaticallyImplyLeading: true,
-      //   elevation: 0,
-      //   backgroundColor: Colors.white,
-      //   title: AnimatedContainer(
-      //     width: (!_isLoading) ? double.infinity : null,
-      //       color: (!_isLoading) ? Colors.black: Colors.white,
-      //       duration: const Duration(milliseconds: 750),
-      //       child: _isLoading?cloudBackupLoadingCard():title()),
-      // ),
       body: Container(
         height: double.infinity,
         width: double.infinity,
@@ -133,30 +135,27 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Padding(
-                padding: EdgeInsets.fromLTRB(9.0, 9.0, 9.0, _isLoading ? 11.0 : 0.0),
+                padding:
+                    EdgeInsets.fromLTRB(9.0, 9.0, 9.0, _isLoading ? 11.0 : 0.0),
                 child: AnimatedContainer(
-                    width: (!_isLoading) ? MediaQuery.of(context).size.width : 31,
-                    height: (!_isLoading) ? AppBar().preferredSize.height : 31,
-                    curve: Curves.easeInCirc,
-                    decoration: BoxDecoration(
-                      color: (!_isLoading) ? Colors.black: Colors.white,
-                      borderRadius: BorderRadius.circular(_isLoading? 1000 : 19)
-                    ),
-                    duration: const Duration(milliseconds: 350),
-                    child: Stack(
-                      children: [
-                        Positioned(
-
-                          child: Visibility(
-                              visible: !_isLoading,
-                              child: title()),
-                        ),
-                        Visibility(
-                            visible: _isLoading,
-                            child: cloudBackupLoadingCard())
-                      ],
-                    ),
-                    // child: _isLoading?cloudBackupLoadingCard():SingleChildScrollView(child: title())
+                  width: (!_isLoading) ? MediaQuery.of(context).size.width : 31,
+                  height: (!_isLoading) ? AppBar().preferredSize.height : 31,
+                  curve: Curves.easeInCirc,
+                  decoration: BoxDecoration(
+                      // color: (!_isLoading) ? Colors.black: Colors.white,
+                      color: Colors.black,
+                      borderRadius:
+                          BorderRadius.circular(_isLoading ? 1000 : 19)),
+                  duration: const Duration(milliseconds: 350),
+                  child: Stack(
+                    children: [
+                      Positioned(
+                        child: Visibility(visible: !_isLoading, child: title()),
+                      ),
+                      Visibility(
+                          visible: _isLoading, child: cloudBackupLoadingCard())
+                    ],
+                  ),
                 ),
               ),
               Expanded(
@@ -179,12 +178,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                                 id: index.toString(),
                                 title: list[index]["title"].toString(),
                                 note: list[index]["note"].toString()),
-                        // PreviewCard(
-                        //   id: list.asMap()["id"].toString(), title: list.asMap()["title"].toString(), note: list.asMap()["note"].toString()
-                        // ),
                         staggeredTileBuilder: (int index) =>
                             const StaggeredTile.fit(1),
-                        // StaggeredTile.coimport 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';unt(2, index.isEven ? 2 : 1),
                         mainAxisSpacing: 9.0,
                         crossAxisSpacing: 9.0,
                       )),
@@ -209,14 +204,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                               onPressed: () {
                                 Navigator.of(context).push(HeroDialogRoute(
                                   builder: (context) => Center(
-                                    // child: Test(
-                                    //     Icons.post_add,
-                                    //     Icons.camera_alt_outlined,
-                                    //     Icons.place_outlined,
-                                    //     Icons.menu),
                                     child: Test(list),
                                   ),
-                                  // settings: const RouteSettings(),
                                 ));
                               },
                               icon: const Icon(

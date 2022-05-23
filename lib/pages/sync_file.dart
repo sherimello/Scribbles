@@ -4,13 +4,16 @@ import 'dart:io';
 
 import 'package:csv/csv.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:scribbles/pages/upload_emo.dart';
 import 'package:sqflite/sqflite.dart';
 
+import '../classes/note_map_for_cloud_fetch.dart';
 import '../popup_card/custom_rect_tween.dart';
 import '../popup_card/hero_dialog_route.dart';
 import 'home.dart';
@@ -71,7 +74,7 @@ class _SyncFileState extends State<SyncFile> {
       }
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const Home()),
+        MaterialPageRoute(builder: (context) => const Home(false)),
       );
     });
   }
@@ -317,6 +320,42 @@ class _SyncFileState extends State<SyncFile> {
                                       ),
                                     ),
                                   ),
+                                  Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                        8, 3.0, 8, 19),
+                                    child: GestureDetector(
+                                      onTap: () async {
+
+
+                                        getUsers();
+
+
+                                      },
+                                      child: RichText(
+                                        textAlign: TextAlign.center,
+                                        text: const TextSpan(
+                                          children: [
+                                            WidgetSpan(
+                                              child: Icon(
+                                                Icons.cloud_download_outlined,
+                                                size: 21,
+                                                color: Colors.black,
+                                              ),
+                                            ),
+                                            TextSpan(
+                                                text: "  from cloud",
+                                                style: TextStyle(
+                                                    color: Colors.black,
+                                                    fontFamily:
+                                                        'varela-round.regular',
+                                                    fontSize: 21,
+                                                    fontWeight:
+                                                        FontWeight.bold)),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
@@ -376,20 +415,6 @@ class _SyncFileState extends State<SyncFile> {
       ),
     );
   }
-
-  // _write(String text, BuildContext context) async {
-  //   print(allNotes);
-  //   final Directory? directory = Platform.isAndroid
-  //       ? await getExternalStorageDirectory() //FOR ANDROID
-  //       : await getApplicationSupportDirectory(); //FOR iOS
-  //   final File file = File('${directory?.path}/cloud.txt');
-  //   print('${directory?.path}/cloud.txt');
-  //   if (file.existsSync()) {
-  //     file.delete().whenComplete(() async => await file.writeAsString(text));
-  //   } else {
-  //     await file.writeAsString(text);
-  //   }
-  // }
 
   Future<void> copyCSVToDB(String key, BuildContext context) async {
     List<String> title = [], note = [], theme = [], time = [];
@@ -502,6 +527,30 @@ class _SyncFileState extends State<SyncFile> {
       setState(() {
         v = false;
       });
+    });
+  }
+  getUsers() async {
+    final _googleSignIn = GoogleSignIn(scopes: ['email']);
+    await _googleSignIn.signIn();
+    String userName = _googleSignIn.currentUser!.email.substring(0, _googleSignIn.currentUser!.email.indexOf('@'));
+    List<String> title = [], note = [], theme = [], time = [];
+
+    final List<User> list = [];
+    final snapshot = await FirebaseDatabase.instance.ref('notes').child(
+        userName
+    ).get();
+    int i = 0;
+    final map = snapshot.value as Map<dynamic, dynamic>;
+
+    map.forEach((key, value) {
+      final user = User.fromMap(value);
+      list.add(user);
+      title.add(list[i].title);
+      note.add(list[i].note);
+      theme.add(list[i].theme);
+      time.add(list[i].time);
+      print(list[i].title);
+      i++;
     });
   }
 }
