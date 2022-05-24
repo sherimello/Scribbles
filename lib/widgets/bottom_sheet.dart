@@ -21,6 +21,7 @@ class Test extends StatefulWidget {
 
 class _TestState extends State<Test> {
   bool isSwitched = false;
+
   double getRadiansFromDegree(double degree) {
     double unitRadian = 57.295779513;
     return degree / unitRadian;
@@ -41,7 +42,8 @@ class _TestState extends State<Test> {
     String userNode = "";
     GoogleSignInAccount _currentUser;
     void signOut() {
-      _googleSignIn.disconnect();
+      _googleSignIn.disconnect().whenComplete(() =>
+          {print("signed out"), MySharedPreferences().removeValue("userName")});
     }
 
     Future<void> signIn() async {
@@ -63,17 +65,20 @@ class _TestState extends State<Test> {
     }
 
     uploadDataToFirebase() {
-      Firebase.initializeApp();
+      // Firebase.initializeApp();
 
       for (int i = 0; i < widget.list.length; i++) {
-        ref.child(userNode).push().set({
-          'title': widget.list[i]['title'].toString(),
-          'note': widget.list[i]['note'].toString(),
-          'theme': widget.list[i]['theme'].toString(),
-          'time': widget.list[i]['time'].toString(),
-        }).asStream().listen((event) { }, onDone: (){
-
-        });
+        ref
+            .child(userNode)
+            .push()
+            .set({
+              'title': widget.list[i]['title'].toString(),
+              'note': widget.list[i]['note'].toString(),
+              'theme': widget.list[i]['theme'].toString(),
+              'time': widget.list[i]['time'].toString(),
+            })
+            .asStream()
+            .listen((event) {}, onDone: () {});
       }
     }
 
@@ -88,7 +93,7 @@ class _TestState extends State<Test> {
               return CustomRectTween(begin: begin!, end: end!);
             },
             child: Material(
-              color:Colors.transparent,
+              color: Colors.transparent,
               child: Container(
                 // width: MediaQuery.of(context).size.width,
                 // height: MediaQuery.of(context).size.height * .5,
@@ -241,25 +246,38 @@ class _TestState extends State<Test> {
                             ),
                             child: Padding(
                               padding: const EdgeInsets.all(11.0),
-                              child:
-                              Row(
+                              child: Row(
                                 children: [
                                   Padding(
                                     padding: const EdgeInsets.only(right: 8.0),
                                     child: Switch(
                                         value: isSwitched,
-                                        activeTrackColor: Colors.lightGreenAccent,
+                                        activeTrackColor:
+                                            Colors.lightGreenAccent,
                                         activeColor: Colors.green,
                                         onChanged: (value) {
                                           setState(() {
                                             isSwitched = value;
                                           });
-                                          value?
-                                          MySharedPreferences().setStringValue("isCloudBackupOn", "1") : MySharedPreferences().setStringValue("isCloudBackupOn", "0");
+                                          value
+                                              ? MySharedPreferences()
+                                                  .setStringValue(
+                                                      "isCloudBackupOn", "1")
+                                              : {
+                                                  MySharedPreferences()
+                                                      .setStringValue(
+                                                          "isCloudBackupOn",
+                                                          "0"),
+                                                  signOut()
+                                                };
                                           save(value);
                                           if (value) {
-                                            signIn().whenComplete(
-                                                    () => uploadDataToFirebase());
+                                            signIn().whenComplete(() => {
+                                                  uploadDataToFirebase(),
+                                                  MySharedPreferences()
+                                                      .setStringValue(
+                                                          "userName", userNode)
+                                                });
                                           }
                                         }),
                                   ),
@@ -272,10 +290,10 @@ class _TestState extends State<Test> {
                                               textAlign: TextAlign.center,
                                               style: TextStyle(
                                                   color: Colors.white,
-                                                  fontFamily: 'varela-round.regular',
+                                                  fontFamily:
+                                                      'varela-round.regular',
                                                   fontSize: 19,
                                                   fontWeight: FontWeight.bold)),
-
                                           Flexible(
                                             child: Text(
                                                 "(automatically backs up notes everytime you open the app)",
@@ -283,9 +301,11 @@ class _TestState extends State<Test> {
                                                 textAlign: TextAlign.center,
                                                 style: TextStyle(
                                                     color: Colors.white,
-                                                    fontFamily: 'varela-round.regular',
+                                                    fontFamily:
+                                                        'varela-round.regular',
                                                     fontSize: 11,
-                                                    fontWeight: FontWeight.bold)),
+                                                    fontWeight:
+                                                        FontWeight.bold)),
                                           ),
                                         ],
                                       ),
@@ -307,16 +327,19 @@ class _TestState extends State<Test> {
       ),
     );
   }
-  void save(bool value) async{
+
+  void save(bool value) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     await sharedPreferences.setBool("isNight", value);
   }
 
   Future<void> checkIfSwitchIsOn() async {
-    await MySharedPreferences().getStringValue("isCloudBackupOn") == "0" ? setState((){
-      isSwitched = false;
-    }) : setState((){
-      isSwitched = true;
-    });
+    await MySharedPreferences().getStringValue("isCloudBackupOn") == "0"
+        ? setState(() {
+            isSwitched = false;
+          })
+        : setState(() {
+            isSwitched = true;
+          });
   }
 }

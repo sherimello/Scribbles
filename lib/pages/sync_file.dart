@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:scribbles/classes/my_sharedpreferences.dart';
 import 'package:scribbles/pages/upload_emo.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -94,7 +95,7 @@ class _SyncFileState extends State<SyncFile> {
         padding: const EdgeInsets.all(19.0),
         child: Card(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(19),
+            borderRadius: BorderRadius.circular(31),
           ),
           color: Colors.white,
           child: SizedBox(
@@ -325,11 +326,15 @@ class _SyncFileState extends State<SyncFile> {
                                         8, 3.0, 8, 19),
                                     child: GestureDetector(
                                       onTap: () async {
-
-
-                                        getUsers();
-
-
+                                        await MySharedPreferences()
+                                                    .containsKey("userName") ==
+                                                true
+                                            ? getUsers()
+                                            : {
+                                                message =
+                                                    "please enable \"Cloud Backup\" first...",
+                                                showCustomSnackBar()
+                                              };
                                       },
                                       child: RichText(
                                         textAlign: TextAlign.center,
@@ -529,16 +534,17 @@ class _SyncFileState extends State<SyncFile> {
       });
     });
   }
+
   getUsers() async {
     final _googleSignIn = GoogleSignIn(scopes: ['email']);
     await _googleSignIn.signIn();
-    String userName = _googleSignIn.currentUser!.email.substring(0, _googleSignIn.currentUser!.email.indexOf('@'));
+    String userName = _googleSignIn.currentUser!.email
+        .substring(0, _googleSignIn.currentUser!.email.indexOf('@'));
     List<String> title = [], note = [], theme = [], time = [];
 
     final List<User> list = [];
-    final snapshot = await FirebaseDatabase.instance.ref('notes').child(
-        userName
-    ).get();
+    final snapshot =
+        await FirebaseDatabase.instance.ref('notes').child(userName).get();
     int i = 0;
     final map = snapshot.value as Map<dynamic, dynamic>;
 

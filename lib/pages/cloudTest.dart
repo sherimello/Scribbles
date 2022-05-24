@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -11,13 +12,14 @@ import 'package:scribbles/widgets/bottom_sheet.dart';
 import 'package:scribbles/widgets/note_preview_card.dart';
 import 'package:sqflite/sqflite.dart';
 
+import '../classes/note_map_for_cloud_fetch.dart';
 import '../popup_card/custom_rect_tween.dart';
 import '../popup_card/hero_dialog_route.dart';
 
-class Home extends StatefulWidget {
+class cloudTest extends StatefulWidget {
   final bool shouldCloudSync;
 
-  const Home(this.shouldCloudSync, {Key? key}) : super(key: key);
+  const cloudTest(this.shouldCloudSync, {Key? key}) : super(key: key);
 
   @override
   _HomeState createState() => _HomeState();
@@ -25,20 +27,56 @@ class Home extends StatefulWidget {
 
 final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email']);
 
-class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
+class _HomeState extends State<cloudTest> with SingleTickerProviderStateMixin {
   var t1 =
       'jhasjkhdiuiashiudyhiausdoijasiojdojoasjioljdoiaiojsiodjoiasjiodjioajoidajsoijdojasiodjojaosjdojoias',
       t2 = "hello",
       date = '19-3-93';
   late Database database;
-  late List<Map> list;
+  List<Map> list = [];
+  String userName = "";
+  late int lastNoteIDinDatabase;
+  final fb = FirebaseDatabase.instance;
 
   late GoogleSignInAccount _currentUser;
 
 // Get a location using getDatabasesPath
   late String path;
   int size = 0;
-  bool visible = true, _isLoading = false;
+  bool visible = true,
+      _isLoading = false;
+
+
+  void universalFetchLogic() async{
+    await MySharedPreferences().containsKey("isCloudBackupOn") == true ?
+    await MySharedPreferences().getStringValue("isCloudBackupOn") == "1" ?
+    widget.shouldCloudSync?
+    initiateDB().whenComplete(() =>
+        showData()
+            .whenComplete(() =>
+            fetchCloudNotes().whenComplete(() =>
+                removeUserDataFromCloud().whenComplete(()=>updateLocalDatabase()
+                    .whenComplete(() =>initiateDB().whenComplete(() => showData())))
+            ))) : initiateDB().whenComplete(() =>
+        showData())
+        : initiateDB().whenComplete(() =>
+        showData())
+        :initiateDB().whenComplete(() =>
+        showData());
+  }
+
+  // Future<void> initiateDB() async {
+  //   // Get a location using getDatabasesPath
+  //   var databasesPath = await getDatabasesPath();
+  //   path = join(databasesPath, 'demo.db');
+  //   // open the database
+  //   database = await openDatabase(path, version: 1,
+  //       onCreate: (Database db, int version) async {
+  //         // When creating the db, create the table
+  //         await db.execute(
+  //             'CREATE TABLE IF NOT EXISTS Notes (id INTEGER PRIMARY KEY, title NVARCHAR, note NVARCHAR, theme NVARCHAR, time NVARCHAR)');
+  //       });
+  // }
 
   Future<void> initiateDB() async {
     // Get a location using getDatabasesPath
@@ -51,10 +89,25 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           await db.execute(
               'CREATE TABLE IF NOT EXISTS Notes (id INTEGER PRIMARY KEY, title NVARCHAR, note NVARCHAR, theme NVARCHAR, time NVARCHAR)');
         });
+    List<Map> tempList = [];
+    tempList = await database.rawQuery('SELECT * FROM Notes').whenComplete(() =>
+        setState(() {
+          list = tempList;
+          print("length of list: " + tempList.length.toString());
+        }));
   }
 
   showData() async {
-    list = (await database.rawQuery('SELECT * FROM Notes'));
+    // if(list.isNotEmpty) {
+    //   list.clear();
+    // }
+    List<Map> tempList = [];
+    tempList = await database.rawQuery('SELECT * FROM Notes').whenComplete(() =>
+        setState(() {
+          list = tempList;
+          print("length of list: " + list.length.toString());
+        }));
+
 
     setState(() {
       if (list.isNotEmpty) {
@@ -67,22 +120,99 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     });
   }
 
-  checkLoadLogic() async {
+  fetchCloudNotes() async {
+    checkCloudBackupStatus();
+    final _googleSignIn = GoogleSignIn(scopes: ['email']);
+    await _googleSignIn.signIn();
+    userName = _googleSignIn.currentUser!.email
+        .substring(0, _googleSignIn.currentUser!.email.indexOf('@'));
+    List<String> title = [],
+        note = [],
+        theme = [],
+        time = [];
+
+    final List<User> cloudNotesList = [];
+    final snapshot =
+    await FirebaseDatabase.instance.ref('notes').child(userName).get();
+    int i = 0;
+    final map = snapshot.value as Map<dynamic, dynamic>;
+
+    map.forEach((key, value) {
+      list.add(value);
+      final user = User.fromMap(value);
+      cloudNotesList.add(user);
+      title.add(cloudNotesList[i].title);
+      note.add(cloudNotesList[i].note);
+      theme.add(cloudNotesList[i].theme);
+      time.add(cloudNotesList[i].time);
+      print(cloudNotesList[i].title);
+      i++;
+    });
+  }
+
+  showAllIDs() {
+    for (int i = 0; i < list.length; i++) {
+      print(list[i]['id'].toString() != ""
+          ? list[i]['id'].toString()
+          : lastNoteIDinDatabase++);
+    }
+  }
+
+  uploadDataToFirebase() {
+    final ref = fb.ref().child('notes');
+    for (int i = 0; i < list.length; i++) {
+      ref
+          .child(userName)
+          .push()
+          .set({
+        'title': list[i]['title'].toString(),
+        'note': list[i]['note'].toString(),
+        'theme': list[i]['theme'].toString(),
+        'time': list[i]['time'].toString(),
+      })
+          .asStream()
+          .listen((event) {}, onDone: () {});
+    }
+  }
+
+  removeUserDataFromCloud() async {
+    await FirebaseDatabase.instance
+        .ref('notes')
+        .child(userName)
+        .remove().whenComplete(() => uploadDataToFirebase());
+  }
+
+  Future<void> checkCloudBackupStatus() async {
     widget.shouldCloudSync
-    ? await MySharedPreferences().getStringValue("isCloudBackupOn") == "0"
+        ? await MySharedPreferences().getStringValue("isCloudBackupOn") == "0"
         ? setState(() {
       _isLoading = false;
     })
         : setState(() {
       _isLoading = true;
     })
-    : null;
+        : null;
+  }
+
+  Future<void> updateLocalDatabase() async {
+    await database.transaction((txn) async {
+      for (int i = 0; i < list.length; i++) {
+        await txn.rawInsert(
+            'INSERT INTO Notes(title, note, theme, time) VALUES(?, ?, ?, ?)',
+            [
+              list[i]['title'].toString(),
+              list[i]['note'].toString(),
+              list[i]['theme'].toString(),
+              list[i]['time'].toString(),
+            ]);
+      }
+    });
   }
 
   @override
   void initState() {
-    // TODO: implement initState
-    checkLoadLogic();
+    super.initState();
+    universalFetchLogic();
     Timer(const Duration(seconds: 3), () {
       // 5 seconds have past, you can do your work
       setState(() {
@@ -96,8 +226,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       });
     });
     _googleSignIn.signInSilently();
-    super.initState();
-    initiateDB().whenComplete(() => showData());
   }
 
   Widget cloudBackupLoadingCard() {
@@ -127,7 +255,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    var s = MediaQuery.of(context).size;
+    var s = MediaQuery
+        .of(context)
+        .size;
 
     return Scaffold(
       body: Container(
@@ -142,7 +272,10 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                 padding:
                 EdgeInsets.fromLTRB(9.0, 9.0, 9.0, _isLoading ? 11.0 : 0.0),
                 child: AnimatedContainer(
-                  width: (!_isLoading) ? MediaQuery.of(context).size.width : 31,
+                  width: (!_isLoading) ? MediaQuery
+                      .of(context)
+                      .size
+                      .width : 31,
                   height: (!_isLoading) ? AppBar().preferredSize.height : 31,
                   curve: Curves.easeInCirc,
                   decoration: BoxDecoration(
@@ -184,8 +317,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                             note: list[index]["note"].toString()),
                         staggeredTileBuilder: (int index) =>
                         const StaggeredTile.fit(1),
-                        mainAxisSpacing: 4.0,
-                        crossAxisSpacing: 4.0,
+                        mainAxisSpacing: 9.0,
+                        crossAxisSpacing: 9.0,
                       )),
                   Positioned(
                       bottom: 21,
@@ -207,9 +340,10 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                               color: Colors.black,
                               onPressed: () {
                                 Navigator.of(context).push(HeroDialogRoute(
-                                  builder: (context) => Center(
-                                    child: Test(list),
-                                  ),
+                                  builder: (context) =>
+                                      Center(
+                                        child: Test(list),
+                                      ),
                                 ));
                               },
                               icon: const Icon(
@@ -223,11 +357,16 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   Visibility(
                     visible: visible,
                     child: Center(
-                      child: Image.asset(
-                        "lib/assets/images/empty2.gif",
-                        fit: BoxFit.cover,
-                        height: s.width * .55,
-                        width: s.width * .55,
+                      child: Container(
+                        height: s.width * .45,
+                        width: s.width * .45,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(1000),
+                          image: const DecorationImage(
+                            fit: BoxFit.cover,
+                            image: AssetImage('lib/assets/images/empty2.gif'),
+                          ),
+                        ),
                       ),
                     ),
                   )
@@ -240,3 +379,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     );
   }
 }
+
+
+
+
