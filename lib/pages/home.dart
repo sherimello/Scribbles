@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -11,6 +12,7 @@ import 'package:scribbles/widgets/bottom_sheet.dart';
 import 'package:scribbles/widgets/note_preview_card.dart';
 import 'package:sqflite/sqflite.dart';
 
+import '../classes/note_map_for_cloud_fetch.dart';
 import '../popup_card/custom_rect_tween.dart';
 import '../popup_card/hero_dialog_route.dart';
 
@@ -27,11 +29,13 @@ final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email']);
 
 class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   var t1 =
-      'jhasjkhdiuiashiudyhiausdoijasiojdojoasjioljdoiaiojsiodjoiasjiodjioajoidajsoijdojasiodjojaosjdojoias',
+          'jhasjkhdiuiashiudyhiausdoijasiojdojoasjioljdoiaiojsiodjoiasjiodjioajoidajsoijdojasiodjojaosjdojoias',
       t2 = "hello",
       date = '19-3-93';
   late Database database;
-  late List<Map> list;
+  List<Map> list = [];
+  List<User> cloudNotesList = [];
+  String userName = "";
 
   late GoogleSignInAccount _currentUser;
 
@@ -47,10 +51,70 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     // open the database
     database = await openDatabase(path, version: 1,
         onCreate: (Database db, int version) async {
-          // When creating the db, create the table
-          await db.execute(
-              'CREATE TABLE IF NOT EXISTS Notes (id INTEGER PRIMARY KEY, title NVARCHAR, note NVARCHAR, theme NVARCHAR, time NVARCHAR)');
-        });
+      // When creating the db, create the table
+      await db.execute(
+          'CREATE TABLE IF NOT EXISTS Notes (id INTEGER PRIMARY KEY, title NVARCHAR, note NVARCHAR, theme NVARCHAR, time NVARCHAR)');
+    });
+  }
+
+  uploadDataToFirebase() async {
+    userName = await MySharedPreferences().getStringValue("userName");
+    print(userName);
+    final ref = FirebaseDatabase.instance.ref().child('notes');
+    print(list.length);
+    for (int i = 0; i < list.length; i++) {
+      print(userName);
+      ref
+          .child(userName)
+          .child((list[i]['time'].toString().replaceAll('\n', ' ')))
+          .set({
+            'title': list[i]['title'].toString(),
+            'note': list[i]['note'].toString(),
+            'theme': list[i]['theme'].toString(),
+            'time': list[i]['time'].toString(),
+          })
+          .asStream()
+          .listen((event) {}, onDone: () {
+            setState(() {
+              _isLoading = false;
+            });
+          });
+    }
+  }
+
+  removeUserDataFromCloud() async {
+    String userName = await MySharedPreferences().getStringValue("userName");
+    await FirebaseDatabase.instance
+        .ref('notes')
+        .child(userName)
+        .remove()
+        .whenComplete(() => fetchCloudNotes().whenComplete(() {
+              uploadDataToFirebase();
+            }));
+  }
+
+  fetchCloudNotes() async {
+    String userName = await MySharedPreferences().getStringValue("userName");
+    List<String> title = [], note = [], theme = [], time = [];
+
+    final snapshot =
+        await FirebaseDatabase.instance.ref('notes').child(userName).get();
+    int i = 0;
+    final map = snapshot.value as Map<dynamic, dynamic>;
+
+    map.forEach((key, value) {
+      final user = User.fromMap(value);
+      cloudNotesList.add(user);
+      title.add(cloudNotesList[i].title);
+      note.add(cloudNotesList[i].note);
+      theme.add(cloudNotesList[i].theme);
+      time.add(cloudNotesList[i].time);
+      print("title: " + cloudNotesList[i].title);
+      i++;
+    });
+    setState(() {
+      list = list;
+    });
   }
 
   showData() async {
@@ -69,35 +133,44 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   checkLoadLogic() async {
     widget.shouldCloudSync
-    ? await MySharedPreferences().getStringValue("isCloudBackupOn") == "0"
-        ? setState(() {
-      _isLoading = false;
-    })
-        : setState(() {
-      _isLoading = true;
-    })
-    : null;
+        ? await MySharedPreferences().getStringValue("isCloudBackupOn") == "0"
+            ? setState(() {
+                _isLoading = false;
+              })
+            : setState(() {
+                _isLoading = true;
+              })
+        : null;
+  }
+
+  void universalFetchLogic() async {
+    await MySharedPreferences().containsKey("isCloudBackupOn") == true
+        ? await MySharedPreferences().getStringValue("isCloudBackupOn") == "1"
+            ? widget.shouldCloudSync
+                ? initiateDB()
+                    .whenComplete(() => showData().whenComplete(() => {
+                          if (list.isEmpty)
+                            {
+                              setState(() {
+                                _isLoading = false;
+                              })
+                            }
+                          /////////////////////////////////////////////////////////////////
+                          ,
+                          uploadDataToFirebase()
+                        }))
+                : initiateDB().whenComplete(() => showData())
+            : initiateDB().whenComplete(() => showData())
+        : initiateDB().whenComplete(() => showData());
   }
 
   @override
   void initState() {
     // TODO: implement initState
     checkLoadLogic();
-    Timer(const Duration(seconds: 3), () {
-      // 5 seconds have past, you can do your work
-      setState(() {
-        _isLoading = false;
-      });
-    });
     Firebase.initializeApp();
-    _googleSignIn.onCurrentUserChanged.listen((event) {
-      setState(() {
-        _currentUser = event!;
-      });
-    });
-    _googleSignIn.signInSilently();
     super.initState();
-    initiateDB().whenComplete(() => showData());
+    universalFetchLogic();
   }
 
   Widget cloudBackupLoadingCard() {
@@ -140,16 +213,16 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             children: [
               Padding(
                 padding:
-                EdgeInsets.fromLTRB(9.0, 9.0, 9.0, _isLoading ? 11.0 : 0.0),
+                    EdgeInsets.fromLTRB(9.0, 9.0, 9.0, _isLoading ? 11.0 : 0.0),
                 child: AnimatedContainer(
                   width: (!_isLoading) ? MediaQuery.of(context).size.width : 31,
                   height: (!_isLoading) ? AppBar().preferredSize.height : 31,
                   curve: Curves.easeInCirc,
                   decoration: BoxDecoration(
-                    // color: (!_isLoading) ? Colors.black: Colors.white,
+                      // color: (!_isLoading) ? Colors.black: Colors.white,
                       color: Colors.black,
                       borderRadius:
-                      BorderRadius.circular(_isLoading ? 1000 : 19)),
+                          BorderRadius.circular(_isLoading ? 1000 : 19)),
                   duration: const Duration(milliseconds: 350),
                   child: Stack(
                     children: [
@@ -171,19 +244,19 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                         shrinkWrap: true,
                         crossAxisCount: 2,
                         itemCount:
-                        // list.isEmpty ? 0:
-                        size,
+                            // list.isEmpty ? 0:
+                            size,
                         itemBuilder: (BuildContext context, int index) =>
-                        // list.isEmpty ? Container():
-                        PreviewCard(
-                            time: list[index]['time'].toString(),
-                            theme: list[index]["theme"].toString(),
-                            noteID: list[index]["id"].toString(),
-                            id: index.toString(),
-                            title: list[index]["title"].toString(),
-                            note: list[index]["note"].toString()),
+                            // list.isEmpty ? Container():
+                            PreviewCard(
+                                time: list[index]['time'].toString(),
+                                theme: list[index]["theme"].toString(),
+                                noteID: list[index]["id"].toString(),
+                                id: index.toString(),
+                                title: list[index]["title"].toString(),
+                                note: list[index]["note"].toString()),
                         staggeredTileBuilder: (int index) =>
-                        const StaggeredTile.fit(1),
+                            const StaggeredTile.fit(1),
                         mainAxisSpacing: 4.0,
                         crossAxisSpacing: 4.0,
                       )),
@@ -223,11 +296,14 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   Visibility(
                     visible: visible,
                     child: Center(
-                      child: Image.asset(
-                        "lib/assets/images/empty2.gif",
-                        fit: BoxFit.cover,
-                        height: s.width * .55,
-                        width: s.width * .55,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(1000),
+                        child: Image.asset(
+                          "lib/assets/images/empty2.gif",
+                          fit: BoxFit.cover,
+                          height: s.width * .41,
+                          width: s.width * .41,
+                        ),
                       ),
                     ),
                   )

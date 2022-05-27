@@ -34,7 +34,7 @@ class _SyncFileState extends State<SyncFile> {
   late List<Map> list;
   int size = 0;
   late String fetchedNotes, s = '\n\n';
-  List<String> title = [], note = [];
+  List<String> title = [], note = [], theme = [], time = [];
 
   Future<void> initiateDB() async {
     // Get a location using getDatabasesPath
@@ -85,6 +85,31 @@ class _SyncFileState extends State<SyncFile> {
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
+
+    updateDB() {
+      database.rawDelete('DELETE FROM TABLE Notes').whenComplete(() async=> await database.transaction((txn) async {
+        for (int i = 0; i < title.length; i++) {
+          int id1 = await txn.rawInsert(
+              'INSERT INTO Notes(title, note, theme, time) VALUES(?, ?, ?, ?)',
+              [title[i], note[i], theme[i], time[i]]);
+          if (kDebugMode) {
+            print('inserted1: $id1');
+          }
+        }
+        for (int i = 0; i < list.length; i++) {
+          int id1 = await txn.rawInsert(
+              'INSERT INTO Notes(title, note, theme, time) VALUES(?, ?, ?, ?)',
+              [list[i]['title'], list[i]['note'], list[i]['theme'], list[i]['time']]);
+          if (kDebugMode) {
+            print('inserted1: $id1');
+          }
+        }
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const Home(false)),
+        );
+      }));
+    }
 
     return Hero(
       tag: widget.string,
@@ -329,7 +354,7 @@ class _SyncFileState extends State<SyncFile> {
                                         await MySharedPreferences()
                                                     .containsKey("userName") ==
                                                 true
-                                            ? getUsers()
+                                            ? fetchNotesFromCloud().whenComplete(() => updateDB())
                                             : {
                                                 message =
                                                     "please enable \"Cloud Backup\" first...",
@@ -535,14 +560,14 @@ class _SyncFileState extends State<SyncFile> {
     });
   }
 
-  getUsers() async {
-    final _googleSignIn = GoogleSignIn(scopes: ['email']);
-    await _googleSignIn.signIn();
-    String userName = _googleSignIn.currentUser!.email
-        .substring(0, _googleSignIn.currentUser!.email.indexOf('@'));
-    List<String> title = [], note = [], theme = [], time = [];
+  fetchNotesFromCloud() async {
+    // final _googleSignIn = GoogleSignIn(scopes: ['email']);
+    // await _googleSignIn.signIn();
+    // String userName = _googleSignIn.currentUser!.email
+    //     .substring(0, _googleSignIn.currentUser!.email.indexOf('@'));
+    String userName = await MySharedPreferences().getStringValue("userName");
 
-    final List<User> list = [];
+    final List<User> listCloud = [];
     final snapshot =
         await FirebaseDatabase.instance.ref('notes').child(userName).get();
     int i = 0;
@@ -550,12 +575,12 @@ class _SyncFileState extends State<SyncFile> {
 
     map.forEach((key, value) {
       final user = User.fromMap(value);
-      list.add(user);
-      title.add(list[i].title);
-      note.add(list[i].note);
-      theme.add(list[i].theme);
-      time.add(list[i].time);
-      print(list[i].title);
+      listCloud.add(user);
+      title.add(listCloud[i].title);
+      note.add(listCloud[i].note);
+      theme.add(listCloud[i].theme);
+      time.add(listCloud[i].time);
+      print(listCloud[i].title);
       i++;
     });
   }

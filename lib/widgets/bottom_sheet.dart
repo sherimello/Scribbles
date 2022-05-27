@@ -41,6 +41,7 @@ class _TestState extends State<Test> {
     final ref = fb.ref().child('notes');
     String userNode = "";
     GoogleSignInAccount _currentUser;
+
     void signOut() {
       _googleSignIn.disconnect().whenComplete(() =>
           {print("signed out"), MySharedPreferences().removeValue("userName")});
@@ -67,10 +68,14 @@ class _TestState extends State<Test> {
     uploadDataToFirebase() {
       // Firebase.initializeApp();
 
+
+
       for (int i = 0; i < widget.list.length; i++) {
+        print((widget.list[i]['time'].toString().replaceAll('\n','')));
+        // print(getNodeForCloudUploadUsingCreationDate(widget.list[i]['time']));
         ref
             .child(userNode)
-            .push()
+            .child((widget.list[i]['time'].toString().replaceAll('\n',' ')))
             .set({
               'title': widget.list[i]['title'].toString(),
               'note': widget.list[i]['note'].toString(),
@@ -341,5 +346,117 @@ class _TestState extends State<Test> {
         : setState(() {
             isSwitched = true;
           });
+  }
+
+  String getNodeForCloudUploadUsingCreationDate(String date) {
+    String node = "";
+    if(date.contains('Sunday')) {
+      node += "01";
+      String removable = "Sunday, ";
+      date = date.substring(removable.length);
+    }
+    if(date.contains('Monday')) {
+      node += "02";
+      String removable = "Monday, ";
+      date = date.substring(removable.length);
+    }
+    if(date.contains('Tuesday')) {
+      node += "03";
+      String removable = "Tuesday, ";
+      date = date.substring(removable.length);
+    }
+    if(date.contains('Wednesday')) {
+      node += "04";
+      String removable = "Wednesday, ";
+      date = date.substring(removable.length);
+    }
+    if(date.contains('Thursday')) {
+      node += "05";
+      String removable = "Thursday, ";
+      date = date.substring(removable.length);
+    }
+    if(date.contains('Friday')) {
+      node += "06";
+      String removable = "Friday, ";
+      date = date.substring(removable.length);
+    }
+    if(date.contains('Saturday')) {
+      node += "07";
+      String removable = "Saturday, ";
+      date = date.substring(removable.length);
+    }
+    //for month...
+    if(date.contains('January')) {
+      node += "01";
+      String removable = "January ";
+      date = date.substring(removable.length);
+    }
+    if(date.contains('February')) {
+      node += "02";
+      String removable = "February ";
+      date = date.substring(removable.length);
+    }
+    if(date.contains('March')) {
+      node += "03";
+      String removable = "March ";
+      date = date.substring(removable.length);
+    }
+    if(date.contains('April')) {
+      node += "04";
+      String removable = "April ";
+      date = date.substring(removable.length);
+    }
+    if(date.contains('May')) {
+      node += "05";
+      String removable = "May ";
+      date = date.substring(removable.length);
+    }
+    if(date.contains('June')) {
+      node += "06";
+      String removable = "June ";
+      date = date.substring(removable.length);
+    }
+    if(date.contains('July')) {
+      node += "07";
+      String removable = "July ";
+      date = date.substring(removable.length);
+    }
+    if(date.contains('August')) {
+      node += "08";
+      String removable = "August ";
+      date = date.substring(removable.length);
+    }
+    if(date.contains('September')) {
+      node += "09";
+      String removable = "September ";
+      date = date.substring(removable.length);
+    }
+    if(date.contains('October')) {
+      node += "10";
+      String removable = "October ";
+      date = date.substring(removable.length);
+    }
+    if(date.contains('November')) {
+      node += "11";
+      String removable = "November ";
+      date = date.substring(removable.length);
+    }
+    if(date.contains('December')) {
+      node += "12";
+      String removable = "December ";
+      date = date.substring(removable.length);
+    }
+    node += date.substring(1,3);
+    date += date.substring(4);
+
+    node += date.substring(1,5);
+    date += date.substring(1);
+    node += date.substring(1,3);
+    date += date.substring(1);
+    node += date.substring(1,3);
+    date += date.substring(1);
+    node += date.substring(1,3);
+
+    return node;
   }
 }
