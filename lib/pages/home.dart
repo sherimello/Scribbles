@@ -120,15 +120,15 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   showData() async {
     list = (await database.rawQuery('SELECT * FROM Notes'));
 
-    setState(() {
-      if (list.isNotEmpty) {
+    if (list.isNotEmpty) {
+      setState(() {
         visible = false;
-      }
-      if (kDebugMode) {
-        print(list.length);
-      }
-      size = list.length;
-    });
+      });
+    }
+    if (kDebugMode) {
+      print(list.length);
+    }
+    size = list.length;
   }
 
   checkLoadLogic() async {
@@ -151,9 +151,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                     .whenComplete(() => showData().whenComplete(() => {
                           if (list.isEmpty)
                             {
-                              setState(() {
-                                _isLoading = false;
-                              })
+                              checkLoadLogic()
                             }
                           /////////////////////////////////////////////////////////////////
                           ,
@@ -167,7 +165,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     // TODO: implement initState
-    checkLoadLogic();
     Firebase.initializeApp();
     super.initState();
     universalFetchLogic();

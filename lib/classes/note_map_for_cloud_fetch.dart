@@ -10,7 +10,7 @@ class User {
 
   factory User.fromMap(Map<dynamic, dynamic> map) {
     return User(
-      note: map['name'] ?? '',
+      note: map['note'] ?? '',
       title: map['title'] ?? '',
       theme: map['theme'] ?? '',
       time: map['time'] ?? '',

@@ -87,7 +87,7 @@ class _SyncFileState extends State<SyncFile> {
     var size = MediaQuery.of(context).size;
 
     updateDB() {
-      database.rawDelete('DELETE FROM TABLE Notes').whenComplete(() async=> await database.transaction((txn) async {
+      database.execute('DELETE FROM Notes').whenComplete(() async=> await database.transaction((txn) async {
         for (int i = 0; i < title.length; i++) {
           int id1 = await txn.rawInsert(
               'INSERT INTO Notes(title, note, theme, time) VALUES(?, ?, ?, ?)',
@@ -96,14 +96,14 @@ class _SyncFileState extends State<SyncFile> {
             print('inserted1: $id1');
           }
         }
-        for (int i = 0; i < list.length; i++) {
-          int id1 = await txn.rawInsert(
-              'INSERT INTO Notes(title, note, theme, time) VALUES(?, ?, ?, ?)',
-              [list[i]['title'], list[i]['note'], list[i]['theme'], list[i]['time']]);
-          if (kDebugMode) {
-            print('inserted1: $id1');
-          }
-        }
+        // for (int i = 0; i < list.length; i++) {
+        //   int id1 = await txn.rawInsert(
+        //       'INSERT INTO Notes(title, note, theme, time) VALUES(?, ?, ?, ?)',
+        //       [list[i]['title'], list[i]['note'], list[i]['theme'], list[i]['time']]);
+        //   if (kDebugMode) {
+        //     print('inserted1: $id1');
+        //   }
+        // }
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const Home(false)),
@@ -576,12 +576,18 @@ class _SyncFileState extends State<SyncFile> {
     map.forEach((key, value) {
       final user = User.fromMap(value);
       listCloud.add(user);
-      title.add(listCloud[i].title);
-      note.add(listCloud[i].note);
-      theme.add(listCloud[i].theme);
-      time.add(listCloud[i].time);
+      title.add(user.title);
+      note.add(user.note);
+      theme.add(user.theme);
+      time.add(user.time);
       print(listCloud[i].title);
       i++;
     });
+    for(int i = 0; i < list.length; i++) {
+      title.add(list[i]['title']);
+      note.add(list[i]['note']);
+      theme.add(list[i]['theme']);
+      time.add(list[i]['time']);
+    }
   }
 }
