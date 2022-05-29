@@ -1,4 +1,3 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -20,7 +19,7 @@ class Test extends StatefulWidget {
 }
 
 class _TestState extends State<Test> {
-  bool isSwitched = false;
+  bool isSwitched = false, _isCloudSyncing = false;
 
   double getRadiansFromDegree(double degree) {
     double unitRadian = 57.295779513;
@@ -59,23 +58,23 @@ class _TestState extends State<Test> {
         });
         _googleSignIn.signInSilently();
       } catch (e) {
+        MySharedPreferences().setStringValue("isCloudBackupOn", "0");
+        setState(() {
+          isSwitched = false;
+        });
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text("error signing in : $e"),
         ));
       }
     }
 
-    uploadDataToFirebase() {
-      // Firebase.initializeApp();
-
-
-
+    uploadDataToFirebase() async {
       for (int i = 0; i < widget.list.length; i++) {
-        print((widget.list[i]['time'].toString().replaceAll('\n','')));
+        print((widget.list[i]['time'].toString().replaceAll('\n', '')));
         // print(getNodeForCloudUploadUsingCreationDate(widget.list[i]['time']));
         ref
             .child(userNode)
-            .child((widget.list[i]['time'].toString().replaceAll('\n',' ')))
+            .child((widget.list[i]['time'].toString().replaceAll('\n', ' ')))
             .set({
               'title': widget.list[i]['title'].toString(),
               'note': widget.list[i]['note'].toString(),
@@ -87,232 +86,267 @@ class _TestState extends State<Test> {
       }
     }
 
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(11.0),
-        child: Align(
-          alignment: Alignment.bottomCenter,
-          child: Hero(
-            tag: '000',
-            createRectTween: (begin, end) {
-              return CustomRectTween(begin: begin!, end: end!);
-            },
-            child: Material(
-              color: Colors.transparent,
-              child: Container(
-                // width: MediaQuery.of(context).size.width,
-                // height: MediaQuery.of(context).size.height * .5,
-                decoration: const BoxDecoration(
-                    color: Colors.black,
-                    borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(35),
-                        topRight: Radius.circular(35),
-                        bottomLeft: Radius.circular(35),
-                        bottomRight: Radius.circular(35))),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(11, 11, 11, 41),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(11),
-                          child: Align(
-                              alignment: Alignment.topRight,
-                              child: GestureDetector(
-                                onTap: Navigator.of(context).pop,
-                                child: const Icon(
-                                  Icons.cancel,
-                                  color: Colors.white,
-                                ),
-                              )),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: GestureDetector(
-                            // splashColor: Colors.white,
-                            // radius: 100,
-                            onTap: () {
-                              Navigator.of(context).push(HeroDialogRoute(
-                                builder: (context) => const Center(
-                                  child: NewNotePage('000', '000', ""),
-                                ),
-                                // settings: const RouteSettings(),
-                              ));
-                              // Navigator.removeRoute(
-                              //   context,
-                              //   MaterialPageRoute(
-                              //     builder: (BuildContext context) => const Home(),
-                              //   ),
-                              // );
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: RichText(
-                                textAlign: TextAlign.center,
-                                text: const TextSpan(
-                                  children: [
-                                    WidgetSpan(
-                                      child: Icon(
-                                        Icons.post_add,
-                                        size: 19,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    TextSpan(
-                                        text: "  create new note",
-                                        style: TextStyle(
-                                            fontFamily: 'varela-round.regular',
-                                            fontSize: 21,
-                                            fontWeight: FontWeight.bold)),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: GestureDetector(
-                            // splashColor: Colors.white,
-                            // radius: 100,
-                            onTap: () {
-                              Navigator.of(context).push(HeroDialogRoute(
-                                builder: (context) => const Center(
-                                  child: SyncFile('000'),
-                                ),
-                                // settings: const RouteSettings(),
-                              ));
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: RichText(
-                                textAlign: TextAlign.center,
-                                text: const TextSpan(
-                                  children: [
-                                    WidgetSpan(
-                                      child: Icon(
-                                        Icons.sync,
-                                        size: 21,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    TextSpan(
-                                        text: "  sync",
-                                        style: TextStyle(
-                                            fontFamily: 'varela-round.regular',
-                                            fontSize: 19,
-                                            fontWeight: FontWeight.bold)),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: GestureDetector(
-                            // splashColor: Colors.white,
-                            // radius: 100,
-                            onTap: () {},
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: RichText(
-                                textAlign: TextAlign.center,
-                                text: const TextSpan(
-                                  children: [
-                                    WidgetSpan(
-                                      child: Icon(
-                                        Icons.person_outline_rounded,
-                                        size: 21,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    TextSpan(
-                                        text: "  profile",
-                                        style: TextStyle(
-                                            fontFamily: 'varela-round.regular',
-                                            fontSize: 19,
-                                            fontWeight: FontWeight.bold)),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white12,
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(11.0),
-                              child: Row(
+    return AbsorbPointer(
+      absorbing: _isCloudSyncing,
+      child: Stack(
+        children: [
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(11.0),
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: SingleChildScrollView(
+                  child: Hero(
+                    tag: '000',
+                    createRectTween: (begin, end) {
+                      return CustomRectTween(begin: begin!, end: end!);
+                    },
+                    child: Material(
+                      color: Colors.transparent,
+                      child: Container(
+                        // width: MediaQuery.of(context).size.width,
+                        // height: MediaQuery.of(context).size.height * .5,
+                        decoration: const BoxDecoration(
+                            color: Colors.black,
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(35),
+                                topRight: Radius.circular(35),
+                                bottomLeft: Radius.circular(35),
+                                bottomRight: Radius.circular(35))),
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(11, 11, 11, 41),
+                          child: SingleChildScrollView(
+                            child: ClipRRect(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Padding(
-                                    padding: const EdgeInsets.only(right: 8.0),
-                                    child: Switch(
-                                        value: isSwitched,
-                                        activeTrackColor:
-                                            Colors.lightGreenAccent,
-                                        activeColor: Colors.green,
-                                        onChanged: (value) {
-                                          setState(() {
-                                            isSwitched = value;
-                                          });
-                                          value
-                                              ? MySharedPreferences()
-                                                  .setStringValue(
-                                                      "isCloudBackupOn", "1")
-                                              : {
-                                                  MySharedPreferences()
-                                                      .setStringValue(
-                                                          "isCloudBackupOn",
-                                                          "0"),
-                                                  signOut()
-                                                };
-                                          save(value);
-                                          if (value) {
-                                            signIn().whenComplete(() => {
-                                                  uploadDataToFirebase(),
-                                                  MySharedPreferences()
-                                                      .setStringValue(
-                                                          "userName", userNode)
-                                                });
-                                          }
-                                        }),
-                                  ),
-                                  Expanded(
-                                    child: Center(
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: const [
-                                          Text("Cloud Backup",
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontFamily:
-                                                      'varela-round.regular',
-                                                  fontSize: 19,
-                                                  fontWeight: FontWeight.bold)),
-                                          Flexible(
-                                            child: Text(
-                                                "(automatically backs up notes everytime you open the app)",
-                                                overflow: TextOverflow.visible,
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontFamily:
-                                                        'varela-round.regular',
-                                                    fontSize: 11,
-                                                    fontWeight:
-                                                        FontWeight.bold)),
+                                    padding: const EdgeInsets.all(11),
+                                    child: Align(
+                                        alignment: Alignment.topRight,
+                                        child: GestureDetector(
+                                          onTap: Navigator.of(context).pop,
+                                          child: const Icon(
+                                            Icons.cancel,
+                                            color: Colors.white,
                                           ),
-                                        ],
+                                        )),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: GestureDetector(
+                                      // splashColor: Colors.white,
+                                      // radius: 100,
+                                      onTap: () {
+                                        Navigator.of(context).push(HeroDialogRoute(
+                                          builder: (context) => const Center(
+                                            child: NewNotePage('000', '000', ""),
+                                          ),
+                                          // settings: const RouteSettings(),
+                                        ));
+                                        // Navigator.removeRoute(
+                                        //   context,
+                                        //   MaterialPageRoute(
+                                        //     builder: (BuildContext context) => const Home(),
+                                        //   ),
+                                        // );
+                                      },
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: RichText(
+                                          textAlign: TextAlign.center,
+                                          text: const TextSpan(
+                                            children: [
+                                              WidgetSpan(
+                                                child: Icon(
+                                                  Icons.post_add,
+                                                  size: 19,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                              TextSpan(
+                                                  text: "  create new note",
+                                                  style: TextStyle(
+                                                      fontFamily:
+                                                          'varela-round.regular',
+                                                      fontSize: 21,
+                                                      fontWeight: FontWeight.bold)),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: GestureDetector(
+                                      // splashColor: Colors.white,
+                                      // radius: 100,
+                                      onTap: () {
+                                        Navigator.of(context).push(HeroDialogRoute(
+                                          builder: (context) => const Center(
+                                            child: SyncFile('000'),
+                                          ),
+                                          // settings: const RouteSettings(),
+                                        ));
+                                      },
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: RichText(
+                                          textAlign: TextAlign.center,
+                                          text: const TextSpan(
+                                            children: [
+                                              WidgetSpan(
+                                                child: Icon(
+                                                  Icons.sync,
+                                                  size: 21,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                              TextSpan(
+                                                  text: "  sync",
+                                                  style: TextStyle(
+                                                      fontFamily:
+                                                          'varela-round.regular',
+                                                      fontSize: 19,
+                                                      fontWeight: FontWeight.bold)),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: GestureDetector(
+                                      // splashColor: Colors.white,
+                                      // radius: 100,
+                                      onTap: () {},
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: RichText(
+                                          textAlign: TextAlign.center,
+                                          text: const TextSpan(
+                                            children: [
+                                              WidgetSpan(
+                                                child: Icon(
+                                                  Icons.person_outline_rounded,
+                                                  size: 21,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                              TextSpan(
+                                                  text: "  profile",
+                                                  style: TextStyle(
+                                                      fontFamily:
+                                                          'varela-round.regular',
+                                                      fontSize: 19,
+                                                      fontWeight: FontWeight.bold)),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.white12,
+                                        borderRadius: BorderRadius.circular(15),
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(11.0),
+                                        child: Wrap(
+                                          children: [
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.only(right: 7.0),
+                                              child: Center(
+                                                child: Switch(
+                                                    value: isSwitched,
+                                                    activeTrackColor:
+                                                        Colors.lightGreenAccent,
+                                                    activeColor: Colors.green,
+                                                    onChanged: (value) {
+                                                      setState(() {
+                                                        isSwitched = value;
+                                                      });
+                                                      value
+                                                          ? {
+                                                              setState(() {
+                                                                _isCloudSyncing =
+                                                                    true;
+                                                              }),
+                                                              MySharedPreferences()
+                                                                  .setStringValue(
+                                                                      "isCloudBackupOn",
+                                                                      "1")
+                                                            }
+                                                          : {
+                                                              MySharedPreferences()
+                                                                  .setStringValue(
+                                                                      "isCloudBackupOn",
+                                                                      "0"),
+                                                              signOut()
+                                                            };
+                                                      save(value);
+                                                      if (value) {
+                                                        signIn().whenComplete(() => {
+                                                              uploadDataToFirebase()
+                                                                  .whenComplete(() {
+                                                                setState(() {
+                                                                  _isCloudSyncing =
+                                                                      false;
+                                                                });
+                                                              }),
+                                                              MySharedPreferences()
+                                                                  .setStringValue(
+                                                                      "userName",
+                                                                      userNode)
+                                                            });
+                                                      }
+                                                    }),
+                                              ),
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.all(8.0),
+                                              child: Center(
+                                                child: Column(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: const [
+                                                    Text("Cloud Backup",
+                                                        textAlign: TextAlign.center,
+                                                        style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontFamily:
+                                                                'varela-round.regular',
+                                                            fontSize: 19,
+                                                            fontWeight:
+                                                                FontWeight.bold)),
+                                                    Flexible(
+                                                      child: Text(
+                                                          "(automatically backs up notes everytime you open the app)",
+                                                          overflow:
+                                                              TextOverflow.visible,
+                                                          textAlign:
+                                                              TextAlign.center,
+                                                          style: TextStyle(
+                                                              color: Colors.white,
+                                                              fontFamily:
+                                                                  'varela-round.regular',
+                                                              fontSize: 11,
+                                                              fontWeight:
+                                                                  FontWeight.bold)),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -321,14 +355,22 @@ class _TestState extends State<Test> {
                             ),
                           ),
                         ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
+          Visibility(
+            visible: _isCloudSyncing,
+            child: const Center(
+              child: CircularProgressIndicator(
+                color: Colors.white,
+              ),
+            ),
+          )
+        ],
       ),
     );
   }
@@ -350,112 +392,112 @@ class _TestState extends State<Test> {
 
   String getNodeForCloudUploadUsingCreationDate(String date) {
     String node = "";
-    if(date.contains('Sunday')) {
+    if (date.contains('Sunday')) {
       node += "01";
       String removable = "Sunday, ";
       date = date.substring(removable.length);
     }
-    if(date.contains('Monday')) {
+    if (date.contains('Monday')) {
       node += "02";
       String removable = "Monday, ";
       date = date.substring(removable.length);
     }
-    if(date.contains('Tuesday')) {
+    if (date.contains('Tuesday')) {
       node += "03";
       String removable = "Tuesday, ";
       date = date.substring(removable.length);
     }
-    if(date.contains('Wednesday')) {
+    if (date.contains('Wednesday')) {
       node += "04";
       String removable = "Wednesday, ";
       date = date.substring(removable.length);
     }
-    if(date.contains('Thursday')) {
+    if (date.contains('Thursday')) {
       node += "05";
       String removable = "Thursday, ";
       date = date.substring(removable.length);
     }
-    if(date.contains('Friday')) {
+    if (date.contains('Friday')) {
       node += "06";
       String removable = "Friday, ";
       date = date.substring(removable.length);
     }
-    if(date.contains('Saturday')) {
+    if (date.contains('Saturday')) {
       node += "07";
       String removable = "Saturday, ";
       date = date.substring(removable.length);
     }
     //for month...
-    if(date.contains('January')) {
+    if (date.contains('January')) {
       node += "01";
       String removable = "January ";
       date = date.substring(removable.length);
     }
-    if(date.contains('February')) {
+    if (date.contains('February')) {
       node += "02";
       String removable = "February ";
       date = date.substring(removable.length);
     }
-    if(date.contains('March')) {
+    if (date.contains('March')) {
       node += "03";
       String removable = "March ";
       date = date.substring(removable.length);
     }
-    if(date.contains('April')) {
+    if (date.contains('April')) {
       node += "04";
       String removable = "April ";
       date = date.substring(removable.length);
     }
-    if(date.contains('May')) {
+    if (date.contains('May')) {
       node += "05";
       String removable = "May ";
       date = date.substring(removable.length);
     }
-    if(date.contains('June')) {
+    if (date.contains('June')) {
       node += "06";
       String removable = "June ";
       date = date.substring(removable.length);
     }
-    if(date.contains('July')) {
+    if (date.contains('July')) {
       node += "07";
       String removable = "July ";
       date = date.substring(removable.length);
     }
-    if(date.contains('August')) {
+    if (date.contains('August')) {
       node += "08";
       String removable = "August ";
       date = date.substring(removable.length);
     }
-    if(date.contains('September')) {
+    if (date.contains('September')) {
       node += "09";
       String removable = "September ";
       date = date.substring(removable.length);
     }
-    if(date.contains('October')) {
+    if (date.contains('October')) {
       node += "10";
       String removable = "October ";
       date = date.substring(removable.length);
     }
-    if(date.contains('November')) {
+    if (date.contains('November')) {
       node += "11";
       String removable = "November ";
       date = date.substring(removable.length);
     }
-    if(date.contains('December')) {
+    if (date.contains('December')) {
       node += "12";
       String removable = "December ";
       date = date.substring(removable.length);
     }
-    node += date.substring(1,3);
+    node += date.substring(1, 3);
     date += date.substring(4);
 
-    node += date.substring(1,5);
+    node += date.substring(1, 5);
     date += date.substring(1);
-    node += date.substring(1,3);
+    node += date.substring(1, 3);
     date += date.substring(1);
-    node += date.substring(1,3);
+    node += date.substring(1, 3);
     date += date.substring(1);
-    node += date.substring(1,3);
+    node += date.substring(1, 3);
 
     return node;
   }

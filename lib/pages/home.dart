@@ -133,7 +133,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   checkLoadLogic() async {
     widget.shouldCloudSync
-        ? await MySharedPreferences().getStringValue("isCloudBackupOn") == "0"
+        ? await MySharedPreferences().getStringValue("isCloudBackupOn") == "0" || list.isEmpty
             ? setState(() {
                 _isLoading = false;
               })
@@ -149,12 +149,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             ? widget.shouldCloudSync
                 ? initiateDB()
                     .whenComplete(() => showData().whenComplete(() => {
-                          if (list.isEmpty)
-                            {
-                              checkLoadLogic()
-                            }
+                          // if (list.isEmpty)
+                          //   {
+                          //     checkLoadLogic()
+                          //   }
                           /////////////////////////////////////////////////////////////////
-                          ,
                           uploadDataToFirebase()
                         }))
                 : initiateDB().whenComplete(() => showData())
