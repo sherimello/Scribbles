@@ -11,13 +11,16 @@ class HeroDialogRoute<T> extends PageRoute<T> {
   /// {@macro hero_dialog_route}
   HeroDialogRoute({
     required WidgetBuilder builder,
+    this.bgColor = const Color(0x55000000),
     // required RouteSettings settings,
     bool fullscreenDialog = false,
   })  : _builder = builder,
+
         // super(settings: settings, fullscreenDialog: fullscreenDialog);
         super(fullscreenDialog: fullscreenDialog);
 
   final WidgetBuilder _builder;
+  final Color bgColor;
 
   @override
   bool get opaque => false;
@@ -32,7 +35,7 @@ class HeroDialogRoute<T> extends PageRoute<T> {
   bool get maintainState => true;
 
   @override
-  Color get barrierColor => Colors.black.withOpacity(.55);
+  Color get barrierColor => bgColor;
 
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation,

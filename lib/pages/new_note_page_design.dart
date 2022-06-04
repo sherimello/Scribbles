@@ -24,10 +24,11 @@ class _NewNotePageState extends State<NewNotePage> {
   late Color searchBarColor;
   bool _isVisible = false,
       _isNoteCardActive = false,
-      _isNoteInUpdateMode = false;
+      _isNoteInUpdateMode = false,
+      _isTitleAdded = false;
   final _searchFieldController = TextEditingController(),
       _noteFieldController = TextEditingController();
-  late FocusNode myFocusNode, myFocusNode2;
+  late FocusNode noteFieldFocusNode, myFocusNode2;
   late Database database;
   late String path,
       initNote,
@@ -43,11 +44,12 @@ class _NewNotePageState extends State<NewNotePage> {
     super.initState();
     initiateDB();
     if (widget.theme == "") {
-      searchBarColor = const Color(0xfff7a221);
+      setState(() => searchBarColor = const Color(0xfff7a221));
     } else {
-      searchBarColor = Color(int.parse(widget.theme));
+      setState(() => searchBarColor = Color(int.parse(widget.theme)));
+      // searchBarColor = Color(int.parse(widget.theme));
     }
-    myFocusNode = FocusNode();
+    noteFieldFocusNode = FocusNode();
     myFocusNode2 = FocusNode();
     widget.id != "000"
         ? setState(() {
@@ -57,7 +59,141 @@ class _NewNotePageState extends State<NewNotePage> {
           })
         : setState(() {
             _isNoteCardActive = false;
+            _isVisible = true;
           });
+
+    myFocusNode2.addListener(() {
+      //check when focus changes from notes to the title bar and make the note field placeholder image visible...
+      if (myFocusNode2.hasFocus && _noteFieldController.text.isEmpty) {
+        setState(() {
+          _isNoteCardActive = false;
+          _isVisible = true;
+        });
+      }
+    });
+
+    noteFieldFocusNode.addListener(() {
+      if(noteFieldFocusNode.hasFocus && _searchFieldController.text.isEmpty) {
+        setState(() => _isTitleAdded = false);
+      }
+      if (!noteFieldFocusNode.hasFocus && _noteFieldController.text.isEmpty) {
+        setState(() {
+          _isNoteCardActive = false;
+          _isVisible = true;
+        });
+        // FocusManager.instance.primaryFocus?.unfocus();
+      }
+      if (_noteFieldController.text.isNotEmpty) {
+        setState(() {
+          print("1");
+          _isNoteCardActive = true;
+          _isVisible = false;
+        });
+      }
+    });
+
+    _searchFieldController.addListener(() {
+      checkIfSaveButtonShouldBeSeen();
+      if(_searchFieldController.text != _noteFieldController.text) {
+        setState(() => _isTitleAdded = true);
+      }
+    });
+
+    _noteFieldController.addListener(() {
+      checkIfSaveButtonShouldBeSeen();
+
+      if(!_isTitleAdded && _noteFieldController.text.length <= 11) {
+        setState((){
+          _searchFieldController.text = _noteFieldController.text;
+        });
+      }
+
+    });
+
+    // _noteFieldController.addListener(() {
+    //   if (!_isTitleAdded &&
+    //       _noteFieldController.text.length <= 11) {
+    //     setState(() {
+    //       _searchFieldController.text =
+    //           _noteFieldController.text;
+    //     });
+    //     // return;
+    //   }
+    //   _searchFieldController.addListener(() {
+    //
+    //
+    //     myFocusNode2.addListener(() {
+    //       if (myFocusNode2.hasFocus &&
+    //           _searchFieldController.text.isNotEmpty) {
+    //         setState(() {
+    //           _isTitleAdded = true;
+    //         });
+    //       }
+    //
+    //       if (myFocusNode2.hasFocus &&
+    //           _noteFieldController.text.isEmpty) {
+    //         setState(() {
+    //           _isNoteCardActive = false;
+    //         });
+    //       }
+    //       if (_noteFieldController.text.isNotEmpty) {
+    //         setState(() {
+    //           print("1");
+    //           _isNoteCardActive = true;
+    //         });
+    //       }
+    //     });
+    //     if (_noteFieldController.text.isNotEmpty &&
+    //         _searchFieldController.text.isNotEmpty) {
+    //       setState(() {
+    //         saveButtonDimen = 55;
+    //       });
+    //     }
+    //     if (_searchFieldController.text.isEmpty) {
+    //       setState(() {
+    //         saveButtonDimen = 0;
+    //       });
+    //     }
+    //   });
+    //   if (_noteFieldController.text.isNotEmpty &&
+    //       _searchFieldController.text.isNotEmpty) {
+    //     setState(() {
+    //       saveButtonDimen = 55;
+    //     });
+    //   }
+    //   if (_noteFieldController.text.isEmpty) {
+    //     setState(() {
+    //       saveButtonDimen = 0;
+    //     });
+    //   }
+    //   if (!noteFieldFocusNode.hasFocus) {
+    //     _isNoteCardActive = false;
+    // //   }
+    //   noteFieldFocusNode.addListener(() {
+    //     if (!noteFieldFocusNode.hasFocus &&
+    //         _noteFieldController.text.isEmpty) {
+    //       setState(() {
+    //         _isNoteCardActive = false;
+    //       });
+    //       // FocusManager.instance.primaryFocus?.unfocus();
+    //     }
+    //     if (_noteFieldController.text.isNotEmpty) {
+    //       setState(() {
+    //         print("1");
+    //         _isNoteCardActive = true;
+    //       });
+    //     }
+    //   });
+    // });
+  }
+
+  checkIfSaveButtonShouldBeSeen() {
+    if (_searchFieldController.text.isNotEmpty &&
+        _noteFieldController.text.isNotEmpty) {
+      setState(() => saveButtonDimen = 55);
+    } else {
+      setState(() => saveButtonDimen = 0);
+    }
   }
 
   Future<void> initiateDB() async {
@@ -117,6 +253,9 @@ class _NewNotePageState extends State<NewNotePage> {
     // TODO: implement dispose
     super.dispose();
     _searchFieldController.dispose();
+    _noteFieldController.dispose();
+    noteFieldFocusNode.dispose();
+    myFocusNode2.dispose();
   }
 
   @override
@@ -137,6 +276,8 @@ class _NewNotePageState extends State<NewNotePage> {
         saveButtonDimen = 0;
       });
     }
+
+    noteListener() {}
 
     List<BoxShadow> boxShadow(double blurRadius, double offset1, double offset2,
         Color colorBottom, Color colorTop) {
@@ -170,7 +311,7 @@ class _NewNotePageState extends State<NewNotePage> {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(11),
               color: Color(int.parse(colorCode)),
-              boxShadow: boxShadow(5, 3, 3, Colors.grey, Colors.white),
+              // boxShadow: boxShadow(7, 3, 3, Colors.grey, Colors.white),
             ),
             child: Center(
               child: Padding(
@@ -197,24 +338,27 @@ class _NewNotePageState extends State<NewNotePage> {
             searchBarColor = Color(color);
           });
         },
-        child: Container(
-          width: size.height * .045,
-          height: size.height * .045,
-          child: Center(
-            child: Container(
-              width: size.height * .015,
-              height: size.height * .015,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(100),
-                color: Color(color),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Container(
+            width: size.height * .045,
+            height: size.height * .045,
+            child: Center(
+              child: Container(
+                width: size.height * .045,
+                height: size.height * .045,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(100),
+                  color: Color(color),
+                ),
               ),
             ),
-          ),
-          decoration: BoxDecoration(
-            // border: Border.all(width: 0, color: Colors.black26),
-            borderRadius: BorderRadius.circular(100),
-            border: Border.all(color: Colors.grey.shade100, width: 1),
-            color: Colors.white,
+            decoration: BoxDecoration(
+              // border: Border.all(width: 0, color: Colors.black26),
+              borderRadius: BorderRadius.circular(100),
+              border: Border.all(color: Colors.grey.shade100, width: 1),
+              color: Colors.white,
+            ),
           ),
         ),
       );
@@ -227,7 +371,7 @@ class _NewNotePageState extends State<NewNotePage> {
       },
       child: Scaffold(
         body: Container(
-          color: Colors.grey[200],
+          color: const Color(0xffF8F0E3),
           child: SafeArea(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -264,7 +408,7 @@ class _NewNotePageState extends State<NewNotePage> {
                                     curve: Curves.fastOutSlowIn,
                                     duration: const Duration(milliseconds: 351),
                                     decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(55),
+                                      borderRadius: BorderRadius.circular(17),
                                       color: searchBarColor,
                                     ),
                                     // boxShadow: boxShadow(21, 3, 3, Colors.grey.shade300, Colors.grey.shade300)),
@@ -364,7 +508,7 @@ class _NewNotePageState extends State<NewNotePage> {
                                       : saveButtonDimen,
                                   curve: Curves.fastOutSlowIn,
                                   child: Visibility(
-                                      visible: _isVisible,
+                                      visible: saveButtonDimen == 55 ? true : false,
                                       child: Center(
                                           child: Icon(
                                         Icons.done_all,
@@ -374,7 +518,7 @@ class _NewNotePageState extends State<NewNotePage> {
                                     color: Colors.white,
                                     border: Border.all(
                                         color: Colors.grey.shade100, width: 1),
-                                    borderRadius: BorderRadius.circular(15),
+                                    borderRadius: BorderRadius.circular(17),
                                   ),
                                   // boxShadow: boxShadow(
                                   //     9, 3, 3, Colors.grey, Colors.white)),
@@ -392,6 +536,7 @@ class _NewNotePageState extends State<NewNotePage> {
                     padding:
                         EdgeInsets.fromLTRB(11, size.height * 0.025, 11, 0),
                     child: RichText(
+                      textAlign: TextAlign.center,
                       text: TextSpan(children: [
                         WidgetSpan(
                           child: Icon(
@@ -401,7 +546,7 @@ class _NewNotePageState extends State<NewNotePage> {
                           ),
                         ),
                         const TextSpan(
-                            text: "  choose note theme:",
+                            text: "  choose a note theme:",
                             style: TextStyle(
                                 color: Colors.black,
                                 fontFamily: "Rounded_Elegance",
@@ -411,24 +556,26 @@ class _NewNotePageState extends State<NewNotePage> {
                     )),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 11.0),
-                  child: SingleChildScrollView(
-                      physics: const BouncingScrollPhysics(),
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          colorNamedColorPalette("0xfff7a221"),
-                          colorNamedColorPalette("0xffb44c4b"),
-                          colorNamedColorPalette("0xffd2ad7e"),
-                          colorNamedColorPalette("0xff02708b"),
-                          colorNamedColorPalette("0xffe78848"),
-                          // roundedColorPalette(0xffe78848),
-                          // roundedColorPalette(0xffb44c4b),
-                          // roundedColorPalette(0xffd2ad7e),
-                          // roundedColorPalette(0xfff7a221),
-                          // roundedColorPalette(0xff02708b),
-                        ],
-                      )),
+                  child: Center(
+                    child: SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(),
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            // colorNamedColorPalette("0xfff7a221"),
+                            // colorNamedColorPalette("0xffb44c4b"),
+                            // colorNamedColorPalette("0xffd2ad7e"),
+                            // colorNamedColorPalette("0xff02708b"),
+                            // colorNamedColorPalette("0xffe78848"),
+                            roundedColorPalette(0xffe78848),
+                            roundedColorPalette(0xffb44c4b),
+                            roundedColorPalette(0xffd2ad7e),
+                            roundedColorPalette(0xfff7a221),
+                            roundedColorPalette(0xff02708b),
+                          ],
+                        )),
+                  ),
                 ),
                 Padding(
                     padding: EdgeInsets.fromLTRB(11, 8, 11, size.height * .025),
@@ -442,7 +589,7 @@ class _NewNotePageState extends State<NewNotePage> {
                           ),
                         ),
                         const TextSpan(
-                            text: "  write your heart:",
+                            text: "  what's on your mind?",
                             style: TextStyle(
                                 color: Colors.black,
                                 fontFamily: "Rounded_Elegance",
@@ -459,58 +606,8 @@ class _NewNotePageState extends State<NewNotePage> {
                           onTap: () {
                             setState(() {
                               _isNoteCardActive = true;
-                              myFocusNode.requestFocus();
-                              _noteFieldController.addListener(() {
-                                _searchFieldController.addListener(() {
-                                  if (_noteFieldController.text.isNotEmpty &&
-                                      _searchFieldController.text.isNotEmpty) {
-                                    changeSaveButtonSize();
-                                  }
-                                  if (_searchFieldController.text.isEmpty) {
-                                    hideSaveButton();
-                                  }
-                                });
-                                if (_noteFieldController.text.isNotEmpty &&
-                                    _searchFieldController.text.isNotEmpty) {
-                                  changeSaveButtonSize();
-                                }
-                                if (_noteFieldController.text.isEmpty) {
-                                  hideSaveButton();
-                                }
-                                if (!myFocusNode.hasFocus) {
-                                  _isNoteCardActive = false;
-                                }
-                                myFocusNode.addListener(() {
-                                  if (!myFocusNode.hasFocus &&
-                                      _noteFieldController.text.isEmpty) {
-                                    setState(() {
-                                      _isNoteCardActive = false;
-                                    });
-                                    // FocusManager.instance.primaryFocus?.unfocus();
-                                  }
-                                  if (_noteFieldController.text.isNotEmpty) {
-                                    setState(() {
-                                      print("1");
-                                      _isNoteCardActive = true;
-                                    });
-                                  }
-                                });
-
-                                myFocusNode2.addListener(() {
-                                  if (myFocusNode2.hasFocus &&
-                                      _noteFieldController.text.isEmpty) {
-                                    setState(() {
-                                      _isNoteCardActive = false;
-                                    });
-                                  }
-                                  if (_noteFieldController.text.isNotEmpty) {
-                                    setState(() {
-                                      print("1");
-                                      _isNoteCardActive = true;
-                                    });
-                                  }
-                                });
-                              });
+                              noteFieldFocusNode.requestFocus();
+                              /////////////////////////////////////////////////////////////////////////////////////
                             });
                           },
                           child: AnimatedContainer(
@@ -528,7 +625,7 @@ class _NewNotePageState extends State<NewNotePage> {
                                   child: Visibility(
                                     visible: _isNoteCardActive,
                                     child: TextField(
-                                      focusNode: myFocusNode,
+                                      focusNode: noteFieldFocusNode,
                                       controller: _noteFieldController,
                                       keyboardType: TextInputType.multiline,
                                       maxLines: 1000000,
@@ -560,38 +657,47 @@ class _NewNotePageState extends State<NewNotePage> {
                                 ),
                                 Visibility(
                                   visible: !_isNoteCardActive,
-                                  child: SizedBox.expand(
+                                  child: const SizedBox.expand(
                                     child: Center(
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Padding(
-                                            padding: const EdgeInsets.all(13.0),
-                                            child: ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(
-                                                        1000.0),
-                                                child: Image.asset(
-                                                  "lib/assets/images/tap.gif",
-                                                  color: searchBarColor,
-                                                  colorBlendMode:
-                                                      BlendMode.screen,
-                                                  width: size.width * .15,
-                                                  height: size.width * .15,
-                                                  fit: BoxFit.cover,
-                                                )),
-                                          ),
-                                          const Text(
-                                            "Tap to start writing!",
-                                            style: TextStyle(
-                                                fontSize: 17,
-                                                fontFamily: "Rounded_Elegance",
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.white),
-                                          ),
-                                        ],
+                                      child: Text(
+                                        "Tap to start writing!",
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                            fontSize: 21,
+                                            fontFamily: "Rounded_Elegance",
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white),
                                       ),
+                                      // child: Column(
+                                      //   mainAxisAlignment:
+                                      //       MainAxisAlignment.center,
+                                      //   children: [
+                                      //     Padding(
+                                      //       padding: const EdgeInsets.all(13.0),
+                                      //       child: ClipRRect(
+                                      //           borderRadius:
+                                      //               BorderRadius.circular(
+                                      //                   1000.0),
+                                      //           child: Image.asset(
+                                      //             "lib/assets/images/tap.gif",
+                                      //             color: searchBarColor,
+                                      //             colorBlendMode:
+                                      //                 BlendMode.screen,
+                                      //             width: size.width * .15,
+                                      //             height: size.width * .15,
+                                      //             fit: BoxFit.cover,
+                                      //           )),
+                                      //     ),
+                                      //     const Text(
+                                      //       "Tap to start writing!",
+                                      //       style: TextStyle(
+                                      //           fontSize: 17,
+                                      //           fontFamily: "Rounded_Elegance",
+                                      //           fontWeight: FontWeight.bold,
+                                      //           color: Colors.white),
+                                      //     ),
+                                      //   ],
+                                      // ),
                                     ),
                                   ),
                                 ),

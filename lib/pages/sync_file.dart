@@ -138,16 +138,16 @@ class _SyncFileState extends State<SyncFile> {
       },
       child: AbsorbPointer(
         absorbing: _isProgressVisible,
-        child: Hero(
-          tag: widget.string,
-          createRectTween: (begin, end) {
-            return CustomRectTween(begin: begin!, end: end!);
-          },
-          child: Stack(
-            children: [
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(19.0),
+        child: Stack(
+          children: [
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(19.0),
+                child: Hero(
+                  tag: widget.string,
+                  createRectTween: (begin, end) {
+                    return CustomRectTween(begin: begin!, end: end!);
+                  },
                   child: Card(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(31),
@@ -515,14 +515,14 @@ class _SyncFileState extends State<SyncFile> {
                   ),
                 ),
               ),
-              Visibility(
-                visible: _isProgressVisible,
-                child: const Center(
-                  child: CircularProgressIndicator(),
-                ),
+            ),
+            Visibility(
+              visible: _isProgressVisible,
+              child: const Center(
+                child: CircularProgressIndicator(),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

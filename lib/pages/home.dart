@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -6,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:intl/intl.dart';
 import 'package:path/path.dart';
 import 'package:scribbles/classes/my_sharedpreferences.dart';
 import 'package:scribbles/widgets/bottom_sheet.dart';
@@ -133,7 +135,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   checkLoadLogic() async {
     widget.shouldCloudSync
-        ? await MySharedPreferences().getStringValue("isCloudBackupOn") == "0" || list.isEmpty
+        ? await MySharedPreferences().getStringValue("isCloudBackupOn") ==
+                    "0" ||
+                list.isEmpty
             ? setState(() {
                 _isLoading = false;
               })
@@ -154,7 +158,12 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                           //     checkLoadLogic()
                           //   }
                           /////////////////////////////////////////////////////////////////
-                          uploadDataToFirebase()
+                          checkUserConnection()
+                              .whenComplete(() => {
+
+                                activeConnection ? uploadDataToFirebase() : setState(() => _isLoading = false)
+
+                          })
                         }))
                 : initiateDB().whenComplete(() => showData())
             : initiateDB().whenComplete(() => showData())
@@ -167,12 +176,33 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     Firebase.initializeApp();
     super.initState();
     universalFetchLogic();
+    saveLastUsed();
   }
 
   Widget cloudBackupLoadingCard() {
     return const Center(
       child: CircularProgressIndicator(),
     );
+  }
+
+  bool activeConnection = false;
+  String T = "";
+
+  Future checkUserConnection() async {
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        setState(() {
+          activeConnection = true;
+          T = "Turn off the data and repress again";
+        });
+      }
+    } on SocketException catch (_) {
+      setState(() {
+        activeConnection = false;
+        T = "Turn On the data and repress again";
+      });
+    }
   }
 
   Widget title() {
@@ -310,5 +340,17 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         ),
       ),
     );
+  }
+
+  String time = "";
+
+  void saveLastUsed() {
+    String cdate2 = DateFormat("EEEEE, MMMM dd, yyyy").format(DateTime.now());
+    //output:  August, 27, 2021
+
+    String tdata = DateFormat("hh:mm:ss a").format(DateTime.now());
+    // output: 07:38:57 PM
+    time = cdate2 + " " + tdata;
+    MySharedPreferences().setStringValue('last opened', time);
   }
 }

@@ -6,6 +6,7 @@ import 'package:scribbles/pages/new_note_page_design.dart';
 import 'package:scribbles/pages/sync_file.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../pages/profile.dart';
 import '../popup_card/custom_rect_tween.dart';
 import '../popup_card/hero_dialog_route.dart';
 
@@ -223,7 +224,15 @@ class _TestState extends State<Test> {
                                     child: GestureDetector(
                                       // splashColor: Colors.white,
                                       // radius: 100,
-                                      onTap: () {},
+                                      onTap: () {
+                                        Navigator.of(context).push(HeroDialogRoute(
+                                          bgColor: const Color(0x00000000),
+                                          builder: (context) => const Center(
+                                            child: Profile(tag: '000'),
+                                          ),
+                                          // settings: const RouteSettings(),
+                                        ));
+                                      },
                                       child: Padding(
                                         padding: const EdgeInsets.all(8.0),
                                         child: RichText(
