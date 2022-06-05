@@ -207,7 +207,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   Widget title() {
     return const Padding(
-      padding: EdgeInsets.all(8.0),
+      padding: EdgeInsets.all(0.0),
       child: Center(
         child: Text(
           'Scribbles',

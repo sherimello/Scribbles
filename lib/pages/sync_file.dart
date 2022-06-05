@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:scribbles/classes/my_sharedpreferences.dart';
-import 'package:scribbles/pages/upload_emo.dart';
+import 'package:scribbles/pages/upload_to_drive.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../classes/note_map_for_cloud_fetch.dart';
@@ -142,7 +142,7 @@ class _SyncFileState extends State<SyncFile> {
           children: [
             Center(
               child: Padding(
-                padding: const EdgeInsets.all(19.0),
+                padding: const EdgeInsets.all(11.0),
                 child: Hero(
                   tag: widget.string,
                   createRectTween: (begin, end) {
@@ -152,7 +152,7 @@ class _SyncFileState extends State<SyncFile> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(31),
                     ),
-                    color: Colors.white,
+                    color: const Color(0xffF8F0E3),
                     child: SizedBox(
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 0.0),
@@ -204,7 +204,7 @@ class _SyncFileState extends State<SyncFile> {
                                           Navigator.of(context)
                                               .push(HeroDialogRoute(
                                             builder: (context) => Center(
-                                                child: UploadDemo(
+                                                child: UploadToDrive(
                                                     string: widget.string,
                                                     allNotes: allNotes)
                                                 // child: WidTest()

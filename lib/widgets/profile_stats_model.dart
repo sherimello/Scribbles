@@ -16,14 +16,15 @@ class StatsModel extends StatelessWidget {
               child: Text(
                 title,
                 style: const TextStyle(
-                    color: Colors.white,
+                    color: Colors.black45,
+                    fontWeight: FontWeight.bold,
                     fontFamily: 'Rounded_Elegance'),
               ),
             ),
             Text(
               value,
               style: const TextStyle(
-                  color: Colors.white,
+                  color: Colors.black,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'Rounded_Elegance'),
             ),

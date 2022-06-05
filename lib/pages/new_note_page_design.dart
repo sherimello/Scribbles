@@ -107,84 +107,7 @@ class _NewNotePageState extends State<NewNotePage> {
           _searchFieldController.text = _noteFieldController.text;
         });
       }
-
     });
-
-    // _noteFieldController.addListener(() {
-    //   if (!_isTitleAdded &&
-    //       _noteFieldController.text.length <= 11) {
-    //     setState(() {
-    //       _searchFieldController.text =
-    //           _noteFieldController.text;
-    //     });
-    //     // return;
-    //   }
-    //   _searchFieldController.addListener(() {
-    //
-    //
-    //     myFocusNode2.addListener(() {
-    //       if (myFocusNode2.hasFocus &&
-    //           _searchFieldController.text.isNotEmpty) {
-    //         setState(() {
-    //           _isTitleAdded = true;
-    //         });
-    //       }
-    //
-    //       if (myFocusNode2.hasFocus &&
-    //           _noteFieldController.text.isEmpty) {
-    //         setState(() {
-    //           _isNoteCardActive = false;
-    //         });
-    //       }
-    //       if (_noteFieldController.text.isNotEmpty) {
-    //         setState(() {
-    //           print("1");
-    //           _isNoteCardActive = true;
-    //         });
-    //       }
-    //     });
-    //     if (_noteFieldController.text.isNotEmpty &&
-    //         _searchFieldController.text.isNotEmpty) {
-    //       setState(() {
-    //         saveButtonDimen = 55;
-    //       });
-    //     }
-    //     if (_searchFieldController.text.isEmpty) {
-    //       setState(() {
-    //         saveButtonDimen = 0;
-    //       });
-    //     }
-    //   });
-    //   if (_noteFieldController.text.isNotEmpty &&
-    //       _searchFieldController.text.isNotEmpty) {
-    //     setState(() {
-    //       saveButtonDimen = 55;
-    //     });
-    //   }
-    //   if (_noteFieldController.text.isEmpty) {
-    //     setState(() {
-    //       saveButtonDimen = 0;
-    //     });
-    //   }
-    //   if (!noteFieldFocusNode.hasFocus) {
-    //     _isNoteCardActive = false;
-    // //   }
-    //   noteFieldFocusNode.addListener(() {
-    //     if (!noteFieldFocusNode.hasFocus &&
-    //         _noteFieldController.text.isEmpty) {
-    //       setState(() {
-    //         _isNoteCardActive = false;
-    //       });
-    //       // FocusManager.instance.primaryFocus?.unfocus();
-    //     }
-    //     if (_noteFieldController.text.isNotEmpty) {
-    //       setState(() {
-    //         print("1");
-    //         _isNoteCardActive = true;
-    //       });
-    //     }
-    //   });
-    // });
   }
 
   checkIfSaveButtonShouldBeSeen() {
@@ -336,6 +259,7 @@ class _NewNotePageState extends State<NewNotePage> {
         onTap: () {
           setState(() {
             searchBarColor = Color(color);
+            selectedColor = color.toString();
           });
         },
         child: Padding(

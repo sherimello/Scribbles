@@ -10,11 +10,11 @@ import 'package:sqflite/sqflite.dart';
 
 import '../popup_card/custom_rect_tween.dart';
 
-class UploadDemo extends StatefulWidget {
+class UploadToDrive extends StatefulWidget {
   final String string, allNotes;
   final bool visible = false;
 
-  const UploadDemo({Key? key, required this.string, required this.allNotes})
+  const UploadToDrive({Key? key, required this.string, required this.allNotes})
       : super(key: key);
 
   static final snackBar = SnackBar(
@@ -43,7 +43,7 @@ class UploadDemo extends StatefulWidget {
   );
 
   @override
-  State<UploadDemo> createState() => _UploadDemoState();
+  State<UploadToDrive> createState() => _UploadToDriveState();
 }
 
 _write(String text, BuildContext context) async {
@@ -57,7 +57,7 @@ _write(String text, BuildContext context) async {
   }
 }
 
-class _UploadDemoState extends State<UploadDemo> {
+class _UploadToDriveState extends State<UploadToDrive> {
   bool v = false;
   String errorMessage = "";
 
@@ -99,36 +99,38 @@ class _UploadDemoState extends State<UploadDemo> {
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
     print((size.height * .65) / ((size.height * .65 * 9) / 20));
-    return Hero(
-        tag: widget.string,
-        createRectTween: (begin, end) {
-          return CustomRectTween(begin: begin!, end: end!);
-        },
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Stack(
-              children: [
-                SingleChildScrollView(
-                  child: Card(
-                    color: Colors.orangeAccent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(19),
-                    ),
-                    child: SizedBox(
-                      width: MediaQuery.of(context).size.width,
-                      height: MediaQuery.of(context).size.height * .85,
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(11.0),
+        child: Hero(
+          tag: widget.string,
+          createRectTween: (begin, end) {
+            return CustomRectTween(begin: begin!, end: end!);
+          },
+          child: Stack(
+            children: [
+              SingleChildScrollView(
+                child: Card(
+                  color: const Color(0xffF8F0E3),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(31),
+                  ),
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width,
+                    // height: MediaQuery.of(context).size.height * .75,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 17.0),
                       child: Column(
                         children: [
                           Padding(
-                            padding: EdgeInsets.only(top: size.height * .1),
+                            padding: EdgeInsets.only(top: 15),
                             child: Container(
-                              width: (size.height * .45 * 9) / 20,
-                              height: size.height * .45,
+                              width: (size.height * .41 * 9) / 20,
+                              height: size.height * .41,
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius:
-                                    const BorderRadius.all(Radius.circular(11)),
+                                    const BorderRadius.all(Radius.circular(21)),
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.black.withOpacity(.25),
@@ -155,7 +157,8 @@ class _UploadDemoState extends State<UploadDemo> {
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.all(8.0),
+                            padding:
+                                const EdgeInsets.fromLTRB(8.0, 15.0, 8.0, 15.0),
                             child: GestureDetector(
                               onTap: () async {
                                 if (list.isNotEmpty) {
@@ -186,7 +189,7 @@ class _UploadDemoState extends State<UploadDemo> {
                                 decoration: BoxDecoration(
                                   color: Colors.orangeAccent,
                                   borderRadius: const BorderRadius.all(
-                                      Radius.circular(11)),
+                                      Radius.circular(15)),
                                   boxShadow: [
                                     BoxShadow(
                                       color: Colors.black.withOpacity(.25),
@@ -216,52 +219,53 @@ class _UploadDemoState extends State<UploadDemo> {
                     ),
                   ),
                 ),
-                Visibility(
-                  visible: v,
-                  child: Positioned(
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      child: Card(
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.vertical(
-                              top: Radius.circular(0),
-                              bottom: Radius.circular(19)),
-                        ),
-                        child: SizedBox(
-                          width: size.width * .9,
-                          height: size.height * .055,
-                          child: Center(
-                            child: RichText(
-                              textAlign: TextAlign.center,
-                              text: TextSpan(
-                                children: [
-                                  WidgetSpan(
-                                    child: Icon(
-                                      Icons
-                                          .sentiment_very_dissatisfied_outlined,
-                                      size: size.height * .021,
-                                      color: Colors.black,
-                                    ),
+              ),
+              Visibility(
+                visible: v,
+                child: Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Card(
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.vertical(
+                            top: Radius.circular(0),
+                            bottom: Radius.circular(19)),
+                      ),
+                      child: SizedBox(
+                        width: size.width * .9,
+                        height: size.height * .055,
+                        child: Center(
+                          child: RichText(
+                            textAlign: TextAlign.center,
+                            text: TextSpan(
+                              children: [
+                                WidgetSpan(
+                                  child: Icon(
+                                    Icons.sentiment_very_dissatisfied_outlined,
+                                    size: size.height * .021,
+                                    color: Colors.black,
                                   ),
-                                  TextSpan(
-                                      text: errorMessage,
-                                      style: TextStyle(
-                                          color: Colors.red,
-                                          fontFamily: 'varela-round.regular',
-                                          fontSize: size.height * .017,
-                                          fontWeight: FontWeight.bold)),
-                                ],
-                              ),
+                                ),
+                                TextSpan(
+                                    text: errorMessage,
+                                    style: TextStyle(
+                                        color: Colors.red,
+                                        fontFamily: 'varela-round.regular',
+                                        fontSize: size.height * .017,
+                                        fontWeight: FontWeight.bold)),
+                              ],
                             ),
                           ),
                         ),
-                      )),
-                )
-              ],
-            ),
+                      ),
+                    )),
+              )
+            ],
           ),
-        ));
+        ),
+      ),
+    );
   }
 
   var fileAddress = "";

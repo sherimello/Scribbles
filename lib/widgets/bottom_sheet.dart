@@ -102,265 +102,256 @@ class _TestState extends State<Test> {
                     createRectTween: (begin, end) {
                       return CustomRectTween(begin: begin!, end: end!);
                     },
-                    child: Material(
-                      color: Colors.transparent,
-                      child: Container(
-                        // width: MediaQuery.of(context).size.width,
-                        // height: MediaQuery.of(context).size.height * .5,
-                        decoration: const BoxDecoration(
-                            color: Colors.black,
-                            borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(35),
-                                topRight: Radius.circular(35),
-                                bottomLeft: Radius.circular(35),
-                                bottomRight: Radius.circular(35))),
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(11, 11, 11, 41),
-                          child: SingleChildScrollView(
-                            child: ClipRRect(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(11),
-                                    child: Align(
-                                        alignment: Alignment.topRight,
-                                        child: GestureDetector(
-                                          onTap: Navigator.of(context).pop,
-                                          child: const Icon(
-                                            Icons.cancel,
-                                            color: Colors.white,
-                                          ),
-                                        )),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: GestureDetector(
-                                      // splashColor: Colors.white,
-                                      // radius: 100,
-                                      onTap: () {
-                                        Navigator.of(context).push(HeroDialogRoute(
-                                          builder: (context) => const Center(
-                                            child: NewNotePage('000', '000', ""),
-                                          ),
-                                          // settings: const RouteSettings(),
-                                        ));
-                                        // Navigator.removeRoute(
-                                        //   context,
-                                        //   MaterialPageRoute(
-                                        //     builder: (BuildContext context) => const Home(),
-                                        //   ),
-                                        // );
-                                      },
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: RichText(
-                                          textAlign: TextAlign.center,
-                                          text: const TextSpan(
-                                            children: [
-                                              WidgetSpan(
-                                                child: Icon(
-                                                  Icons.post_add,
-                                                  size: 19,
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-                                              TextSpan(
-                                                  text: "  create new note",
-                                                  style: TextStyle(
-                                                      fontFamily:
-                                                          'varela-round.regular',
-                                                      fontSize: 21,
-                                                      fontWeight: FontWeight.bold)),
-                                            ],
-                                          ),
+                    child: Card(
+                      color: Colors.black,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(31)),
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(11, 11, 11, 41),
+                        child: SingleChildScrollView(
+                          child: ClipRRect(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(11),
+                                  child: Align(
+                                      alignment: Alignment.topRight,
+                                      child: GestureDetector(
+                                        onTap: Navigator.of(context).pop,
+                                        child: const Icon(
+                                          Icons.cancel,
+                                          color: Colors.white,
                                         ),
-                                      ),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: GestureDetector(
-                                      // splashColor: Colors.white,
-                                      // radius: 100,
-                                      onTap: () {
-                                        Navigator.of(context).push(HeroDialogRoute(
-                                          builder: (context) => const Center(
-                                            child: SyncFile('000'),
-                                          ),
-                                          // settings: const RouteSettings(),
-                                        ));
-                                      },
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: RichText(
-                                          textAlign: TextAlign.center,
-                                          text: const TextSpan(
-                                            children: [
-                                              WidgetSpan(
-                                                child: Icon(
-                                                  Icons.sync,
-                                                  size: 21,
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-                                              TextSpan(
-                                                  text: "  sync",
-                                                  style: TextStyle(
-                                                      fontFamily:
-                                                          'varela-round.regular',
-                                                      fontSize: 19,
-                                                      fontWeight: FontWeight.bold)),
-                                            ],
-                                          ),
+                                      )),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: GestureDetector(
+                                    // splashColor: Colors.white,
+                                    // radius: 100,
+                                    onTap: () {
+                                      Navigator.of(context).push(HeroDialogRoute(
+                                        builder: (context) => const Center(
+                                          child: NewNotePage('000', '000', ""),
                                         ),
-                                      ),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: GestureDetector(
-                                      // splashColor: Colors.white,
-                                      // radius: 100,
-                                      onTap: () {
-                                        Navigator.of(context).push(HeroDialogRoute(
-                                          bgColor: const Color(0x00000000),
-                                          builder: (context) => const Center(
-                                            child: Profile(tag: '000'),
-                                          ),
-                                          // settings: const RouteSettings(),
-                                        ));
-                                      },
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: RichText(
-                                          textAlign: TextAlign.center,
-                                          text: const TextSpan(
-                                            children: [
-                                              WidgetSpan(
-                                                child: Icon(
-                                                  Icons.person_outline_rounded,
-                                                  size: 21,
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-                                              TextSpan(
-                                                  text: "  profile",
-                                                  style: TextStyle(
-                                                      fontFamily:
-                                                          'varela-round.regular',
-                                                      fontSize: 19,
-                                                      fontWeight: FontWeight.bold)),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: Colors.white12,
-                                        borderRadius: BorderRadius.circular(15),
-                                      ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(11.0),
-                                        child: Wrap(
+                                        // settings: const RouteSettings(),
+                                      ));
+                                      // Navigator.removeRoute(
+                                      //   context,
+                                      //   MaterialPageRoute(
+                                      //     builder: (BuildContext context) => const Home(),
+                                      //   ),
+                                      // );
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: RichText(
+                                        textAlign: TextAlign.center,
+                                        text: const TextSpan(
                                           children: [
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.only(right: 7.0),
-                                              child: Center(
-                                                child: Switch(
-                                                    value: isSwitched,
-                                                    activeTrackColor:
-                                                        Colors.lightGreenAccent,
-                                                    activeColor: Colors.green,
-                                                    onChanged: (value) {
-                                                      setState(() {
-                                                        isSwitched = value;
-                                                      });
-                                                      value
-                                                          ? {
-                                                              setState(() {
-                                                                _isCloudSyncing =
-                                                                    true;
-                                                              }),
-                                                              MySharedPreferences()
-                                                                  .setStringValue(
-                                                                      "isCloudBackupOn",
-                                                                      "1")
-                                                            }
-                                                          : {
-                                                              MySharedPreferences()
-                                                                  .setStringValue(
-                                                                      "isCloudBackupOn",
-                                                                      "0"),
-                                                              signOut()
-                                                            };
-                                                      save(value);
-                                                      if (value) {
-                                                        signIn().whenComplete(() => {
-                                                              uploadDataToFirebase()
-                                                                  .whenComplete(() {
-                                                                setState(() {
-                                                                  _isCloudSyncing =
-                                                                      false;
-                                                                });
-                                                              }),
-                                                              MySharedPreferences()
-                                                                  .setStringValue(
-                                                                      "userName",
-                                                                      userNode)
-                                                            });
-                                                      }
-                                                    }),
+                                            WidgetSpan(
+                                              child: Icon(
+                                                Icons.post_add,
+                                                size: 19,
+                                                color: Colors.white,
                                               ),
                                             ),
-                                            Padding(
-                                              padding: const EdgeInsets.all(8.0),
-                                              child: Center(
-                                                child: Column(
-                                                  mainAxisSize: MainAxisSize.min,
-                                                  children: const [
-                                                    Text("Cloud Backup",
-                                                        textAlign: TextAlign.center,
-                                                        style: TextStyle(
-                                                            color: Colors.white,
-                                                            fontFamily:
-                                                                'varela-round.regular',
-                                                            fontSize: 19,
-                                                            fontWeight:
-                                                                FontWeight.bold)),
-                                                    Flexible(
-                                                      child: Text(
-                                                          "(automatically backs up notes everytime you open the app)",
-                                                          overflow:
-                                                              TextOverflow.visible,
-                                                          textAlign:
-                                                              TextAlign.center,
-                                                          style: TextStyle(
-                                                              color: Colors.white,
-                                                              fontFamily:
-                                                                  'varela-round.regular',
-                                                              fontSize: 11,
-                                                              fontWeight:
-                                                                  FontWeight.bold)),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
+                                            TextSpan(
+                                                text: "  create new note",
+                                                style: TextStyle(
+                                                    fontFamily:
+                                                        'varela-round.regular',
+                                                    fontSize: 21,
+                                                    fontWeight: FontWeight.bold)),
                                           ],
                                         ),
                                       ),
                                     ),
                                   ),
-                                ],
-                              ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: GestureDetector(
+                                    // splashColor: Colors.white,
+                                    // radius: 100,
+                                    onTap: () {
+                                      Navigator.of(context).push(HeroDialogRoute(
+                                        builder: (context) => const Center(
+                                          child: SyncFile('000'),
+                                        ),
+                                        // settings: const RouteSettings(),
+                                      ));
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: RichText(
+                                        textAlign: TextAlign.center,
+                                        text: const TextSpan(
+                                          children: [
+                                            WidgetSpan(
+                                              child: Icon(
+                                                Icons.sync,
+                                                size: 21,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                            TextSpan(
+                                                text: "  sync",
+                                                style: TextStyle(
+                                                    fontFamily:
+                                                        'varela-round.regular',
+                                                    fontSize: 19,
+                                                    fontWeight: FontWeight.bold)),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: GestureDetector(
+                                    // splashColor: Colors.white,
+                                    // radius: 100,
+                                    onTap: () {
+                                      Navigator.of(context).push(HeroDialogRoute(
+                                        // bgColor: const Color(0x00000000),
+                                        builder: (context) => const Center(
+                                          child: Profile(tag: '000'),
+                                        ),
+                                        // settings: const RouteSettings(),
+                                      ));
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: RichText(
+                                        textAlign: TextAlign.center,
+                                        text: const TextSpan(
+                                          children: [
+                                            WidgetSpan(
+                                              child: Icon(
+                                                Icons.person_outline_rounded,
+                                                size: 21,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                            TextSpan(
+                                                text: "  profile",
+                                                style: TextStyle(
+                                                    fontFamily:
+                                                        'varela-round.regular',
+                                                    fontSize: 19,
+                                                    fontWeight: FontWeight.bold)),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.white12,
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(11.0),
+                                      child: Wrap(
+                                        children: [
+                                          Padding(
+                                            padding:
+                                                const EdgeInsets.only(right: 7.0),
+                                            child: Center(
+                                              child: Switch(
+                                                  value: isSwitched,
+                                                  activeTrackColor:
+                                                      Colors.lightGreenAccent,
+                                                  activeColor: Colors.green,
+                                                  onChanged: (value) {
+                                                    setState(() {
+                                                      isSwitched = value;
+                                                    });
+                                                    value
+                                                        ? {
+                                                            setState(() {
+                                                              _isCloudSyncing =
+                                                                  true;
+                                                            }),
+                                                            MySharedPreferences()
+                                                                .setStringValue(
+                                                                    "isCloudBackupOn",
+                                                                    "1")
+                                                          }
+                                                        : {
+                                                            MySharedPreferences()
+                                                                .setStringValue(
+                                                                    "isCloudBackupOn",
+                                                                    "0"),
+                                                            signOut()
+                                                          };
+                                                    save(value);
+                                                    if (value) {
+                                                      signIn().whenComplete(() => {
+                                                            uploadDataToFirebase()
+                                                                .whenComplete(() {
+                                                              setState(() {
+                                                                _isCloudSyncing =
+                                                                    false;
+                                                              });
+                                                            }),
+                                                            MySharedPreferences()
+                                                                .setStringValue(
+                                                                    "userName",
+                                                                    userNode)
+                                                          });
+                                                    }
+                                                  }),
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Center(
+                                              child: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: const [
+                                                  Text("Cloud Backup",
+                                                      textAlign: TextAlign.center,
+                                                      style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontFamily:
+                                                              'varela-round.regular',
+                                                          fontSize: 19,
+                                                          fontWeight:
+                                                              FontWeight.bold)),
+                                                  Flexible(
+                                                    child: Text(
+                                                        "(automatically backs up notes everytime you open the app)",
+                                                        overflow:
+                                                            TextOverflow.visible,
+                                                        textAlign:
+                                                            TextAlign.center,
+                                                        style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontFamily:
+                                                                'varela-round.regular',
+                                                            fontSize: 11,
+                                                            fontWeight:
+                                                                FontWeight.bold)),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),

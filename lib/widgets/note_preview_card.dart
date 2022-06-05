@@ -29,6 +29,7 @@ class PreviewCard extends StatelessWidget {
     return InkWell(
       onLongPress: () {
         Navigator.of(context).push(HeroDialogRoute(
+          bgColor: const Color(0xff000000),
           builder: (context) => Center(
             child: SimplifiedDeleteCard(noteID, id),
             // child: DeleteCard(widget.id, widget.title, widget.note, widget.noteID),
@@ -38,9 +39,7 @@ class PreviewCard extends StatelessWidget {
       },
       onTap: () {
         Navigator.of(context).push(HeroDialogRoute(
-          builder: (context) => Center(
-            child: NoteCard(noteID, id, title, note, time, theme),
-          ),
+          builder: (context) => SafeArea(child: Center(child: NoteCard(noteID, id, title, note, time, theme))),
           // settings: const RouteSettings(),
         ));
       },
@@ -61,27 +60,27 @@ class PreviewCard extends StatelessWidget {
             color: Color(int.parse(theme)),
             child: SingleChildScrollView(
               child: Padding(
-                padding: const EdgeInsets.all(11.0),
+                padding: const EdgeInsets.all(15.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Padding(
+                    //   padding: const EdgeInsets.all(8.0),
+                    //   child: Row(
+                    //     children: const [
+                    //       Spacer(),
+                    //       RotationTransition(
+                    //         turns: AlwaysStoppedAnimation(45 / 360),
+                    //         child: Icon(
+                    //           Icons.push_pin_sharp,
+                    //           color: Colors.black,
+                    //         ),
+                    //       ),
+                    //     ],
+                    //   ),
+                    // ),
                     Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        children: const [
-                          Spacer(),
-                          RotationTransition(
-                            turns: AlwaysStoppedAnimation(45 / 360),
-                            child: Icon(
-                              Icons.push_pin_sharp,
-                              color: Colors.black,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 5.0),
+                      padding: const EdgeInsets.fromLTRB(0, 13, 0, 5),
                       child: Text(
                         // t1,
                         title,
