@@ -52,6 +52,7 @@ dependencies:
   firebase_core: ^1.17.0
   google_sign_in: ^5.3.1
   shared_preferences: ^2.0.15
+  flutter_inset_box_shadow: ^1.0.8
 
 dev_dependencies:
   flutter_test:

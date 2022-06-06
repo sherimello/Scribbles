@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:scribbles/popup_card/custom_rect_tween.dart';
-import 'package:scribbles/popup_card/hero_dialog_route.dart';
-import 'package:scribbles/popup_card/models.dart';
+import 'package:scribbles/hero_transition_handler/custom_rect_tween.dart';
+import 'package:scribbles/hero_transition_handler/hero_dialog_route.dart';
+import 'package:scribbles/hero_transition_handler/models.dart';
 import 'package:scribbles/widgets/note_card.dart';
 import 'package:scribbles/widgets/simplified_delete_card.dart';
 
@@ -29,9 +29,9 @@ class PreviewCard extends StatelessWidget {
     return InkWell(
       onLongPress: () {
         Navigator.of(context).push(HeroDialogRoute(
-          bgColor: const Color(0xff000000),
+          bgColor: Color(int.parse(theme)),
           builder: (context) => Center(
-            child: SimplifiedDeleteCard(noteID, id),
+            child: SimplifiedDeleteCard(noteID, id, theme),
             // child: DeleteCard(widget.id, widget.title, widget.note, widget.noteID),
           ),
           // settings: const RouteSettings(),

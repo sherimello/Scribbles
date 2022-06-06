@@ -5,8 +5,8 @@ import 'package:path/path.dart';
 
 import '../pages/home.dart';
 import '../pages/new_note_page_design.dart';
-import '../popup_card/custom_rect_tween.dart';
-import '../popup_card/hero_dialog_route.dart';
+import '../hero_transition_handler/custom_rect_tween.dart';
+import '../hero_transition_handler/hero_dialog_route.dart';
 
 class NoteCard extends StatelessWidget {
   final String id, string, title, note, date, theme;
@@ -93,7 +93,7 @@ class NoteCard extends StatelessWidget {
                                       borderRadius: BorderRadius.circular(1000),
                                       color: Color(int.parse(theme)).withOpacity(.95),
                                       boxShadow: boxShadow(
-                                          7, 3, 3, const Color(0x35000000), const Color(
+                                          11, 3, 3, const Color(0x35000000), const Color(
                                           0x35ffffff))),
                                   child: const Padding(
                                     padding: EdgeInsets.all(8.0),
@@ -117,7 +117,7 @@ class NoteCard extends StatelessWidget {
                                       borderRadius: BorderRadius.circular(1000),
                                       color: Color(int.parse(theme)).withOpacity(.85),
                                       boxShadow: boxShadow(
-                                          7, 3, 3, const Color(0x35000000), const Color(
+                                          11, 3, 3, const Color(0x35000000), const Color(
                                           0x35ffffff))),
                                   child: const Padding(
                                     padding: EdgeInsets.all(8.0),

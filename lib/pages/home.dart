@@ -4,7 +4,8 @@ import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide BoxDecoration, BoxShadow;
+import 'package:flutter_inset_box_shadow/flutter_inset_box_shadow.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl/intl.dart';
@@ -15,8 +16,8 @@ import 'package:scribbles/widgets/note_preview_card.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../classes/note_map_for_cloud_fetch.dart';
-import '../popup_card/custom_rect_tween.dart';
-import '../popup_card/hero_dialog_route.dart';
+import '../hero_transition_handler/custom_rect_tween.dart';
+import '../hero_transition_handler/hero_dialog_route.dart';
 
 class Home extends StatefulWidget {
   final bool shouldCloudSync;
@@ -153,17 +154,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             ? widget.shouldCloudSync
                 ? initiateDB()
                     .whenComplete(() => showData().whenComplete(() => {
-                          // if (list.isEmpty)
-                          //   {
-                          //     checkLoadLogic()
-                          //   }
-                          /////////////////////////////////////////////////////////////////
-                          checkUserConnection()
-                              .whenComplete(() => {
-
-                                activeConnection ? uploadDataToFirebase() : setState(() => _isLoading = false)
-
-                          })
+                          checkUserConnection().whenComplete(() => {
+                                activeConnection
+                                    ? uploadDataToFirebase()
+                                    : setState(() => _isLoading = false)
+                              })
                         }))
                 : initiateDB().whenComplete(() => showData())
             : initiateDB().whenComplete(() => showData())
@@ -224,9 +219,29 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     );
   }
 
+  bool isNotesPressed = false;
+
   @override
   Widget build(BuildContext context) {
     var s = MediaQuery.of(context).size;
+
+    List<BoxShadow> boxShadow(double blurRadius, double offset1, double offset2,
+        Color colorBottom, Color colorTop, bool isInSet) {
+      return [
+        BoxShadow(
+            blurRadius: blurRadius,
+            spreadRadius: 0,
+            offset: Offset(offset1, offset2),
+            color: colorBottom,
+            inset: isInSet),
+        BoxShadow(
+            blurRadius: blurRadius,
+            spreadRadius: 0,
+            offset: Offset(-offset1, -offset2),
+            color: colorTop,
+            inset: isInSet),
+      ];
+    }
 
     return Scaffold(
       body: Container(
@@ -238,29 +253,135 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Padding(
-                padding:
-                    EdgeInsets.fromLTRB(9.0, 9.0, 9.0, _isLoading ? 11.0 : 0.0),
-                child: AnimatedContainer(
-                  width: (!_isLoading) ? MediaQuery.of(context).size.width : 31,
-                  height: (!_isLoading) ? AppBar().preferredSize.height : 31,
-                  curve: Curves.easeInCirc,
-                  decoration: BoxDecoration(
-                      // color: (!_isLoading) ? Colors.black: Colors.white,
-                      color: Colors.black,
-                      borderRadius:
-                          BorderRadius.circular(_isLoading ? 1000 : 19)),
-                  duration: const Duration(milliseconds: 350),
-                  child: Stack(
-                    children: [
-                      Positioned(
-                        child: Visibility(visible: !_isLoading, child: title()),
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(11, 3, 11, 11),
+                      child: GestureDetector(
+                        onTap: () => setState(() =>
+                        {
+                              if (!isNotesPressed)
+                                isNotesPressed = !isNotesPressed
+                            }),
+                        child: AnimatedContainer(
+                          width: MediaQuery.of(context).size.width * .35,
+                          height: AppBar().preferredSize.height * .75,
+                          duration: const Duration(milliseconds: 355),
+                          decoration: BoxDecoration(
+                              color: const Color(0xffF8F0E3),
+                              borderRadius: BorderRadius.circular(13),
+                              boxShadow: boxShadow(
+                                  !isNotesPressed ? 11 : 3,
+                                  5,
+                                  5,
+                                  const Color(0x31000000),
+                                  isNotesPressed ? const Color(0xfffff5f5) : const Color(0xffffffff),
+                                  isNotesPressed ? true : false)),
+                          child: const Center(
+                            child: Text(
+                              'notes',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  fontFamily: "varela-round.regular",
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
                       ),
-                      Visibility(
-                          visible: _isLoading, child: cloudBackupLoadingCard())
-                    ],
-                  ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(11, 3, 11, 11),
+                      child: GestureDetector(
+                        onTap: () => setState(() => {
+                          if (isNotesPressed)
+                          isNotesPressed = !isNotesPressed
+                        }),
+                        child: AnimatedContainer(
+                          width: MediaQuery.of(context).size.width * .35,
+                          height: AppBar().preferredSize.height * .75,
+                          duration: const Duration(milliseconds: 355),
+                          decoration: BoxDecoration(
+                              color: const Color(0xffF8F0E3),
+                              borderRadius: BorderRadius.circular(13),
+                              boxShadow: boxShadow(
+                                  isNotesPressed ? 11 : 3,
+                                  5,
+                                  5,
+                                  const Color(0x31000000),
+                                  !isNotesPressed ? const Color(0xfffff5f5) : const Color(0xffffffff),
+                                  isNotesPressed ? false : true)),
+                          child: const Center(
+                            child: Text(
+                              'tasks',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  fontFamily: "varela-round.regular",
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Padding(
+                    //   padding: const EdgeInsets.all(8.0),
+                    //   child: GestureDetector(
+                    //     onTap: () => setState(() => isNotesPressed = !isNotesPressed),
+                    //     child: AnimatedContainer(
+                    //       width: MediaQuery.of(context).size.width * .35,
+                    //       height: AppBar().preferredSize.height * .75,
+                    //       duration: const Duration(milliseconds: 555),
+                    //       decoration: BoxDecoration(
+                    //           color: const Color(0xffF8F0E3),
+                    //           borderRadius: BorderRadius.circular(13),
+                    //           boxShadow: boxShadow(
+                    //               !isNotesPressed ? 15 : 5,
+                    //               5,
+                    //               5,
+                    //               const Color(0x31000000),
+                    //               const Color(0x99ffffff),
+                    //               isNotesPressed ? false : true)),
+                    //       child: const Center(
+                    //         child: Text(
+                    //           'tasks',
+                    //           textAlign: TextAlign.center,
+                    //           style: TextStyle(
+                    //               fontFamily: "varela-round.regular",
+                    //               fontWeight: FontWeight.bold),
+                    //         ),
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ),
+                  ],
                 ),
               ),
+              // Padding(
+              //   padding:
+              //       EdgeInsets.fromLTRB(9.0, 9.0, 9.0, _isLoading ? 11.0 : 0.0),
+              //   child: AnimatedContainer(
+              //     width: (!_isLoading) ? MediaQuery.of(context).size.width : 31,
+              //     height: (!_isLoading) ? AppBar().preferredSize.height : 31,
+              //     curve: Curves.easeInCirc,
+              //     decoration: BoxDecoration(
+              //         // color: (!_isLoading) ? Colors.black: Colors.white,
+              //         color: Colors.black,
+              //         borderRadius:
+              //             BorderRadius.circular(_isLoading ? 1000 : 19)),
+              //     duration: const Duration(milliseconds: 350),
+              //     child: Stack(
+              //       children: [
+              //         Positioned(
+              //           child: Visibility(visible: !_isLoading, child: title()),
+              //         ),
+              //         Visibility(
+              //             visible: _isLoading, child: cloudBackupLoadingCard())
+              //       ],
+              //     ),
+              //   ),
+              // ),
               Expanded(
                 child: Stack(children: [
                   Padding(

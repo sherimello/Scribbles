@@ -3,7 +3,7 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../pages/home.dart';
-import '../popup_card/custom_rect_tween.dart';
+import '../hero_transition_handler/custom_rect_tween.dart';
 
 class DeleteCard extends StatelessWidget {
   final String string, title, note, noteID;

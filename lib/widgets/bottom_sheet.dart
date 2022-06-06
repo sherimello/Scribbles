@@ -6,9 +6,9 @@ import 'package:scribbles/pages/new_note_page_design.dart';
 import 'package:scribbles/pages/sync_file.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../hero_transition_handler/custom_rect_tween.dart';
+import '../hero_transition_handler/hero_dialog_route.dart';
 import '../pages/profile.dart';
-import '../popup_card/custom_rect_tween.dart';
-import '../popup_card/hero_dialog_route.dart';
 
 class Test extends StatefulWidget {
   final List<Map<dynamic, dynamic>> list;
@@ -133,7 +133,8 @@ class _TestState extends State<Test> {
                                     // splashColor: Colors.white,
                                     // radius: 100,
                                     onTap: () {
-                                      Navigator.of(context).push(HeroDialogRoute(
+                                      Navigator.of(context)
+                                          .push(HeroDialogRoute(
                                         builder: (context) => const Center(
                                           child: NewNotePage('000', '000', ""),
                                         ),
@@ -165,7 +166,8 @@ class _TestState extends State<Test> {
                                                     fontFamily:
                                                         'varela-round.regular',
                                                     fontSize: 21,
-                                                    fontWeight: FontWeight.bold)),
+                                                    fontWeight:
+                                                        FontWeight.bold)),
                                           ],
                                         ),
                                       ),
@@ -178,7 +180,8 @@ class _TestState extends State<Test> {
                                     // splashColor: Colors.white,
                                     // radius: 100,
                                     onTap: () {
-                                      Navigator.of(context).push(HeroDialogRoute(
+                                      Navigator.of(context)
+                                          .push(HeroDialogRoute(
                                         builder: (context) => const Center(
                                           child: SyncFile('000'),
                                         ),
@@ -204,7 +207,8 @@ class _TestState extends State<Test> {
                                                     fontFamily:
                                                         'varela-round.regular',
                                                     fontSize: 19,
-                                                    fontWeight: FontWeight.bold)),
+                                                    fontWeight:
+                                                        FontWeight.bold)),
                                           ],
                                         ),
                                       ),
@@ -217,7 +221,8 @@ class _TestState extends State<Test> {
                                     // splashColor: Colors.white,
                                     // radius: 100,
                                     onTap: () {
-                                      Navigator.of(context).push(HeroDialogRoute(
+                                      Navigator.of(context)
+                                          .push(HeroDialogRoute(
                                         // bgColor: const Color(0x00000000),
                                         builder: (context) => const Center(
                                           child: Profile(tag: '000'),
@@ -244,7 +249,8 @@ class _TestState extends State<Test> {
                                                     fontFamily:
                                                         'varela-round.regular',
                                                     fontSize: 19,
-                                                    fontWeight: FontWeight.bold)),
+                                                    fontWeight:
+                                                        FontWeight.bold)),
                                           ],
                                         ),
                                       ),
@@ -263,11 +269,12 @@ class _TestState extends State<Test> {
                                       child: Wrap(
                                         children: [
                                           Padding(
-                                            padding:
-                                                const EdgeInsets.only(right: 7.0),
+                                            padding: const EdgeInsets.only(
+                                                right: 7.0),
                                             child: Center(
                                               child: Switch(
-                                                  value: isSwitched,
+                                                  value:
+                                                      isSwitched ? true : false,
                                                   activeTrackColor:
                                                       Colors.lightGreenAccent,
                                                   activeColor: Colors.green,
@@ -295,19 +302,21 @@ class _TestState extends State<Test> {
                                                           };
                                                     save(value);
                                                     if (value) {
-                                                      signIn().whenComplete(() => {
-                                                            uploadDataToFirebase()
-                                                                .whenComplete(() {
-                                                              setState(() {
-                                                                _isCloudSyncing =
-                                                                    false;
+                                                      signIn()
+                                                          .whenComplete(() => {
+                                                                uploadDataToFirebase()
+                                                                    .whenComplete(
+                                                                        () {
+                                                                  setState(() {
+                                                                    _isCloudSyncing =
+                                                                        false;
+                                                                  });
+                                                                }),
+                                                                MySharedPreferences()
+                                                                    .setStringValue(
+                                                                        "userName",
+                                                                        userNode)
                                                               });
-                                                            }),
-                                                            MySharedPreferences()
-                                                                .setStringValue(
-                                                                    "userName",
-                                                                    userNode)
-                                                          });
                                                     }
                                                   }),
                                             ),
@@ -319,7 +328,8 @@ class _TestState extends State<Test> {
                                                 mainAxisSize: MainAxisSize.min,
                                                 children: const [
                                                   Text("Cloud Backup",
-                                                      textAlign: TextAlign.center,
+                                                      textAlign:
+                                                          TextAlign.center,
                                                       style: TextStyle(
                                                           color: Colors.white,
                                                           fontFamily:
@@ -330,8 +340,8 @@ class _TestState extends State<Test> {
                                                   Flexible(
                                                     child: Text(
                                                         "(automatically backs up notes everytime you open the app)",
-                                                        overflow:
-                                                            TextOverflow.visible,
+                                                        overflow: TextOverflow
+                                                            .visible,
                                                         textAlign:
                                                             TextAlign.center,
                                                         style: TextStyle(
@@ -340,7 +350,8 @@ class _TestState extends State<Test> {
                                                                 'varela-round.regular',
                                                             fontSize: 11,
                                                             fontWeight:
-                                                                FontWeight.bold)),
+                                                                FontWeight
+                                                                    .bold)),
                                                   ),
                                                 ],
                                               ),
@@ -381,12 +392,16 @@ class _TestState extends State<Test> {
   }
 
   Future<void> checkIfSwitchIsOn() async {
-    await MySharedPreferences().getStringValue("isCloudBackupOn") == "0"
-        ? setState(() {
-            isSwitched = false;
-          })
+    await MySharedPreferences().containsKey("isCloudBackupOn") == true
+        ? await MySharedPreferences().getStringValue("isCloudBackupOn") == "0"
+            ? setState(() {
+                isSwitched = false;
+              })
+            : setState(() {
+                isSwitched = true;
+              })
         : setState(() {
-            isSwitched = true;
+            isSwitched = false;
           });
   }
 

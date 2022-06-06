@@ -14,8 +14,8 @@ import 'package:scribbles/pages/upload_to_drive.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../classes/note_map_for_cloud_fetch.dart';
-import '../popup_card/custom_rect_tween.dart';
-import '../popup_card/hero_dialog_route.dart';
+import '../hero_transition_handler/custom_rect_tween.dart';
+import '../hero_transition_handler/hero_dialog_route.dart';
 import 'home.dart';
 
 class SyncFile extends StatefulWidget {

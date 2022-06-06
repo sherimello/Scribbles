@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:scribbles/pages/home.dart';
-import 'package:scribbles/popup_card/custom_rect_tween.dart';
+import 'package:scribbles/hero_transition_handler/custom_rect_tween.dart';
 import 'package:sqflite/sqflite.dart';
 
 class NotePage extends StatefulWidget {

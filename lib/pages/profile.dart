@@ -6,7 +6,7 @@ import 'package:scribbles/classes/my_sharedpreferences.dart';
 import 'package:scribbles/widgets/profile_stats_model.dart';
 import 'package:sqflite/sqflite.dart';
 
-import '../popup_card/custom_rect_tween.dart';
+import '../hero_transition_handler/custom_rect_tween.dart';
 import 'home.dart';
 
 class Profile extends StatefulWidget {
