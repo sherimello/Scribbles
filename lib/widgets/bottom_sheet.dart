@@ -4,6 +4,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:scribbles/classes/my_sharedpreferences.dart';
 import 'package:scribbles/pages/new_note_page_design.dart';
 import 'package:scribbles/pages/sync_file.dart';
+import 'package:scribbles/pages/task_creation_page.dart';
+import 'package:scribbles/widgets/animated_date_time_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../hero_transition_handler/custom_rect_tween.dart';
@@ -166,6 +168,48 @@ class _TestState extends State<Test> {
                                                     fontFamily:
                                                         'varela-round.regular',
                                                     fontSize: 21,
+                                                    fontWeight:
+                                                        FontWeight.bold)),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: GestureDetector(
+                                    // splashColor: Colors.white,
+                                    // radius: 100,
+                                    onTap: () {
+                                      Navigator.of(context)
+                                          .push(HeroDialogRoute(
+                                        builder: (context) => const Center(
+                                          // child: TaskCreationPage(),
+                                          child: AnimatedDateTimePicker(),
+                                        ),
+                                        // settings: const RouteSettings(),
+                                      ));
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: RichText(
+                                        textAlign: TextAlign.center,
+                                        text: const TextSpan(
+                                          children: [
+                                            WidgetSpan(
+                                              child: Icon(
+                                                Icons.add_task_rounded,
+                                                size: 21,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                            TextSpan(
+                                                text: "  create new task",
+                                                style: TextStyle(
+                                                    fontFamily:
+                                                        'varela-round.regular',
+                                                    fontSize: 19,
                                                     fontWeight:
                                                         FontWeight.bold)),
                                           ],

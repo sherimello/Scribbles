@@ -64,6 +64,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.4"
+  day_night_time_picker:
+    dependency: "direct main"
+    description:
+      name: day_night_time_picker
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.5"
   device_frame:
     dependency: transitive
     description:
@@ -579,6 +586,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.99"
+  slider:
+    dependency: "direct main"
+    description:
+      name: slider
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.0.1"
   source_span:
     dependency: transitive
     description:
