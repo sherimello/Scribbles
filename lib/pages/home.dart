@@ -32,7 +32,7 @@ final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email']);
 
 class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   var t1 =
-      'jhasjkhdiuiashiudyhiausdoijasiojdojoasjioljdoiaiojsiodjoiasjiodjioajoidajsoijdojasiodjojaosjdojoias',
+          'jhasjkhdiuiashiudyhiausdoijasiojdojoasjioljdoiaiojsiodjoiasjiodjioajoidajsoijdojasiodjojaosjdojoias',
       t2 = "hello",
       date = '19-3-93';
   late Database database;
@@ -45,8 +45,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 // Get a location using getDatabasesPath
   late String path;
   int size = 0;
-  bool visible = false,
-      _isLoading = false;
+  bool visible = false, _isLoading = false;
 
   Future<void> initiateDB() async {
     // Get a location using getDatabasesPath
@@ -55,14 +54,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     // open the database
     database = await openDatabase(path, version: 1,
         onCreate: (Database db, int version) async {
-          // When creating the db, create the table
-          await db.execute(
-              'CREATE TABLE IF NOT EXISTS Notes (id INTEGER PRIMARY KEY, title NVARCHAR, note NVARCHAR, theme NVARCHAR, time NVARCHAR)');
-        });
+      // When creating the db, create the table
+      await db.execute(
+          'CREATE TABLE IF NOT EXISTS Notes (id INTEGER PRIMARY KEY, title NVARCHAR, note NVARCHAR, theme NVARCHAR, time NVARCHAR)');
+    });
   }
-
-
-
 
   uploadDataToFirebase() async {
     userName = await MySharedPreferences().getStringValue("userName");
@@ -75,22 +71,19 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           .child(userName)
           .child((list[i]['time'].toString().replaceAll('\n', ' ')))
           .set({
-        'title': list[i]['title'].toString(),
-        'note': list[i]['note'].toString(),
-        'theme': list[i]['theme'].toString(),
-        'time': list[i]['time'].toString(),
-      })
+            'title': list[i]['title'].toString(),
+            'note': list[i]['note'].toString(),
+            'theme': list[i]['theme'].toString(),
+            'time': list[i]['time'].toString(),
+          })
           .asStream()
           .listen((event) {}, onDone: () {
-        setState(() {
-          _isLoading = false;
-        });
-      });
+            setState(() {
+              _isLoading = false;
+            });
+          });
     }
   }
-
-
-
 
   removeUserDataFromCloud() async {
     String userName = await MySharedPreferences().getStringValue("userName");
@@ -98,24 +91,17 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         .ref('notes')
         .child(userName)
         .remove()
-        .whenComplete(() =>
-        fetchCloudNotes().whenComplete(() {
-          uploadDataToFirebase();
-        }));
+        .whenComplete(() => fetchCloudNotes().whenComplete(() {
+              uploadDataToFirebase();
+            }));
   }
-
-
-
 
   fetchCloudNotes() async {
     String userName = await MySharedPreferences().getStringValue("userName");
-    List<String> title = [],
-        note = [],
-        theme = [],
-        time = [];
+    List<String> title = [], note = [], theme = [], time = [];
 
     final snapshot =
-    await FirebaseDatabase.instance.ref('notes').child(userName).get();
+        await FirebaseDatabase.instance.ref('notes').child(userName).get();
     int i = 0;
     final map = snapshot.value as Map<dynamic, dynamic>;
 
@@ -134,9 +120,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     });
   }
 
-
-
-
   showData() async {
     list = (await database.rawQuery('SELECT * FROM Notes'));
 
@@ -144,61 +127,47 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       setState(() {
         visible = false;
       });
+    } else {
+      setState(() {
+        visible = true;
+      });
     }
-    else
-      {
-        setState(() {
-          visible = true;
-        });
-      }
     if (kDebugMode) {
       print(list.length);
     }
     size = list.length;
   }
 
-
-
-
   checkLoadLogic() async {
     widget.shouldCloudSync
         ? await MySharedPreferences().getStringValue("isCloudBackupOn") ==
-        "0" ||
-        list.isEmpty
-        ? setState(() {
-      _isLoading = false;
-    })
-        : setState(() {
-      _isLoading = true;
-    })
+                    "0" ||
+                list.isEmpty
+            ? setState(() {
+                _isLoading = false;
+              })
+            : setState(() {
+                _isLoading = true;
+              })
         : null;
   }
-
-
-
 
   void universalFetchLogic() async {
     await MySharedPreferences().containsKey("isCloudBackupOn") == true
         ? await MySharedPreferences().getStringValue("isCloudBackupOn") == "1"
-        ? widget.shouldCloudSync
-        ? initiateDB()
-        .whenComplete(() =>
-        showData().whenComplete(() =>
-        {
-          checkUserConnection().whenComplete(() =>
-          {
-            activeConnection
-                ? uploadDataToFirebase()
-                : setState(() => _isLoading = false)
-          })
-        }))
-        : initiateDB().whenComplete(() => showData())
-        : initiateDB().whenComplete(() => showData())
+            ? widget.shouldCloudSync
+                ? initiateDB()
+                    .whenComplete(() => showData().whenComplete(() => {
+                          checkUserConnection().whenComplete(() => {
+                                activeConnection
+                                    ? uploadDataToFirebase()
+                                    : setState(() => _isLoading = false)
+                              })
+                        }))
+                : initiateDB().whenComplete(() => showData())
+            : initiateDB().whenComplete(() => showData())
         : initiateDB().whenComplete(() => showData());
   }
-
-
-
 
   @override
   void initState() {
@@ -209,24 +178,14 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     saveLastUsed();
   }
 
-
-
-
   Widget cloudBackupLoadingCard() {
     return const Center(
       child: CircularProgressIndicator(),
     );
   }
 
-
-
-
   bool activeConnection = false;
   String T = "";
-
-
-
-
 
   Future checkUserConnection() async {
     try {
@@ -244,9 +203,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       });
     }
   }
-
-
-
 
   Widget title() {
     return const Padding(
@@ -267,22 +223,15 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     );
   }
 
-
-
-
   bool isNotesPressed = true;
-
-
-
 
   @override
   Widget build(BuildContext context) {
-    var s = MediaQuery
-        .of(context)
-        .size;
+    var s = MediaQuery.of(context).size;
 
-
-
+    bool isPortraitMode(){
+      return s.height > s.width ? true : false;
+    }
 
     List<BoxShadow> boxShadow(double blurRadius, double offset1, double offset2,
         Color colorBottom, Color colorTop, bool isInSet) {
@@ -302,9 +251,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       ];
     }
 
-
-
-
     Padding notesList() {
       return Padding(
           padding: const EdgeInsets.all(8.0),
@@ -313,26 +259,22 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             shrinkWrap: true,
             crossAxisCount: 2,
             itemCount:
-            // list.isEmpty ? 0:
-            size,
+                // list.isEmpty ? 0:
+                size,
             itemBuilder: (BuildContext context, int index) =>
-            // list.isEmpty ? Container():
-            PreviewCard(
-                time: list[index]['time'].toString(),
-                theme: list[index]["theme"].toString(),
-                noteID: list[index]["id"].toString(),
-                id: index.toString(),
-                title: list[index]["title"].toString(),
-                note: list[index]["note"].toString()),
-            staggeredTileBuilder: (int index) =>
-            const StaggeredTile.fit(1),
+                // list.isEmpty ? Container():
+                PreviewCard(
+                    time: list[index]['time'].toString(),
+                    theme: list[index]["theme"].toString(),
+                    noteID: list[index]["id"].toString(),
+                    id: index.toString(),
+                    title: list[index]["title"].toString(),
+                    note: list[index]["note"].toString()),
+            staggeredTileBuilder: (int index) => const StaggeredTile.fit(1),
             mainAxisSpacing: 4.0,
             crossAxisSpacing: 4.0,
           ));
     }
-
-
-
 
     return Scaffold(
       body: AnimatedContainer(
@@ -353,17 +295,12 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                     Padding(
                       padding: const EdgeInsets.fromLTRB(11, 3, 11, 11),
                       child: GestureDetector(
-                        onTap: () =>
-                            setState(() =>
-                            {
+                        onTap: () => setState(() => {
                               if (!isNotesPressed)
                                 isNotesPressed = !isNotesPressed
                             }),
                         child: AnimatedContainer(
-                          width: MediaQuery
-                              .of(context)
-                              .size
-                              .width * .35,
+                          width: isPortraitMode() ? s.width * .35 : s.height * .35,
                           height: AppBar().preferredSize.height * .75,
                           duration: const Duration(milliseconds: 355),
                           decoration: BoxDecoration(
@@ -383,17 +320,17 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                           child: Center(
                             child: AnimatedDefaultTextStyle(
                               duration: const Duration(milliseconds: 355),
-                              style: isNotesPressed ? const TextStyle(
-                                  fontFamily: "varela-round.regular",
-                                  fontSize: 15,
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold)
-                                  :
-                              const TextStyle(
-                                  fontFamily: "varela-round.regular",
-                                  fontSize: 13,
-                                  color: Colors.black45,
-                                  fontWeight: FontWeight.bold),
+                              style: isNotesPressed
+                                  ? const TextStyle(
+                                      fontFamily: "varela-round.regular",
+                                      fontSize: 15,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold)
+                                  : const TextStyle(
+                                      fontFamily: "varela-round.regular",
+                                      fontSize: 13,
+                                      color: Colors.black45,
+                                      fontWeight: FontWeight.bold),
                               child: const Text(
                                 'notes',
                                 textAlign: TextAlign.center,
@@ -406,17 +343,12 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                     Padding(
                       padding: const EdgeInsets.fromLTRB(11, 3, 11, 11),
                       child: GestureDetector(
-                        onTap: () =>
-                            setState(() =>
-                            {
+                        onTap: () => setState(() => {
                               if (isNotesPressed)
                                 isNotesPressed = !isNotesPressed
                             }),
                         child: AnimatedContainer(
-                          width: MediaQuery
-                              .of(context)
-                              .size
-                              .width * .35,
+                          width: isPortraitMode() ? s.width * .35 : s.height * .35,
                           height: AppBar().preferredSize.height * .75,
                           duration: const Duration(milliseconds: 355),
                           decoration: BoxDecoration(
@@ -436,20 +368,20 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                           child: Center(
                             child: AnimatedDefaultTextStyle(
                               duration: const Duration(milliseconds: 355),
-                              style: !isNotesPressed ? const TextStyle(
-                                  fontFamily: "varela-round.regular",
-                                  fontSize: 15,
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold)
-                                  :
-                              const TextStyle(
-                                  fontFamily: "varela-round.regular",
-                                  fontSize: 13,
-                                  color: Colors.black45,
-                                  fontWeight: FontWeight.bold),
+                              style: !isNotesPressed
+                                  ? const TextStyle(
+                                      fontFamily: "varela-round.regular",
+                                      fontSize: 15,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold)
+                                  : const TextStyle(
+                                      fontFamily: "varela-round.regular",
+                                      fontSize: 13,
+                                      color: Colors.black45,
+                                      fontWeight: FontWeight.bold),
                               child: const Text(
-                                  'tasks',
-                                  textAlign: TextAlign.center,
+                                'tasks',
+                                textAlign: TextAlign.center,
                               ),
                             ),
                           ),
@@ -506,10 +438,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                               color: Colors.black,
                               onPressed: () {
                                 Navigator.of(context).push(HeroDialogRoute(
-                                  builder: (context) =>
-                                      Center(
-                                        child: Test(list),
-                                      ),
+                                  builder: (context) => Center(
+                                    child: Test(list),
+                                  ),
                                 ));
                               },
                               icon: const Icon(
