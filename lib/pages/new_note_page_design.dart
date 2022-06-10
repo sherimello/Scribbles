@@ -364,7 +364,8 @@ class _NewNotePageState extends State<NewNotePage> {
                                                 right: 15),
                                             hintText: "note title..."),
                                       ),
-                                    )),
+                                    )
+                                ),
                               ),
                             ),
                             Align(
