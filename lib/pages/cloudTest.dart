@@ -308,7 +308,7 @@ class _HomeState extends State<cloudTest> with SingleTickerProviderStateMixin {
                         size,
                         itemBuilder: (BuildContext context, int index) =>
                         // list.isEmpty ? Container():
-                        PreviewCard(
+                        NotePreviewCard(
                             time: list[index]['time'].toString(),
                             theme: list[index]["theme"].toString(),
                             noteID: list[index]["id"].toString(),

@@ -18,6 +18,7 @@ import 'package:sqflite/sqflite.dart';
 import '../classes/note_map_for_cloud_fetch.dart';
 import '../hero_transition_handler/custom_rect_tween.dart';
 import '../hero_transition_handler/hero_dialog_route.dart';
+import '../widgets/task_preview_card.dart';
 
 class Home extends StatefulWidget {
   final bool shouldCloudSync;
@@ -29,10 +30,11 @@ class Home extends StatefulWidget {
 }
 
 final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email']);
+String listWidget = 'notes';
 
 class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   var t1 =
-          'jhasjkhdiuiashiudyhiausdoijasiojdojoasjioljdoiaiojsiodjoiasjiodjioajoidajsoijdojasiodjojaosjdojoias',
+      'jhasjkhdiuiashiudyhiausdoijasiojdojoasjioljdoiaiojsiodjoiasjiodjioajoidajsoijdojasiodjojaosjdojoias',
       t2 = "hello",
       date = '19-3-93';
   late Database database;
@@ -45,7 +47,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 // Get a location using getDatabasesPath
   late String path;
   int size = 0;
-  bool visible = false, _isLoading = false;
+  bool visible = false,
+      _isLoading = false;
 
   Future<void> initiateDB() async {
     // Get a location using getDatabasesPath
@@ -54,10 +57,10 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     // open the database
     database = await openDatabase(path, version: 1,
         onCreate: (Database db, int version) async {
-      // When creating the db, create the table
-      await db.execute(
-          'CREATE TABLE IF NOT EXISTS Notes (id INTEGER PRIMARY KEY, title NVARCHAR, note NVARCHAR, theme NVARCHAR, time NVARCHAR)');
-    });
+          // When creating the db, create the table
+          await db.execute(
+              'CREATE TABLE IF NOT EXISTS Notes (id INTEGER PRIMARY KEY, title NVARCHAR, note NVARCHAR, theme NVARCHAR, time NVARCHAR)');
+        });
   }
 
   uploadDataToFirebase() async {
@@ -71,17 +74,17 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           .child(userName)
           .child((list[i]['time'].toString().replaceAll('\n', ' ')))
           .set({
-            'title': list[i]['title'].toString(),
-            'note': list[i]['note'].toString(),
-            'theme': list[i]['theme'].toString(),
-            'time': list[i]['time'].toString(),
-          })
+        'title': list[i]['title'].toString(),
+        'note': list[i]['note'].toString(),
+        'theme': list[i]['theme'].toString(),
+        'time': list[i]['time'].toString(),
+      })
           .asStream()
           .listen((event) {}, onDone: () {
-            setState(() {
-              _isLoading = false;
-            });
-          });
+        setState(() {
+          _isLoading = false;
+        });
+      });
     }
   }
 
@@ -91,17 +94,21 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         .ref('notes')
         .child(userName)
         .remove()
-        .whenComplete(() => fetchCloudNotes().whenComplete(() {
-              uploadDataToFirebase();
-            }));
+        .whenComplete(() =>
+        fetchCloudNotes().whenComplete(() {
+          uploadDataToFirebase();
+        }));
   }
 
   fetchCloudNotes() async {
     String userName = await MySharedPreferences().getStringValue("userName");
-    List<String> title = [], note = [], theme = [], time = [];
+    List<String> title = [],
+        note = [],
+        theme = [],
+        time = [];
 
     final snapshot =
-        await FirebaseDatabase.instance.ref('notes').child(userName).get();
+    await FirebaseDatabase.instance.ref('notes').child(userName).get();
     int i = 0;
     final map = snapshot.value as Map<dynamic, dynamic>;
 
@@ -141,32 +148,84 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   checkLoadLogic() async {
     widget.shouldCloudSync
         ? await MySharedPreferences().getStringValue("isCloudBackupOn") ==
-                    "0" ||
-                list.isEmpty
-            ? setState(() {
-                _isLoading = false;
-              })
-            : setState(() {
-                _isLoading = true;
-              })
+        "0" ||
+        list.isEmpty
+        ? setState(() {
+      _isLoading = false;
+    })
+        : setState(() {
+      _isLoading = true;
+    })
         : null;
   }
 
   void universalFetchLogic() async {
     await MySharedPreferences().containsKey("isCloudBackupOn") == true
         ? await MySharedPreferences().getStringValue("isCloudBackupOn") == "1"
-            ? widget.shouldCloudSync
-                ? initiateDB()
-                    .whenComplete(() => showData().whenComplete(() => {
-                          checkUserConnection().whenComplete(() => {
-                                activeConnection
-                                    ? uploadDataToFirebase()
-                                    : setState(() => _isLoading = false)
-                              })
-                        }))
-                : initiateDB().whenComplete(() => showData())
-            : initiateDB().whenComplete(() => showData())
+        ? widget.shouldCloudSync
+        ? initiateDB()
+        .whenComplete(() =>
+        showData().whenComplete(() =>
+        {
+          checkUserConnection().whenComplete(() =>
+          {
+            activeConnection
+                ? uploadDataToFirebase()
+                : setState(() => _isLoading = false)
+          })
+        }))
+        : initiateDB().whenComplete(() => showData())
+        : initiateDB().whenComplete(() => showData())
         : initiateDB().whenComplete(() => showData());
+  }
+
+
+  Padding notesList() {
+    return Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: StaggeredGridView.countBuilder(
+          physics: const BouncingScrollPhysics(),
+          shrinkWrap: true,
+          crossAxisCount: 2,
+          itemCount:
+          // list.isEmpty ? 0:
+          size,
+          itemBuilder: (BuildContext context, int index) =>
+          // list.isEmpty ? Container():
+          NotePreviewCard(
+              time: list[index]['time'].toString(),
+              theme: list[index]["theme"].toString(),
+              noteID: list[index]["id"].toString(),
+              id: index.toString(),
+              title: list[index]["title"].toString(),
+              note: list[index]["note"].toString()),
+          staggeredTileBuilder: (int index) => const StaggeredTile.fit(1),
+          mainAxisSpacing: 4.0,
+          crossAxisSpacing: 4.0,
+        ));
+  }
+  Padding tasksList() {
+    return Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: StaggeredGridView.countBuilder(
+          physics: const BouncingScrollPhysics(),
+          shrinkWrap: true,
+          crossAxisCount: 1,
+          itemCount:
+          // list.isEmpty ? 0:
+          size,
+          itemBuilder: (BuildContext context, int index) =>
+          // list.isEmpty ? Container():
+          TaskPreviewCard(
+              time: list[index]['time'].toString(),
+              theme: list[index]["theme"].toString(),
+              noteID: list[index]["id"].toString(),
+              id: index.toString(),
+              title: list[index]["title"].toString()),
+          staggeredTileBuilder: (int index) => const StaggeredTile.fit(1),
+          mainAxisSpacing: 4.0,
+          crossAxisSpacing: 4.0,
+        ));
   }
 
   @override
@@ -176,6 +235,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     super.initState();
     universalFetchLogic();
     saveLastUsed();
+    setState((){
+      listWidget = 'notes';
+    });
   }
 
   Widget cloudBackupLoadingCard() {
@@ -227,9 +289,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    var s = MediaQuery.of(context).size;
+    var s = MediaQuery
+        .of(context)
+        .size;
 
-    bool isPortraitMode(){
+    bool isPortraitMode() {
       return s.height > s.width ? true : false;
     }
 
@@ -251,34 +315,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       ];
     }
 
-    Padding notesList() {
-      return Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: StaggeredGridView.countBuilder(
-            physics: const BouncingScrollPhysics(),
-            shrinkWrap: true,
-            crossAxisCount: 2,
-            itemCount:
-                // list.isEmpty ? 0:
-                size,
-            itemBuilder: (BuildContext context, int index) =>
-                // list.isEmpty ? Container():
-                PreviewCard(
-                    time: list[index]['time'].toString(),
-                    theme: list[index]["theme"].toString(),
-                    noteID: list[index]["id"].toString(),
-                    id: index.toString(),
-                    title: list[index]["title"].toString(),
-                    note: list[index]["note"].toString()),
-            staggeredTileBuilder: (int index) => const StaggeredTile.fit(1),
-            mainAxisSpacing: 4.0,
-            crossAxisSpacing: 4.0,
-          ));
-    }
-
     return Scaffold(
       body: AnimatedContainer(
-        duration: const Duration(milliseconds: 355),
+        duration: const Duration(milliseconds: 255),
         height: double.infinity,
         width: double.infinity,
         color: const Color(0xffF8F0E3),
@@ -295,42 +334,46 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                     Padding(
                       padding: const EdgeInsets.fromLTRB(11, 3, 11, 11),
                       child: GestureDetector(
-                        onTap: () => setState(() => {
+                        onTap: () =>
+                            setState(() =>
+                            {
+                              listWidget = 'notes',
                               if (!isNotesPressed)
                                 isNotesPressed = !isNotesPressed
                             }),
                         child: AnimatedContainer(
-                          width: isPortraitMode() ? s.width * .35 : s.height * .35,
+                          width: isPortraitMode() ? s.width * .35 : s.height *
+                              .35,
                           height: AppBar().preferredSize.height * .75,
-                          duration: const Duration(milliseconds: 355),
+                          duration: const Duration(milliseconds: 255),
                           decoration: BoxDecoration(
-                              color: const Color(0xffF8F0E3),
+                              color: const Color(0xffe1dacf),
                               borderRadius: BorderRadius.circular(13),
                               boxShadow: boxShadow(
-                                  !isNotesPressed ? 11 : 3,
+                                  !isNotesPressed ? 7 : 5,
                                   5,
                                   5,
                                   isNotesPressed
-                                      ? const Color(0x45000000)
-                                      : const Color(0x31000000),
+                                      ? const Color(0x55000000)
+                                      : const Color(0x55000000),
                                   isNotesPressed
-                                      ? const Color(0xfffffbfb)
+                                      ? const Color(0xffffffff)
                                       : const Color(0xffffffff),
                                   isNotesPressed ? true : false)),
                           child: Center(
                             child: AnimatedDefaultTextStyle(
-                              duration: const Duration(milliseconds: 355),
+                              duration: const Duration(milliseconds: 255),
                               style: isNotesPressed
                                   ? const TextStyle(
-                                      fontFamily: "varela-round.regular",
-                                      fontSize: 15,
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.bold)
+                                  fontFamily: "varela-round.regular",
+                                  fontSize: 15,
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold)
                                   : const TextStyle(
-                                      fontFamily: "varela-round.regular",
-                                      fontSize: 13,
-                                      color: Colors.black45,
-                                      fontWeight: FontWeight.bold),
+                                  fontFamily: "varela-round.regular",
+                                  fontSize: 13,
+                                  color: Colors.black45,
+                                  fontWeight: FontWeight.bold),
                               child: const Text(
                                 'notes',
                                 textAlign: TextAlign.center,
@@ -343,42 +386,46 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                     Padding(
                       padding: const EdgeInsets.fromLTRB(11, 3, 11, 11),
                       child: GestureDetector(
-                        onTap: () => setState(() => {
+                        onTap: () =>
+                            setState(() =>
+                            {
+                            listWidget = 'tasks',
                               if (isNotesPressed)
                                 isNotesPressed = !isNotesPressed
                             }),
                         child: AnimatedContainer(
-                          width: isPortraitMode() ? s.width * .35 : s.height * .35,
+                          width: isPortraitMode() ? s.width * .35 : s.height *
+                              .35,
                           height: AppBar().preferredSize.height * .75,
-                          duration: const Duration(milliseconds: 355),
+                          duration: const Duration(milliseconds: 255),
                           decoration: BoxDecoration(
                               color: const Color(0xffF8F0E3),
                               borderRadius: BorderRadius.circular(13),
                               boxShadow: boxShadow(
-                                  isNotesPressed ? 11 : 3,
+                                  !isNotesPressed ? 5 : 7,
                                   5,
                                   5,
-                                  !isNotesPressed
-                                      ? const Color(0x45000000)
-                                      : const Color(0x31000000),
-                                  !isNotesPressed
-                                      ? const Color(0xfffffbfb)
+                                  isNotesPressed
+                                      ? const Color(0x55000000)
+                                      : const Color(0x55000000),
+                                  isNotesPressed
+                                      ? const Color(0xffffffff)
                                       : const Color(0xffffffff),
                                   isNotesPressed ? false : true)),
                           child: Center(
                             child: AnimatedDefaultTextStyle(
-                              duration: const Duration(milliseconds: 355),
+                              duration: const Duration(milliseconds: 255),
                               style: !isNotesPressed
                                   ? const TextStyle(
-                                      fontFamily: "varela-round.regular",
-                                      fontSize: 15,
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.bold)
+                                  fontFamily: "varela-round.regular",
+                                  fontSize: 15,
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold)
                                   : const TextStyle(
-                                      fontFamily: "varela-round.regular",
-                                      fontSize: 13,
-                                      color: Colors.black45,
-                                      fontWeight: FontWeight.bold),
+                                  fontFamily: "varela-round.regular",
+                                  fontSize: 13,
+                                  color: Colors.black45,
+                                  fontWeight: FontWeight.bold),
                               child: const Text(
                                 'tasks',
                                 textAlign: TextAlign.center,
@@ -391,33 +438,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   ],
                 ),
               ),
-              // Padding(
-              //   padding:
-              //       EdgeInsets.fromLTRB(9.0, 9.0, 9.0, _isLoading ? 11.0 : 0.0),
-              //   child: AnimatedContainer(
-              //     width: (!_isLoading) ? MediaQuery.of(context).size.width : 31,
-              //     height: (!_isLoading) ? AppBar().preferredSize.height : 31,
-              //     curve: Curves.easeInCirc,
-              //     decoration: BoxDecoration(
-              //         // color: (!_isLoading) ? Colors.black: Colors.white,
-              //         color: Colors.black,
-              //         borderRadius:
-              //             BorderRadius.circular(_isLoading ? 1000 : 19)),
-              //     duration: const Duration(milliseconds: 350),
-              //     child: Stack(
-              //       children: [
-              //         Positioned(
-              //           child: Visibility(visible: !_isLoading, child: title()),
-              //         ),
-              //         Visibility(
-              //             visible: _isLoading, child: cloudBackupLoadingCard())
-              //       ],
-              //     ),
-              //   ),
-              // ),
               Expanded(
                 child: Stack(children: [
-                  notesList(),
+                  listWidget != 'tasks' ? notesList() : tasksList(),
                   Positioned(
                       bottom: 21,
                       right: 11,
@@ -438,9 +461,10 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                               color: Colors.black,
                               onPressed: () {
                                 Navigator.of(context).push(HeroDialogRoute(
-                                  builder: (context) => Center(
-                                    child: Test(list),
-                                  ),
+                                  builder: (context) =>
+                                      Center(
+                                        child: Test(list),
+                                      ),
                                 ));
                               },
                               icon: const Icon(

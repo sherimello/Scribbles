@@ -5,10 +5,10 @@ import 'package:scribbles/hero_transition_handler/models.dart';
 import 'package:scribbles/widgets/note_card.dart';
 import 'package:scribbles/widgets/simplified_delete_card.dart';
 
-class PreviewCard extends StatelessWidget {
+class NotePreviewCard extends StatelessWidget {
   final String title, note, id, noteID, theme, time;
 
-  const PreviewCard(
+  const NotePreviewCard(
       {Key? key,
       required this.id,
       required this.time,
@@ -64,21 +64,6 @@ class PreviewCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Padding(
-                    //   padding: const EdgeInsets.all(8.0),
-                    //   child: Row(
-                    //     children: const [
-                    //       Spacer(),
-                    //       RotationTransition(
-                    //         turns: AlwaysStoppedAnimation(45 / 360),
-                    //         child: Icon(
-                    //           Icons.push_pin_sharp,
-                    //           color: Colors.black,
-                    //         ),
-                    //       ),
-                    //     ],
-                    //   ),
-                    // ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(0, 13, 0, 5),
                       child: Text(
@@ -121,65 +106,65 @@ class PreviewCard extends StatelessWidget {
   }
 }
 
-class _TodoPopupCard extends StatefulWidget {
-  // const _TodoPopupCard({Key key, required this.todo}) : super(key: key);
-  // final Todo todo;
-
-  // const _TodoPopupCard(this.todo);
-
-  @override  State<_TodoPopupCard> createState() => _TodoPopupCardState();
-}
-
-class _TodoPopupCardState extends State<_TodoPopupCard> {
-  @override
-  Widget build(BuildContext context) {
-    return Hero(
-      tag: '1',
-      createRectTween: (begin, end) {
-        return CustomRectTween(begin: begin!, end: end!);
-      },
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Material(
-          borderRadius: BorderRadius.circular(16),
-          color: Colors.blueGrey,
-          child: SizedBox(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // _TodoTitle(title: todo.description),
-                    const SizedBox(
-                      height: 8,
-                    ),
-                    // if (widget.todo.items != null) ...[
-                    const Divider(),
-                    // _TodoItemsBox(items: todo.items),
-                    // ],
-                    Container(
-                      margin: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.black12,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const TextField(
-                        maxLines: 8,
-                        cursorColor: Colors.white,
-                        decoration: InputDecoration(
-                            contentPadding: EdgeInsets.all(8),
-                            hintText: 'Write a note...',
-                            border: InputBorder.none),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
+// class _TodoPopupCard extends StatefulWidget {
+//   // const _TodoPopupCard({Key key, required this.todo}) : super(key: key);
+//   // final Todo todo;
+//
+//   // const _TodoPopupCard(this.todo);
+//
+//   @override  State<_TodoPopupCard> createState() => _TodoPopupCardState();
+// }
+//
+// class _TodoPopupCardState extends State<_TodoPopupCard> {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Hero(
+//       tag: '1',
+//       createRectTween: (begin, end) {
+//         return CustomRectTween(begin: begin!, end: end!);
+//       },
+//       child: Padding(
+//         padding: const EdgeInsets.all(16.0),
+//         child: Material(
+//           borderRadius: BorderRadius.circular(16),
+//           color: Colors.blueGrey,
+//           child: SizedBox(
+//             child: Padding(
+//               padding: const EdgeInsets.all(16.0),
+//               child: SingleChildScrollView(
+//                 child: Column(
+//                   mainAxisSize: MainAxisSize.min,
+//                   children: [
+//                     // _TodoTitle(title: todo.description),
+//                     const SizedBox(
+//                       height: 8,
+//                     ),
+//                     // if (widget.todo.items != null) ...[
+//                     const Divider(),
+//                     // _TodoItemsBox(items: todo.items),
+//                     // ],
+//                     Container(
+//                       margin: const EdgeInsets.all(8),
+//                       decoration: BoxDecoration(
+//                         color: Colors.black12,
+//                         borderRadius: BorderRadius.circular(8),
+//                       ),
+//                       child: const TextField(
+//                         maxLines: 8,
+//                         cursorColor: Colors.white,
+//                         decoration: InputDecoration(
+//                             contentPadding: EdgeInsets.all(8),
+//                             hintText: 'Write a note...',
+//                             border: InputBorder.none),
+//                       ),
+//                     ),
+//                   ],
+//                 ),
+//               ),
+//             ),
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }

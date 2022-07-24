@@ -1,33 +1,17 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:scribbles/pages/home.dart';
+import 'package:scribbles/widgets/testwidget.dart';
+import 'package:timezone/data/latest.dart' as tz;
+
+import 'classes/notificationservice.dart';
 
 Future<void> main() async {
-  var kReleaseMode = true;
+  // var kReleaseMode = true;
   WidgetsFlutterBinding.ensureInitialized();
+  await NotificationService().initNotification();
   await Firebase.initializeApp();
   runApp(const MyApp());
-  //   DevicePreview(
-  //   enabled: true,
-  //   tools: const [
-  //     ...DevicePreview.defaultTools,
-  //     // const CustomPlugin(),DevicePreview(
-  //     //       enabled: true,
-  //     //       tools: [
-  //     //         ...DevicePreview.defaultTools,
-  //     //         const CustomPlugin(),
-  //     //       ],
-  //     //       builder: (context) => const BasicApp(),
-  //     //     ),
-  //   ],
-  //   builder: (context) => const MyApp(),
-  // ),
-  // );
-}
-
-@override
-void initState() {
-  // TODO: implement initState
 }
 
 class MyApp extends StatelessWidget {
@@ -75,14 +59,11 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
+  @override
+  void initState() {
+    super.initState();
+    tz.initializeTimeZones();
   }
-
   @override
   Widget build(BuildContext context) {
     // return const NewNotePage("","");

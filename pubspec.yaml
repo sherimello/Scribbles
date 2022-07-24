@@ -53,8 +53,13 @@ dependencies:
   google_sign_in: ^5.3.1
   shared_preferences: ^2.0.15
   flutter_inset_box_shadow: ^1.0.8
-  day_night_time_picker: ^1.0.5
   slider: ^0.0.1
+  home_widget: ^0.1.6
+  awesome_notifications: ^0.6.21
+  cron: ^0.5.0
+  workmanager: ^0.5.0
+  timezone: ^0.8.0
+  flutter_local_notifications: ^9.7.0
 
 dev_dependencies:
   flutter_test:

@@ -1,10 +1,11 @@
-import 'package:day_night_time_picker/lib/constants.dart';
-import 'package:day_night_time_picker/lib/daynight_timepicker.dart';
 import 'package:flutter/material.dart';
+import 'package:sqflite/sqflite.dart';
 
 import '../hero_transition_handler/custom_rect_tween.dart';
 import '../hero_transition_handler/hero_dialog_route.dart';
 import '../widgets/animated_date_time_picker.dart';
+import 'package:intl/intl.dart';
+import 'package:path/path.dart';
 
 class TaskCreationPage extends StatefulWidget {
   final String tag;
@@ -15,22 +16,45 @@ class TaskCreationPage extends StatefulWidget {
 }
 
 class _TaskCreationPageState extends State<TaskCreationPage> {
+  late Database database;
+  late String path, time;
   bool scheduleButtonClicked = false;
-  final _searchFieldController = TextEditingController();
+  final _taskFieldController = TextEditingController();
   var _groupValue = -1;
   bool _isScheduleSelected = false, _isTaskWritten = false;
   var selectedColor = "0xfff7a221";
 
+
   @override
   void initState() {
-    _searchFieldController.addListener(() {
-      setState(() {
-        _searchFieldController.text.isNotEmpty
-            ? _isTaskWritten = true
-            : _isTaskWritten = false;
-      });
-    });
     super.initState();
+    initiateDB();
+    _taskFieldController.addListener(() {
+    });
+  }
+
+  Future<void> initiateDB() async {
+    // Get a location using getDatabasesPath
+    var databasesPath = await getDatabasesPath();
+    path = join(databasesPath, 'tasks.db');
+    // open the database
+    database = await openDatabase(path, version: 1,
+        onCreate: (Database db, int version) async {
+          // When creating the db, create the table
+          await db.execute(
+              'CREATE TABLE IF NOT EXISTS Tasks (id INTEGER PRIMARY KEY, task NVARCHAR, theme NVARCHAR, time NVARCHAR, pending INTEGER)');
+        });
+  }
+  
+  Future<void> insertData(String time, int pending) async {
+
+    print(time);
+    await database.transaction((txn) async {
+      int id1 = await txn.rawInsert(
+          'INSERT INTO Tasks(task, theme, time, pending) VALUES(?, ?, ?, ?)',
+          [_taskFieldController.text, selectedColor, time, pending]);
+      print('inserted1: $id1');
+    });
   }
 
   @override
@@ -95,25 +119,6 @@ class _TaskCreationPageState extends State<TaskCreationPage> {
         print(
             newTime.hourOfPeriod.toString() + ":" + newTime.minute.toString());
       });
-    }
-
-    promptDateTimePicker() {
-      setState(() {
-        scheduleButtonClicked = !scheduleButtonClicked;
-      });
-      print(scheduleButtonClicked);
-      Navigator.of(context).push(
-        showPicker(
-          context: context,
-          value: _time,
-          onChange: onTimeChanged,
-          minuteInterval: MinuteInterval.FIVE,
-          // Optional onChange to receive value as DateTime
-          onChangeDateTime: (DateTime dateTime) {
-            // print(dateTime);
-          },
-        ),
-      );
     }
 
     bool isPortraitMode() {
@@ -193,7 +198,7 @@ class _TaskCreationPageState extends State<TaskCreationPage> {
                           child: Material(
                             color: Colors.transparent,
                             child: TextField(
-                              controller: _searchFieldController,
+                              controller: _taskFieldController,
                               textAlign: TextAlign.center,
                               style: const TextStyle(
                                   color: Colors.white,
@@ -224,54 +229,49 @@ class _TaskCreationPageState extends State<TaskCreationPage> {
                         Expanded(
                           child: Padding(
                             padding: const EdgeInsets.fromLTRB(11, 11, 5.5, 11),
-                            child: Visibility(
-                              maintainAnimation: true,
-                              maintainState: true,
-                              visible: _isTaskWritten,
-                              child: GestureDetector(
-                                onTap: (){
-                                  Navigator.of(context)
-                                      .push(HeroDialogRoute(
-                                    builder: (context) => const Center(
-                                      child: AnimatedDateTimePicker("000"),
-                                      // child: AnimatedDateTimePicker(),
-                                    ),
-                                    // settings: const RouteSettings(),
-                                  ));
-                                },
-                                child: AnimatedContainer(
-                                  duration: const Duration(milliseconds: 355),
-                                  decoration: BoxDecoration(
-                                      color: Color(int.parse(selectedColor))
-                                          .withOpacity(.15),
-                                      borderRadius: BorderRadius.circular(21)),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(15.0),
-                                    child: Column(
-                                      children: [
-                                        Icon(
-                                          Icons.alarm_on_outlined,
-                                          size: imageSize,
-                                          color: Color(int.parse(selectedColor))
-                                              .withOpacity(1),
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.only(top: 11.0),
-                                          child: GestureDetector(
-                                            onTap: () {},
-                                            child: const Text(
-                                              "scheduled task",
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                color: Colors.black,
-                                                fontFamily: "Rounded_Elegance",
-                                                fontWeight: FontWeight.bold,
-                                              ),
+                            child: GestureDetector(
+                              onTap: (){
+                                Navigator.of(context)
+                                    .push(HeroDialogRoute(
+                                  builder: (context) => const Center(
+                                    child: AnimatedDateTimePicker("000"),
+                                    // child: AnimatedDateTimePicker(),
+                                  ),
+                                  // settings: const RouteSettings(),
+                                ));
+                              },
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 355),
+                                decoration: BoxDecoration(
+                                    color: Color(int.parse(selectedColor))
+                                        .withOpacity(.15),
+                                    borderRadius: BorderRadius.circular(21)),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(15.0),
+                                  child: Column(
+                                    children: [
+                                      Icon(
+                                        Icons.alarm_on_outlined,
+                                        size: imageSize,
+                                        color: Color(int.parse(selectedColor))
+                                            .withOpacity(1),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 11.0),
+                                        child: GestureDetector(
+                                          onTap: () {},
+                                          child: const Text(
+                                            "scheduled task",
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontFamily: "Rounded_Elegance",
+                                              fontWeight: FontWeight.bold,
                                             ),
                                           ),
                                         ),
-                                      ],
-                                    ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ),
@@ -281,10 +281,19 @@ class _TaskCreationPageState extends State<TaskCreationPage> {
                         Expanded(
                           child: Padding(
                             padding: const EdgeInsets.fromLTRB(5.5, 11, 11, 11),
-                            child: Visibility(
-                              maintainAnimation: true,
-                              maintainState: true,
-                              visible: _isTaskWritten,
+                            child: GestureDetector(
+                              onTap: () async {
+                                String cdate2 =
+                                DateFormat("EEEEE, MMMM dd, yyyy")
+                                    .format(DateTime.now());
+                                //output:  August, 27, 2021
+
+                                String tdata = DateFormat("hh:mm:ss a")
+                                    .format(DateTime.now());
+                                // output: 07:38:57 PM
+                                time = cdate2 + "\n" + tdata;
+                                initiateDB().whenComplete(() => insertData(time, 1));
+                              },
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 355),
                                 decoration: BoxDecoration(
