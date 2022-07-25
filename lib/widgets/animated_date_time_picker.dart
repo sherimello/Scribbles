@@ -1,18 +1,17 @@
-import 'package:awesome_notifications/awesome_notifications.dart';
-import 'package:cron/cron.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:sqflite/sqflite.dart';
-import 'package:intl/intl.dart';
 import 'package:path/path.dart';
+import 'package:scribbles/classes/notificationservice.dart';
+import 'package:sqflite/sqflite.dart';
 
 import '../hero_transition_handler/custom_rect_tween.dart';
 
 class AnimatedDateTimePicker extends StatefulWidget {
-  final String tag;
+  final String tag, task, theme;
 
-  const AnimatedDateTimePicker(this.tag, {Key? key}) : super(key: key);
+  const AnimatedDateTimePicker(this.tag, this.task, this.theme, {Key? key})
+      : super(key: key);
 
   @override
   State<AnimatedDateTimePicker> createState() => _AnimatedDateTimePickerState();
@@ -33,6 +32,11 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
     initiateDB();
     super.initState();
     date = DateTime.now();
+    setState(() {
+      hourValue = date.minute + 1 == 60 ? date.hour + 1 == 24 ? 00 : (date.hour + 1).toDouble() : (date.hour).toDouble();
+      minuteValue = minute + 1 == 60 ? 00 : date.minute + 1.toDouble();
+    });
+    print(date);
   }
 
   Future<void> initiateDB() async {
@@ -42,10 +46,20 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
     // open the database
     database = await openDatabase(path, version: 1,
         onCreate: (Database db, int version) async {
-          // When creating the db, create the table
-          await db.execute(
-              'CREATE TABLE IF NOT EXISTS Tasks (id INTEGER PRIMARY KEY, task NVARCHAR, theme NVARCHAR, time NVARCHAR, pending INTEGER)');
-        });
+      // When creating the db, create the table
+      await db.execute(
+          'CREATE TABLE IF NOT EXISTS Tasks (id INTEGER PRIMARY KEY, task NVARCHAR, theme NVARCHAR, time NVARCHAR, pending INTEGER)');
+    });
+  }
+
+  Future<void> insertData(String time, bool pending) async {
+    print(time);
+    await database.transaction((txn) async {
+      int id1 = await txn.rawInsert(
+          'INSERT INTO Tasks(task, theme, time, pending) VALUES(?, ?, ?, ?)',
+          [widget.task, widget.theme, time, pending]);
+      print('inserted1: $id1');
+    });
   }
 
   @override
@@ -54,51 +68,25 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
     double sunMoonMovementWidth = size.width - 2 * (size.height * .0125);
 
     var myFormat = DateFormat('d-MM-yyyy');
-    final cron = Cron();
-
-    void scheduleTask() {
-      cron.schedule(Schedule.parse('* 52 23 * * *'), () async {
-        print('every Five minutes');
-        AwesomeNotifications().initialize(
-            // set the icon to null if you want to use the default app icon
-            //   'resource://drawable/res_app_icon',
-            null,
-            [
-              NotificationChannel(
-                  channelGroupKey: 'basic_channel_group',
-                  channelKey: 'key1',
-                  channelName: 'Basic notifications',
-                  channelDescription: 'Notification channel for basic tests',
-                  defaultColor: const Color(0xFF9D50DD),
-                  ledColor: Colors.white)
-            ],
-            // Channel groups are only visual and are not required
-            channelGroups: [
-              NotificationChannelGroup(
-                  channelGroupkey: 'basic_channel_group',
-                  channelGroupName: 'Basic group')
-            ],
-            debug: true);
-        AwesomeNotifications().createNotification(
-            content: NotificationContent(
-                id: 1,
-                channelKey: 'key1',
-                title:'Title for your notification',
-                body: 'body text/ content'
-            )
-        );
-      });
-    }
 
     Future<void> _selectDate(BuildContext context) async {
       final DateTime? picked = await showDatePicker(
           context: context,
           initialDate: date,
           firstDate: DateTime(2015, 8),
-          lastDate: DateTime(2101));
+          lastDate: DateTime(3000));
       setState(() {
         date = picked ?? date;
       });
+      print(date.year.toString() +
+          '\n' +
+          date.month.toString() +
+          '\n' +
+          date.day.toString() +
+          '\n' +
+          (hourValue ~/ 10).toString() +
+          '\n' +
+          minuteValue.toInt().toString());
     }
 
     bool isPortraitMode() {
@@ -169,7 +157,9 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Text(
-                                hour.toString().padLeft(2, '0') + ":",
+                                hour == 0
+                                    ? '12:'
+                                    : hour.toString().padLeft(2, '0') + ":",
                                 style: TextStyle(
                                     fontSize: isPortraitMode()
                                         ? size.width * .13
@@ -303,8 +293,7 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
                                             : Colors.white,
                                         value: hourValue,
                                         onChanged: (newHourValue) {
-
-                                          print(newHourValue/10);
+                                          print(newHourValue / 10);
 
                                           HapticFeedback.lightImpact();
                                           setState(() {
@@ -485,7 +474,34 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
                     right: 11,
                     top: 11,
                     child: GestureDetector(
-                      onTap: () => scheduleTask(),
+                      onTap: () async {
+                        String cdate2 = DateFormat("EEEEE, MMMM dd, yyyy")
+                            .format(DateTime.now());
+                        //output:  August, 27, 2021
+
+                        String tdata =
+                            DateFormat("hh:mm:ss a").format(DateTime.now());
+                        // output: 07:38:57 PM
+                        time = cdate2 + "\n" + tdata;
+                        await initiateDB().whenComplete(() async {
+                          insertData(time, true);
+                          List<Map> tempID = (await database.rawQuery(
+                              'SELECT id FROM Tasks WHERE time = ?', [time]));
+                          print("kkk " +
+                              tempID[0]['id'].toString() +
+                              " " +
+                              widget.task +
+                              " ");
+                          NotificationService().showNotification(
+                              tempID[0]['id'],
+                              widget.task,
+                              date.year,
+                              date.month,
+                              date.day,
+                              hourValue ~/ 10,
+                              minuteValue.toInt());
+                        });
+                      },
                       child: Container(
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(1000),

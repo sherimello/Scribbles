@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:path/path.dart';
 import 'package:scribbles/hero_transition_handler/custom_rect_tween.dart';
 import 'package:scribbles/hero_transition_handler/hero_dialog_route.dart';
 import 'package:scribbles/hero_transition_handler/models.dart';
-import 'package:scribbles/widgets/note_card.dart';
 import 'package:scribbles/widgets/simplified_delete_card.dart';
+import 'package:sqflite/sqflite.dart';
 
 class TaskPreviewCard extends StatefulWidget {
-  final String title, id, noteID, theme, time;
+  final String id, task, theme, time, taskID;
+  final bool pending;
 
   const TaskPreviewCard(
       {Key? key,
-        required this.id,
-        required this.time,
-        required this.title,
-        required this.noteID,
-        required this.theme})
+      required this.id,
+      required this.time,
+      required this.theme,
+      required this.task,
+      required this.pending,
+      required this.taskID})
       : super(key: key);
 
   @override
@@ -22,14 +25,38 @@ class TaskPreviewCard extends StatefulWidget {
 }
 
 class _TaskPreviewCardState extends State<TaskPreviewCard> {
-  late bool isChecked = false;
+  late bool isChecked = widget.pending;
+  late Database database;
+  late String path;
+
+  Future<void> initiateDB() async {
+    // Get a location using getDatabasesPath
+    var databasesPath = await getDatabasesPath();
+    path = join(databasesPath, 'tasks.db');
+    // open the database
+    database = await openDatabase(path, version: 1,
+        onCreate: (Database db, int version) async {
+      // When creating the db, create the table
+      await db.execute(
+          'CREATE TABLE IF NOT EXISTS Tasks (id INTEGER PRIMARY KEY, task NVARCHAR, theme NVARCHAR, time NVARCHAR, pending BOOLEAN)');
+    });
+  }
+
+  int boolToInt(bool b) => b ? 1 : 0;
+
+  Future<void> updateData(bool newPendingState) async {
+    await database.transaction((txn) async {
+      database.rawUpdate('UPDATE Tasks SET pending = ? WHERE id = ?',
+          [boolToInt(newPendingState), widget.taskID]);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     late String t1, t2, date;
     late Todo todo;
     t1 =
-    'jhasjkhdiuiashiudyhiausdoijasiojdojoasjioljdoiaiojsiodjoiasjiodjioajoidajsoijdojasiodjojaosjdojoias';
+        'jhasjkhdiuiashiudyhiausdoijasiojdojoasjioljdoiaiojsiodjoiasjiodjioajoidajsoijdojasiodjojaosjdojoias';
     t2 = "hello";
     date = '19-3-93';
     return InkWell(
@@ -37,17 +64,19 @@ class _TaskPreviewCardState extends State<TaskPreviewCard> {
         Navigator.of(context).push(HeroDialogRoute(
           bgColor: Color(int.parse(widget.theme)),
           builder: (context) => Center(
-            child: SimplifiedDeleteCard(widget.noteID, widget.id, widget.theme),
+            child: SimplifiedDeleteCard(widget.taskID, widget.id, widget.theme),
             // child: DeleteCard(widget.id, widget.title, widget.note, widget.noteID),
           ),
           // settings: const RouteSettings(),
         ));
       },
-      onTap: () {
-        // Navigator.of(context).push(HeroDialogRoute(
-          // builder: (context) => SafeArea(child: Center(child: NoteCard(noteID, id, title, note, time, theme))),
-          // settings: const RouteSettings(),
-        // ));
+      onTap: () async {
+        setState(() {
+          isChecked = !isChecked;
+        });
+        print(isChecked);
+        print(widget.taskID);
+        await initiateDB().whenComplete(() => updateData(isChecked));
       },
       child: Hero(
         tag: widget.id,
@@ -77,14 +106,15 @@ class _TaskPreviewCardState extends State<TaskPreviewCard> {
                           Checkbox(
                               activeColor: Colors.white,
                               checkColor: Color(int.parse(widget.theme)),
-                              value: isChecked, onChanged: (checkedState){
-                            setState((){
-                              isChecked = checkedState!;
-                            });
-                          }),
+                              value: isChecked,
+                              onChanged: (checkedState) {
+                                setState(() {
+                                  isChecked = checkedState!;
+                                });
+                              }),
                           Text(
                             // t1,
-                            widget.title,
+                            widget.task,
                             style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 19,

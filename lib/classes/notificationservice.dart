@@ -38,16 +38,18 @@ class NotificationService {
     await flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
-  Future<void> showNotification(int id, String title, String body) async {
+  Future<void> showNotification(int id, String task, year, month, day, hour, minute) async {
+    Duration offsetTime= DateTime.now().timeZoneOffset;
+    print(offsetTime);
 
     print(tz.TZDateTime.now(tz.local));
     await flutterLocalNotificationsPlugin.zonedSchedule(
       id,
-      title,
-      body,
+      'scheduled scribble task',
+      task,
       // tz.TZDateTime.now(tz.local).add(const Duration(
       //     seconds: 5)), //schedule the notification to show after 2 seconds.
-      tz.TZDateTime.local(2022,7,24,14,20,0,0,0), //schedule the notification to show after 2 seconds.
+      tz.TZDateTime.local(year,month,day,hour,minute).subtract(offsetTime), //schedule the notification to show after 2 seconds.
       const NotificationDetails(
 
         // Android details
@@ -72,3 +74,4 @@ class NotificationService {
     );
   }
 }
+//

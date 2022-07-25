@@ -42,11 +42,11 @@ class _TaskCreationPageState extends State<TaskCreationPage> {
         onCreate: (Database db, int version) async {
           // When creating the db, create the table
           await db.execute(
-              'CREATE TABLE IF NOT EXISTS Tasks (id INTEGER PRIMARY KEY, task NVARCHAR, theme NVARCHAR, time NVARCHAR, pending INTEGER)');
+              'CREATE TABLE IF NOT EXISTS Tasks (id INTEGER PRIMARY KEY, task NVARCHAR, theme NVARCHAR, time NVARCHAR, pending BOOLEAN)');
         });
   }
   
-  Future<void> insertData(String time, int pending) async {
+  Future<void> insertData(String time, bool pending) async {
 
     print(time);
     await database.transaction((txn) async {
@@ -229,12 +229,12 @@ class _TaskCreationPageState extends State<TaskCreationPage> {
                         Expanded(
                           child: Padding(
                             padding: const EdgeInsets.fromLTRB(11, 11, 5.5, 11),
-                            child: GestureDetector(
+                            child: InkWell(
                               onTap: (){
                                 Navigator.of(context)
                                     .push(HeroDialogRoute(
-                                  builder: (context) => const Center(
-                                    child: AnimatedDateTimePicker("000"),
+                                  builder: (context) => Center(
+                                    child: AnimatedDateTimePicker("000", _taskFieldController.text, selectedColor),
                                     // child: AnimatedDateTimePicker(),
                                   ),
                                   // settings: const RouteSettings(),
@@ -281,7 +281,7 @@ class _TaskCreationPageState extends State<TaskCreationPage> {
                         Expanded(
                           child: Padding(
                             padding: const EdgeInsets.fromLTRB(5.5, 11, 11, 11),
-                            child: GestureDetector(
+                            child: InkWell(
                               onTap: () async {
                                 String cdate2 =
                                 DateFormat("EEEEE, MMMM dd, yyyy")
@@ -292,7 +292,7 @@ class _TaskCreationPageState extends State<TaskCreationPage> {
                                     .format(DateTime.now());
                                 // output: 07:38:57 PM
                                 time = cdate2 + "\n" + tdata;
-                                initiateDB().whenComplete(() => insertData(time, 1));
+                                initiateDB().whenComplete(() => insertData(time, true));
                               },
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 355),

@@ -13,8 +13,9 @@ class TestWidget extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: GestureDetector(
-            onTap: (){
-              NotificationService().showNotification(1, 'test title', 'test body');
+            onTap: () async {
+              await NotificationService().initNotification();
+              // NotificationService().showNotification(1, 'test title', 'test body');
             },
             child: const Text(
               'show notification'
