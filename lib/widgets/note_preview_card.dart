@@ -31,10 +31,8 @@ class NotePreviewCard extends StatelessWidget {
         Navigator.of(context).push(HeroDialogRoute(
           bgColor: Color(int.parse(theme)),
           builder: (context) => Center(
-            child: SimplifiedDeleteCard(noteID, id, theme),
-            // child: DeleteCard(widget.id, widget.title, widget.note, widget.noteID),
+            child: SimplifiedDeleteCard("note", noteID, id, theme),
           ),
-          // settings: const RouteSettings(),
         ));
       },
       onTap: () {

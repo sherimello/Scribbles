@@ -99,7 +99,7 @@ class _NotePageState extends State<NotePage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const Home(false)),
+                                builder: (context) => const Home(false, 'notes')),
                           )
                         })
                 : Navigator.pop(context, false);
@@ -343,7 +343,7 @@ class _NotePageState extends State<NotePage> {
 
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const Home(false)),
+      MaterialPageRoute(builder: (context) => const Home(false, 'notes')),
     );
   }
 }

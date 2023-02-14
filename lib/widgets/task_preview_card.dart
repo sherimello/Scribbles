@@ -47,7 +47,7 @@ class _TaskPreviewCardState extends State<TaskPreviewCard> {
   Future<void> updateData(bool newPendingState) async {
     await database.transaction((txn) async {
       database.rawUpdate('UPDATE Tasks SET pending = ? WHERE id = ?',
-          [boolToInt(newPendingState), widget.taskID]);
+          [newPendingState ? 1 : 0, widget.taskID]);
     });
   }
 
@@ -64,7 +64,8 @@ class _TaskPreviewCardState extends State<TaskPreviewCard> {
         Navigator.of(context).push(HeroDialogRoute(
           bgColor: Color(int.parse(widget.theme)),
           builder: (context) => Center(
-            child: SimplifiedDeleteCard(widget.taskID, widget.id, widget.theme),
+            child: SimplifiedDeleteCard(
+                "task", widget.taskID, widget.id, widget.theme),
             // child: DeleteCard(widget.id, widget.title, widget.note, widget.noteID),
           ),
           // settings: const RouteSettings(),
@@ -83,57 +84,124 @@ class _TaskPreviewCardState extends State<TaskPreviewCard> {
         createRectTween: (begin, end) {
           return CustomRectTween(begin: begin!, end: end!);
         },
-        child: Card(
-            elevation: 0,
-            shape: RoundedRectangleBorder(
+        child: Container(
+            decoration: BoxDecoration(
+              color: isChecked
+                  ? Color(int.parse(widget.theme)).withOpacity(.19)
+                  : Color(int.parse(widget.theme)),
               borderRadius: BorderRadius.circular(31),
             ),
             // color: Colors.teal[200],
             // color: Colors.pink.withOpacity(.31),
             // color: Colors.orange.withOpacity(.31),
             // color: Colors.red.withOpacity(.31),
-            color: Color(int.parse(widget.theme)),
             child: SingleChildScrollView(
               child: Padding(
-                padding: const EdgeInsets.all(15.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 13, 0, 5),
-                      child: Row(
-                        children: [
-                          Checkbox(
-                              activeColor: Colors.white,
-                              checkColor: Color(int.parse(widget.theme)),
-                              value: isChecked,
-                              onChanged: (checkedState) {
-                                setState(() {
-                                  isChecked = checkedState!;
-                                });
-                              }),
-                          Text(
-                            // t1,
-                            widget.task,
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 19,
-                                fontFamily: 'varela-round.regular'),
+                  padding: const EdgeInsets.all(15.0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Checkbox(
+                          // materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5)),
+                          side: MaterialStateBorderSide.resolveWith(
+                            (states) => const BorderSide(
+                                width: 2.0, color: Colors.black),
                           ),
-                        ],
-                      ),
-                    ),
-                    Text(
-                      widget.time,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white54,
-                          fontSize: 11,
-                          fontFamily: 'Rounded_Elegance'),
-                    ),
-                  ],
-                ),
-              ),
+                          activeColor: Colors.black,
+                          checkColor: Color(int.parse(widget.theme)),
+                          value: isChecked,
+                          onChanged: (checkedState) async {
+                            setState(() {
+                              isChecked = checkedState!;
+                            });
+                            await initiateDB()
+                                .whenComplete(() => updateData(checkedState!));
+                          }),
+                      Text.rich(TextSpan(children: [
+                        TextSpan(
+                          text: widget.task,
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 19,
+                              decoration: isChecked
+                                  ? TextDecoration.lineThrough
+                                  : TextDecoration.none,
+                              fontFamily: 'varela-round.regular'),
+                        ),
+                        TextSpan(
+                          text: "\n${widget.time}",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black.withOpacity(.55),
+                              fontSize: 11,
+                              decoration: isChecked
+                                  ? TextDecoration.lineThrough
+                                  : TextDecoration.none,
+                              fontFamily: 'Rounded_Elegance'),
+                        ),
+                      ])),
+                    ],
+                  )
+
+                  // SingleChildScrollView(
+                  //   child: Row(
+                  //     children: [
+                  //       Checkbox(
+                  //           shape:
+                  //       RoundedRectangleBorder(
+                  //           borderRadius:
+                  //           BorderRadius
+                  //               .circular(
+                  //               5)),
+                  //           side:
+                  //           MaterialStateBorderSide
+                  //               .resolveWith(
+                  //                 (states) =>
+                  //             const BorderSide(
+                  //                 width: 2.0,
+                  //                 color: Colors
+                  //                     .white),
+                  //           ),
+                  //           activeColor: Colors.white,
+                  //           checkColor: Color(int.parse(widget.theme)),
+                  //           value: isChecked,
+                  //           onChanged: (checkedState) async {
+                  //             setState(() {
+                  //               isChecked = checkedState!;
+                  //             });
+                  //             await initiateDB().whenComplete(() => updateData(checkedState!));
+                  //           }),
+                  //       Wrap(
+                  //         direction: Axis.vertical,
+                  //         children: [Text.rich(
+                  //           // t1,
+                  //           TextSpan(
+                  //             children: [
+                  //               TextSpan(
+                  //                 text: widget.task,
+                  //                 style: const TextStyle(
+                  //                     fontWeight: FontWeight.bold,
+                  //                     fontSize: 19,
+                  //                     fontFamily: 'varela-round.regular'),
+                  //               ),
+                  //               TextSpan(
+                  //                 text: "   ${widget.time}",
+                  //                 style: const TextStyle(
+                  //                     fontWeight: FontWeight.bold,
+                  //                     color: Colors.white54,
+                  //                     fontSize: 11,
+                  //                     fontFamily: 'Rounded_Elegance'),
+                  //               ),
+                  //             ]
+                  //           )
+                  //         ),]
+                  //       ),
+                  //     ],
+                  //   ),
+                  // ),
+                  ),
             )),
       ),
     );

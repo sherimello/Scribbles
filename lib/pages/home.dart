@@ -22,8 +22,10 @@ import '../widgets/task_preview_card.dart';
 
 class Home extends StatefulWidget {
   final bool shouldCloudSync;
+  final String whatToShow;
 
-  const Home(this.shouldCloudSync, {Key? key}) : super(key: key);
+  const Home(this.shouldCloudSync, this.whatToShow, {Key? key})
+      : super(key: key);
 
   @override
   _HomeState createState() => _HomeState();
@@ -31,6 +33,7 @@ class Home extends StatefulWidget {
 
 final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email']);
 String listWidget = 'notes';
+bool visible = false;
 
 class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   var t1 =
@@ -47,7 +50,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 // Get a location using getDatabasesPath
   late String path;
   int nSize = 0, tSize = 0;
-  bool visible = false, _isLoading = false;
+  bool _isLoading = false;
 
   Future<void> initiateTasksDB() async {
     // Get a location using getDatabasesPath
@@ -90,6 +93,55 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             'note': nList[i]['note'].toString(),
             'theme': nList[i]['theme'].toString(),
             'time': nList[i]['time'].toString(),
+          })
+          .asStream()
+          .listen((event) {}, onDone: () async {
+            await initiateTasksDB().whenComplete(() =>
+                showTasksData().whenComplete(() {
+                  final ref2 = FirebaseDatabase.instance.ref().child('tasks');
+                  print("hello: ${tList.length}");
+                  for (int i = 0; i < tList.length; i++) {
+                    print(userName);
+                    ref2
+                        .child(userName)
+                        .child(
+                            (tList[i]['time'].toString().replaceAll('\n', ' ')))
+                        .set({
+                          'task': tList[i]['task'].toString(),
+                          'theme': tList[i]['theme'].toString(),
+                          'time': tList[i]['time'].toString(),
+                          'pending': (tList[i]['pending']) == 0 ? "false" : "true",
+                        })
+                        .asStream()
+                        .listen((event) {}, onDone: () {
+                          setState(() {
+                            _isLoading = false;
+                          });
+                        });
+                  }
+                }));
+            // setState(() {
+            //   _isLoading = false;
+            // });
+          });
+    }
+  }
+
+  uploadTaskToFirebase() async {
+    userName = await MySharedPreferences().getStringValue("userName");
+    print(userName);
+    final ref = FirebaseDatabase.instance.ref().child('tasks');
+    print(tList.length);
+    for (int i = 0; i < tList.length; i++) {
+      print(userName);
+      ref
+          .child(userName)
+          .child((tList[i]['time'].toString().replaceAll('\n', ' ')))
+          .set({
+            'title': tList[i]['title'].toString(),
+            'task': tList[i]['task'].toString(),
+            'theme': tList[i]['theme'].toString(),
+            'time': tList[i]['time'].toString(),
           })
           .asStream()
           .listen((event) {}, onDone: () {
@@ -138,6 +190,12 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   showNotesData() async {
     nList = (await database.rawQuery('SELECT * FROM Notes'));
 
+    setState(() {
+      nList = nList;
+      nSize = nList.length;
+    });
+    // print(nList.length);
+
     if (nList.isNotEmpty) {
       setState(() {
         visible = false;
@@ -150,11 +208,14 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     if (kDebugMode) {
       print(nList.length);
     }
-    nSize = nList.length;
   }
 
-  showTasksData() async {
+  Future<void> showTasksData() async {
     tList = (await database.rawQuery('SELECT * FROM Tasks'));
+    setState(() {
+      tList = tList;
+      tSize = tList.length;
+    });
 
     if (tList.isNotEmpty) {
       setState(() {
@@ -168,7 +229,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     if (kDebugMode) {
       print(tList.length);
     }
-    tSize = tList.length;
 
     print(tList[0]["pending"]);
   }
@@ -206,53 +266,64 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   Padding notesList() {
     return Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 4.0,
+        ),
         child: StaggeredGridView.countBuilder(
           physics: const BouncingScrollPhysics(),
           shrinkWrap: true,
           crossAxisCount: 2,
           itemCount:
               // list.isEmpty ? 0:
-              nSize,
+              nList.isEmpty ? 0 : nList.length,
           itemBuilder: (BuildContext context, int index) =>
               // list.isEmpty ? Container():
-              NotePreviewCard(
-                  time: nList[index]['time'].toString(),
-                  theme: nList[index]["theme"].toString(),
-                  noteID: nList[index]["id"].toString(),
-                  id: index.toString(),
-                  title: nList[index]["title"].toString(),
-                  note: nList[index]["note"].toString()),
+              Padding(
+            padding: index == 0 || index == 1
+                ? EdgeInsets.only(
+                    top: 56 + MediaQuery.of(context).size.width * .05)
+                : EdgeInsets.zero,
+            child: NotePreviewCard(
+                time: nList[index]['time'].toString(),
+                theme: nList[index]["theme"].toString(),
+                noteID: nList[index]["id"].toString(),
+                id: index.toString(),
+                title: nList[index]["title"].toString(),
+                note: nList[index]["note"].toString()),
+          ),
           staggeredTileBuilder: (int index) => const StaggeredTile.fit(1),
-          mainAxisSpacing: 4.0,
-          crossAxisSpacing: 4.0,
+          mainAxisSpacing: 0.0,
+          crossAxisSpacing: 0.0,
         ));
   }
 
-  Padding tasksList() {
-    return Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: StaggeredGridView.countBuilder(
-          physics: const BouncingScrollPhysics(),
-          shrinkWrap: true,
-          crossAxisCount: 1,
-          itemCount:
-              // list.isEmpty ? 0:
-              tSize,
-          itemBuilder: (BuildContext context, int index) =>
-              // list.isEmpty ? Container():
-              TaskPreviewCard(
-            time: tList[index]['time'].toString(),
-            theme: tList[index]["theme"].toString(),
-            taskID: tList[index]["id"].toString(),
-            id: index.toString(),
-            task: tList[index]["task"].toString(),
-            pending: intToBool(tList[index]["pending"]),
-          ),
-          staggeredTileBuilder: (int index) => const StaggeredTile.fit(1),
-          mainAxisSpacing: 4.0,
-          crossAxisSpacing: 4.0,
-        ));
+  Widget tasksList() {
+    return StaggeredGridView.countBuilder(
+      physics: const BouncingScrollPhysics(),
+      shrinkWrap: true,
+      crossAxisCount: 1,
+      itemCount:
+          // list.isEmpty ? 0:
+          tSize,
+      itemBuilder: (BuildContext context, int index) =>
+          // list.isEmpty ? Container():
+          Padding(
+        padding: index == 0
+            ? EdgeInsets.only(top: 56 + MediaQuery.of(context).size.width * .05)
+            : EdgeInsets.zero,
+        child: TaskPreviewCard(
+          time: tList[index]['time'].toString(),
+          theme: tList[index]["theme"].toString(),
+          taskID: tList[index]["id"].toString(),
+          id: index.toString(),
+          task: tList[index]["task"].toString(),
+          pending: intToBool(tList[index]["pending"]),
+        ),
+      ),
+      staggeredTileBuilder: (int index) => const StaggeredTile.fit(1),
+      mainAxisSpacing: 4.0,
+      crossAxisSpacing: 0.0,
+    );
   }
 
   bool intToBool(int a) => a == 0 ? false : true;
@@ -260,14 +331,22 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     // TODO: implement initState
-    Firebase.initializeApp();
+    // Firebase.initializeApp();
     super.initState();
     initiateTasksDB();
+    initiateNotesDB();
     universalFetchLogic();
     saveLastUsed();
     setState(() {
-      listWidget = 'notes';
+      listWidget = widget.whatToShow;
     });
+    if (listWidget == "tasks") {
+      initiateTasksDB().whenComplete(() => showTasksData());
+      setState(() {
+        isNotesPressed = false;
+      });
+    }
+    print(listWidget);
   }
 
   Widget cloudBackupLoadingCard() {
@@ -343,6 +422,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       ];
     }
 
+    var size = MediaQuery.of(context).size;
+
     return Scaffold(
       body: AnimatedContainer(
         duration: const Duration(milliseconds: 255),
@@ -350,123 +431,24 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         width: double.infinity,
         color: const Color(0xffF8F0E3),
         child: SafeArea(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
+          bottom: false,
+          child: Stack(
+            // mainAxisAlignment: MainAxisAlignment.start,
+            // crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(11, 3, 11, 11),
-                      child: GestureDetector(
-                        onTap: () => setState(() => {
-                              listWidget = 'notes',
-                              if (!isNotesPressed)
-                                isNotesPressed = !isNotesPressed
-                            }),
-                        child: AnimatedContainer(
-                          width:
-                              isPortraitMode() ? s.width * .35 : s.height * .35,
-                          height: AppBar().preferredSize.height * .75,
-                          duration: const Duration(milliseconds: 255),
-                          decoration: BoxDecoration(
-                              color: const Color(0xffe1dacf),
-                              borderRadius: BorderRadius.circular(13),
-                              boxShadow: boxShadow(
-                                  !isNotesPressed ? 7 : 5,
-                                  5,
-                                  5,
-                                  isNotesPressed
-                                      ? const Color(0x55000000)
-                                      : const Color(0x55000000),
-                                  isNotesPressed
-                                      ? const Color(0xffffffff)
-                                      : const Color(0xffffffff),
-                                  isNotesPressed ? true : false)),
-                          child: Center(
-                            child: AnimatedDefaultTextStyle(
-                              duration: const Duration(milliseconds: 255),
-                              style: isNotesPressed
-                                  ? const TextStyle(
-                                      fontFamily: "varela-round.regular",
-                                      fontSize: 15,
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.bold)
-                                  : const TextStyle(
-                                      fontFamily: "varela-round.regular",
-                                      fontSize: 13,
-                                      color: Colors.black45,
-                                      fontWeight: FontWeight.bold),
-                              child: const Text(
-                                'notes',
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(11, 3, 11, 11),
-                      child: GestureDetector(
-                        onTap: () => setState(() {
-                          listWidget = 'tasks';
-                          if (isNotesPressed) {
-                            initiateTasksDB().whenComplete(() => showTasksData());
-                            isNotesPressed = !isNotesPressed;
-                          }
-                        }),
-                        child: AnimatedContainer(
-                          width:
-                              isPortraitMode() ? s.width * .35 : s.height * .35,
-                          height: AppBar().preferredSize.height * .75,
-                          duration: const Duration(milliseconds: 255),
-                          decoration: BoxDecoration(
-                              color: const Color(0xffe1dacf),
-                              borderRadius: BorderRadius.circular(13),
-                              boxShadow: boxShadow(
-                                  !isNotesPressed ? 5 : 7,
-                                  5,
-                                  5,
-                                  isNotesPressed
-                                      ? const Color(0x55000000)
-                                      : const Color(0x55000000),
-                                  isNotesPressed
-                                      ? const Color(0xffffffff)
-                                      : const Color(0xffffffff),
-                                  isNotesPressed ? false : true)),
-                          child: Center(
-                            child: AnimatedDefaultTextStyle(
-                              duration: const Duration(milliseconds: 255),
-                              style: !isNotesPressed
-                                  ? const TextStyle(
-                                      fontFamily: "varela-round.regular",
-                                      fontSize: 15,
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.bold)
-                                  : const TextStyle(
-                                      fontFamily: "varela-round.regular",
-                                      fontSize: 13,
-                                      color: Colors.black45,
-                                      fontWeight: FontWeight.bold),
-                              child: const Text(
-                                'tasks',
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
+              SizedBox(
+                width: double.infinity,
+                height: double.infinity,
                 child: Stack(children: [
-                  listWidget != 'tasks' ? notesList() : tasksList(),
+                  listWidget != 'tasks'
+                      ? notesList()
+                      : Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 11.0),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(31),
+                            child: tasksList(),
+                          ),
+                        ),
                   Positioned(
                       bottom: 21,
                       right: 11,
@@ -515,6 +497,249 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                     ),
                   )
                 ]),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                    horizontal: size.width * .05, vertical: 11),
+                child: Container(
+                  decoration: BoxDecoration(
+                      color: Colors.black,
+                      borderRadius: BorderRadius.circular(100)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(11.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        GestureDetector(
+                          onTap: () => setState(() {
+                            listWidget = 'notes';
+                            if (!isNotesPressed) {
+                              initiateNotesDB()
+                                  .whenComplete(() => showNotesData());
+                              isNotesPressed = !isNotesPressed;
+                            }
+                          }),
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * .5 -
+                                (size.width * .05 + 16.5),
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(100),
+                                color: isNotesPressed
+                                    ? const Color(0xffF8F0E3).withOpacity(.19)
+                                    : const Color(0xffF8F0E3)),
+                            child: Padding(
+                              padding: const EdgeInsets.all(7.0),
+                              child: Text.rich(
+                                TextSpan(
+                                    style: TextStyle(
+                                        height: 0,
+                                        color: isNotesPressed
+                                            ? Colors.white
+                                            : Colors.black,
+                                        fontSize: size.width * .031,
+                                        fontFamily: "Rounded_Elegance",
+                                        fontWeight: FontWeight.bold),
+                                    children: [
+                                      WidgetSpan(
+                                          child: Icon(
+                                            Icons.note_outlined,
+                                            size: size.width * .05,
+                                            color: isNotesPressed
+                                                ? Colors.white
+                                                : Colors.black,
+                                          ),
+                                          alignment:
+                                              PlaceholderAlignment.middle),
+                                      TextSpan(
+                                        text: "  notes",
+                                        style: TextStyle(
+                                            height: 0,
+                                            color: isNotesPressed
+                                                ? Colors.white
+                                                : Colors.black,
+                                            fontSize: size.width * .031,
+                                            fontFamily: "Rounded_Elegance",
+                                            fontWeight: FontWeight.bold),
+                                      )
+                                    ]),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () => setState(() {
+                            listWidget = 'tasks';
+                            if (isNotesPressed) {
+                              initiateTasksDB()
+                                  .whenComplete(() => showTasksData());
+                              isNotesPressed = false;
+                            }
+                          }),
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * .5 -
+                                (size.width * .05 + 16.5),
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(100),
+                                color: isNotesPressed
+                                    ? const Color(0xffF8F0E3)
+                                    : const Color(0xffF8F0E3).withOpacity(.19)),
+                            child: Padding(
+                              padding: const EdgeInsets.all(7.0),
+                              child: Text.rich(
+                                TextSpan(
+                                    style: TextStyle(
+                                        height: 0,
+                                        color: !isNotesPressed
+                                            ? Colors.white
+                                            : Colors.black,
+                                        fontFamily: "Rounded_Elegance",
+                                        fontSize: size.width * .031,
+                                        fontWeight: FontWeight.bold),
+                                    children: [
+                                      WidgetSpan(
+                                          child: Icon(
+                                            Icons.task_outlined,
+                                            size: size.width * .05,
+                                            color: !isNotesPressed
+                                                ? Colors.white
+                                                : Colors.black,
+                                          ),
+                                          alignment:
+                                              PlaceholderAlignment.middle),
+                                      TextSpan(
+                                        text: "  tasks",
+                                        style: TextStyle(
+                                            height: 0,
+                                            color: !isNotesPressed
+                                                ? Colors.white
+                                                : Colors.black,
+                                            fontSize: size.width * .031,
+                                            fontFamily: "Rounded_Elegance",
+                                            fontWeight: FontWeight.bold),
+                                      )
+                                    ]),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                // child: Row(
+                //   mainAxisSize: MainAxisSize.min,
+                //   mainAxisAlignment: MainAxisAlignment.center,
+                //   children: [
+                //     Padding(
+                //       padding: const EdgeInsets.fromLTRB(11, 7, 5.5, 7),
+                //       child: GestureDetector(
+                //         onTap: () => setState(() {
+                //           listWidget = 'notes';
+                //           if (!isNotesPressed) {
+                //             initiateNotesDB()
+                //                 .whenComplete(() => showNotesData());
+                //             isNotesPressed = !isNotesPressed;
+                //           }
+                //         }),
+                //         child: AnimatedContainer(
+                //           width:
+                //               isPortraitMode() ? s.width * .35 : s.height * .35,
+                //           height: AppBar().preferredSize.height * .75,
+                //           duration: const Duration(milliseconds: 255),
+                //           decoration: BoxDecoration(
+                //               color: const Color(0xffe1dacf),
+                //               borderRadius: BorderRadius.circular(13),
+                //               boxShadow: boxShadow(
+                //                   !isNotesPressed ? 7 : 5,
+                //                   5,
+                //                   5,
+                //                   isNotesPressed
+                //                       ? const Color(0x55000000)
+                //                       : const Color(0x55000000),
+                //                   isNotesPressed
+                //                       ? const Color(0xffffffff)
+                //                       : const Color(0xffffffff),
+                //                   isNotesPressed ? true : false)),
+                //           child: Center(
+                //             child: AnimatedDefaultTextStyle(
+                //               duration: const Duration(milliseconds: 255),
+                //               style: isNotesPressed
+                //                   ? const TextStyle(
+                //                       fontFamily: "varela-round.regular",
+                //                       fontSize: 15,
+                //                       color: Colors.black,
+                //                       fontWeight: FontWeight.bold)
+                //                   : const TextStyle(
+                //                       fontFamily: "varela-round.regular",
+                //                       fontSize: 13,
+                //                       color: Colors.black45,
+                //                       fontWeight: FontWeight.bold),
+                //               child: const Text(
+                //                 'notes',
+                //                 textAlign: TextAlign.center,
+                //               ),
+                //             ),
+                //           ),
+                //         ),
+                //       ),
+                //     ),
+                //     Padding(
+                //       padding: const EdgeInsets.fromLTRB(5.5, 3, 11, 3),
+                //       child: GestureDetector(
+                //         onTap: () => setState(() {
+                //           listWidget = 'tasks';
+                //           if (isNotesPressed) {
+                //             initiateTasksDB()
+                //                 .whenComplete(() => showTasksData());
+                //             isNotesPressed = !isNotesPressed;
+                //           }
+                //         }),
+                //         child: AnimatedContainer(
+                //           width:
+                //               isPortraitMode() ? s.width * .35 : s.height * .35,
+                //           height: AppBar().preferredSize.height * .75,
+                //           duration: const Duration(milliseconds: 255),
+                //           decoration: BoxDecoration(
+                //               color: const Color(0xffe1dacf),
+                //               borderRadius: BorderRadius.circular(13),
+                //               boxShadow: boxShadow(
+                //                   !isNotesPressed ? 5 : 7,
+                //                   5,
+                //                   5,
+                //                   isNotesPressed
+                //                       ? const Color(0x55000000)
+                //                       : const Color(0x55000000),
+                //                   isNotesPressed
+                //                       ? const Color(0xffffffff)
+                //                       : const Color(0xffffffff),
+                //                   isNotesPressed ? false : true)),
+                //           child: Center(
+                //             child: AnimatedDefaultTextStyle(
+                //               duration: const Duration(milliseconds: 255),
+                //               style: !isNotesPressed
+                //                   ? const TextStyle(
+                //                       fontFamily: "varela-round.regular",
+                //                       fontSize: 15,
+                //                       color: Colors.black,
+                //                       fontWeight: FontWeight.bold)
+                //                   : const TextStyle(
+                //                       fontFamily: "varela-round.regular",
+                //                       fontSize: 13,
+                //                       color: Colors.black45,
+                //                       fontWeight: FontWeight.bold),
+                //               child: const Text(
+                //                 'tasks',
+                //                 textAlign: TextAlign.center,
+                //               ),
+                //             ),
+                //           ),
+                //         ),
+                //       ),
+                //     ),
+                //   ],
+                // ),
               ),
             ],
           ),

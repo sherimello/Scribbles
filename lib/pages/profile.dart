@@ -137,7 +137,7 @@ class _ProfileState extends State<Profile> {
                                           context,
                                           MaterialPageRoute(
                                               builder: (context) =>
-                                                  const Home(false)),
+                                                  const Home(false, 'notes')),
                                         )
                                       });
                         },
@@ -178,7 +178,7 @@ class _ProfileState extends State<Profile> {
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) =>
-                                              const Home(false)),
+                                              const Home(false, 'notes')),
                                     )
                                   });
                         },

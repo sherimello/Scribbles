@@ -82,7 +82,7 @@ class DeleteCard extends StatelessWidget {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => const Home(true)),
+                                    builder: (context) => const Home(true, 'notes')),
                               );
                             },
                             icon: const Icon(

@@ -6,11 +6,14 @@ import 'package:scribbles/classes/notificationservice.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../hero_transition_handler/custom_rect_tween.dart';
+import '../pages/home.dart';
 
 class AnimatedDateTimePicker extends StatefulWidget {
   final String tag, task, theme;
+  final Size size;
 
-  const AnimatedDateTimePicker(this.tag, this.task, this.theme, {Key? key})
+  const AnimatedDateTimePicker(this.tag, this.task, this.theme, this.size,
+      {Key? key})
       : super(key: key);
 
   @override
@@ -27,15 +30,53 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
   late Database database;
   late String path, time;
 
+  bool isPortraitModeForInit() {
+    return widget.size.height > widget.size.width ? true : false;
+  }
+
   @override
   void initState() {
     initiateDB();
     super.initState();
-    date = DateTime.now();
+    date = DateTime.now().add(const Duration(minutes: 1));
     setState(() {
-      hourValue = date.minute + 1 == 60 ? date.hour + 1 == 24 ? 00 : (date.hour + 1).toDouble() : (date.hour).toDouble();
-      minuteValue = minute + 1 == 60 ? 00 : date.minute + 1.toDouble();
+      double hr = date.hour.toDouble();
+      hour = hr >= 12 ? hr.toInt() - 12 : hr.toInt();
+      hourValue = hr * 10;
+      minuteValue = date.minute.toDouble();
+
+      double skyHeight = isPortraitModeForInit()
+              ? widget.size.height * .17
+              : widget.size.width * .17,
+          imageSize = isPortraitModeForInit()
+              ? widget.size.height * .071
+              : widget.size.width * .071;
+
+      hourValue >= 60 && hourValue <= 180
+          ? image = 'lib/assets/images/suun.png'
+          : image = 'lib/assets/images/moonn.png';
+      (hourValue >= 60 && hourValue <= 70) ||
+              (hourValue >= 170 && hourValue <= 180)
+          ? skyTheme = const Color(0xffffbf77)
+          : hourValue >= 70 && hourValue <= 160
+              ? skyTheme = Colors.lightBlueAccent
+              : skyTheme = const Color(0xff334760);
+
+      isPortraitModeForInit()
+          ? movementX =
+              (((widget.size.width - 44 - imageSize) / 23)) * (hourValue / 10)
+          : movementX =
+              (((widget.size.width - 44 - imageSize) / 23)) * (hourValue / 10);
+      hourValue == 110 || hourValue == 120
+          ? movementY = (((skyHeight - 22 - imageSize) / 10)) * 10
+          : hourValue > 120
+              ? movementY = ((((skyHeight - 22 - imageSize) / 13)) * 13) -
+                  (((skyHeight - 22 - imageSize) / 11)) *
+                      ((hourValue / 10) - 12)
+              : movementY =
+                  (((skyHeight - 22 - imageSize) / 10)) * (hourValue / 10);
     });
+    print(hourValue);
     print(date);
   }
 
@@ -69,6 +110,10 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
 
     var myFormat = DateFormat('d-MM-yyyy');
 
+    bool isPortraitMode() {
+      return size.height > size.width ? true : false;
+    }
+
     Future<void> _selectDate(BuildContext context) async {
       final DateTime? picked = await showDatePicker(
           context: context,
@@ -87,10 +132,6 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
           (hourValue ~/ 10).toString() +
           '\n' +
           minuteValue.toInt().toString());
-    }
-
-    bool isPortraitMode() {
-      return size.height > size.width ? true : false;
     }
 
     double skyHeight = isPortraitMode() ? size.height * .17 : size.width * .17,
@@ -484,7 +525,7 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
                         // output: 07:38:57 PM
                         time = cdate2 + "\n" + tdata;
                         await initiateDB().whenComplete(() async {
-                          insertData(time, true);
+                          insertData(time, false);
                           List<Map> tempID = (await database.rawQuery(
                               'SELECT id FROM Tasks WHERE time = ?', [time]));
                           print("kkk " +
@@ -499,7 +540,13 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
                               date.month,
                               date.day,
                               hourValue ~/ 10,
-                              minuteValue.toInt());
+                              minuteValue.toInt()).whenComplete(() => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                const Home(
+                                    true, 'tasks')),
+                          ));
                         });
                       },
                       child: Container(

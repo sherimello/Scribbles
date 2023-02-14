@@ -246,7 +246,7 @@ class _TestState extends State<Test> {
                                               ),
                                             ),
                                             TextSpan(
-                                                text: "  sync",
+                                                text: "  sync notes",
                                                 style: TextStyle(
                                                     fontFamily:
                                                         'varela-round.regular',

@@ -75,7 +75,7 @@ class _SyncFileState extends State<SyncFile> {
       }
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const Home(false)),
+        MaterialPageRoute(builder: (context) => const Home(false, 'notes')),
       );
     });
   }
@@ -101,7 +101,7 @@ class _SyncFileState extends State<SyncFile> {
         });
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const Home(false)),
+          MaterialPageRoute(builder: (context) => const Home(false, 'notes')),
         );
       });
     }

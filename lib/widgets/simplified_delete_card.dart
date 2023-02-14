@@ -7,9 +7,9 @@ import '../pages/home.dart';
 import '../hero_transition_handler/custom_rect_tween.dart';
 
 class SimplifiedDeleteCard extends StatelessWidget {
-  final String string, noteID, theme;
+  final String whatToDelete, string, noteID, theme;
 
-  const SimplifiedDeleteCard(this.noteID, this.string, this.theme, {Key? key})
+  const SimplifiedDeleteCard(this.whatToDelete, this.noteID, this.string, this.theme, {Key? key})
       : super(key: key);
 
   @override
@@ -34,16 +34,24 @@ class SimplifiedDeleteCard extends StatelessWidget {
     
     Future<void> deleteNote() async {
       var databasesPath = await getDatabasesPath();
-      path = join(databasesPath, 'demo.db');
+      if(whatToDelete == "note") {
+      }
+      else {
+        path = join(databasesPath, 'tasks.db');
+      }
       Database database = await openDatabase(
         path,
         version: 1,
       );
-      database.rawDelete('DELETE FROM Notes WHERE id = ?', [noteID]);
+      if(whatToDelete == "note") {
+        database.rawDelete('DELETE FROM Notes WHERE id = ?', [noteID]);
+      }
+      else {
+        database.rawDelete('DELETE FROM Tasks WHERE id = ?', [noteID]);
+      }
       if (kDebugMode) {
         print('deleted');
       }
-      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const Home(true)), (route) => false);
     }
 
     var size = MediaQuery.of(context).size;
@@ -54,7 +62,16 @@ class SimplifiedDeleteCard extends StatelessWidget {
         return CustomRectTween(begin: begin!, end: end!);
       },
       child: GestureDetector(
-        onTap: deleteNote,
+        onTap: () {
+          deleteNote().whenComplete(() {
+            if(whatToDelete == "note") {
+              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const Home(true, 'notes')), (route) => false);
+            }
+            else {
+              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const Home(true, 'tasks')), (route) => false);
+            }
+          });
+        },
         child: SizedBox(
           width: size.width*.25,
           height: size.width*.25,

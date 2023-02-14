@@ -31,7 +31,7 @@ class NoteCard extends StatelessWidget {
       if (kDebugMode) {
         print('deleted');
       }
-      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const Home(true)), (route) => false);
+      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const Home(true, 'notes')), (route) => false);
     }
 
     List<BoxShadow> boxShadow(double blurRadius, double offset1, double offset2,
