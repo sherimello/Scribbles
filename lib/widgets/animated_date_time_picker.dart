@@ -89,16 +89,21 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
         onCreate: (Database db, int version) async {
       // When creating the db, create the table
       await db.execute(
-          'CREATE TABLE IF NOT EXISTS Tasks (id INTEGER PRIMARY KEY, task NVARCHAR, theme NVARCHAR, time NVARCHAR, pending INTEGER)');
+          'CREATE TABLE IF NOT EXISTS Tasks (id INTEGER PRIMARY KEY, task NVARCHAR, theme NVARCHAR, time NVARCHAR, pending INTEGER, schedule NVARCHAR)');
     });
   }
 
   Future<void> insertData(String time, bool pending) async {
+    String month = date.month.toString().length == 1 ? "0${date.month}" : date.month.toString();
+    String day = date.day.toString().length == 1 ? "0${date.day}" : date.day.toString();
+    String hour = hourValue ~/ 10.toString().length == 1 ? "0${hourValue ~/ 10}" : (hourValue ~/ 10).toString();
+    String minute = minuteValue.toInt().toString().length == 1 ? "0${minuteValue.toInt()}" : (minuteValue.toInt()).toString();
+    String schedule = "${date.year}|$month|$day|$hour|$minute";
     print(time);
     await database.transaction((txn) async {
       int id1 = await txn.rawInsert(
-          'INSERT INTO Tasks(task, theme, time, pending) VALUES(?, ?, ?, ?)',
-          [widget.task, widget.theme, time, pending]);
+          'INSERT INTO Tasks(task, theme, time, pending, schedule) VALUES(?, ?, ?, ?, ?)',
+          [widget.task, widget.theme, time, pending, schedule]);
       print('inserted1: $id1');
     });
   }

@@ -16,6 +16,7 @@ import 'package:scribbles/widgets/note_preview_card.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../classes/note_map_for_cloud_fetch.dart';
+import '../classes/notificationservice.dart';
 import '../hero_transition_handler/custom_rect_tween.dart';
 import '../hero_transition_handler/hero_dialog_route.dart';
 import '../widgets/task_preview_card.dart';
@@ -61,7 +62,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         onCreate: (Database db, int version) async {
       // When creating the db, create the table
       await db.execute(
-          'CREATE TABLE IF NOT EXISTS Tasks (id INTEGER PRIMARY KEY, task NVARCHAR, theme NVARCHAR, time NVARCHAR, pending BOOLEAN)');
+          'CREATE TABLE IF NOT EXISTS Tasks (id INTEGER PRIMARY KEY, task NVARCHAR, theme NVARCHAR, time NVARCHAR, pending BOOLEAN, schedule NVARCHAR)');
     });
   }
 
@@ -96,60 +97,34 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           })
           .asStream()
           .listen((event) {}, onDone: () async {
-            await initiateTasksDB().whenComplete(() =>
-                showTasksData().whenComplete(() {
-                  final ref2 = FirebaseDatabase.instance.ref().child('tasks');
-                  print("hello: ${tList.length}");
-                  for (int i = 0; i < tList.length; i++) {
-                    print(userName);
-                    ref2
-                        .child(userName)
-                        .child(
-                            (tList[i]['time'].toString().replaceAll('\n', ' ')))
-                        .set({
-                          'task': tList[i]['task'].toString(),
-                          'theme': tList[i]['theme'].toString(),
-                          'time': tList[i]['time'].toString(),
-                          'pending': (tList[i]['pending']) == 0 ? "false" : "true",
-                        })
-                        .asStream()
-                        .listen((event) {}, onDone: () {
-                          setState(() {
-                            _isLoading = false;
-                          });
-                        });
-                  }
-                }));
             // setState(() {
             //   _isLoading = false;
             // });
           });
     }
-  }
-
-  uploadTaskToFirebase() async {
-    userName = await MySharedPreferences().getStringValue("userName");
-    print(userName);
-    final ref = FirebaseDatabase.instance.ref().child('tasks');
-    print(tList.length);
-    for (int i = 0; i < tList.length; i++) {
-      print(userName);
-      ref
-          .child(userName)
-          .child((tList[i]['time'].toString().replaceAll('\n', ' ')))
-          .set({
-            'title': tList[i]['title'].toString(),
-            'task': tList[i]['task'].toString(),
-            'theme': tList[i]['theme'].toString(),
-            'time': tList[i]['time'].toString(),
-          })
-          .asStream()
-          .listen((event) {}, onDone: () {
-            setState(() {
-              _isLoading = false;
-            });
-          });
-    }
+    await initiateTasksDB().whenComplete(() => showTasksData().whenComplete(() {
+          final ref2 = FirebaseDatabase.instance.ref().child('tasks');
+          print("hello: ${tList.length}");
+          for (int i = 0; i < tList.length; i++) {
+            print(userName);
+            ref2
+                .child(userName)
+                .child((tList[i]['time'].toString().replaceAll('\n', ' ')))
+                .set({
+                  'task': tList[i]['task'].toString(),
+                  'theme': tList[i]['theme'].toString(),
+                  'time': tList[i]['time'].toString(),
+                  'pending': (tList[i]['pending']) == 0 ? "false" : "true",
+                  'schedule': tList[i]['schedule'].toString(),
+                })
+                .asStream()
+                .listen((event) {}, onDone: () {
+                  setState(() {
+                    _isLoading = false;
+                  });
+                });
+          }
+        }));
   }
 
   removeUserDataFromCloud() async {
@@ -196,15 +171,18 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     });
     // print(nList.length);
 
-    if (nList.isNotEmpty) {
-      setState(() {
-        visible = false;
-      });
-    } else {
-      setState(() {
-        visible = true;
-      });
-    }
+    setState(() {
+      if (nList.isEmpty) {
+        setState(() {
+          visible = true;
+        });
+      } else {
+        setState(() {
+          visible = false;
+        });
+      }
+    });
+
     if (kDebugMode) {
       print(nList.length);
     }
@@ -217,20 +195,48 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       tSize = tList.length;
     });
 
-    if (tList.isNotEmpty) {
+    bindNotificationToTasks();
+
+    if (tList.isEmpty) {
       setState(() {
-        visible = false;
+        visible = true;
       });
     } else {
       setState(() {
-        visible = true;
+        visible = false;
       });
     }
     if (kDebugMode) {
       print(tList.length);
     }
 
-    print(tList[0]["pending"]);
+    // print(tList[0]["pending"]);
+  }
+
+  bindNotificationToTasks() {
+    for (int i = 0; i < tList.length; i++) {
+      if (tList[i]['schedule'] != "undefined") {
+        String year = tList[i]["schedule"].toString().substring(0, 4);
+        String month = tList[i]["schedule"].toString().substring(5, 7);
+        String day = tList[i]["schedule"].toString().substring(8, 10);
+        String hour = tList[i]["schedule"].toString().substring(11, 13);
+        String minute = tList[i]["schedule"].toString().substring(14, 16);
+        print(year);
+        print(month);
+        print(day);
+        print(hour);
+        print(minute);
+
+        NotificationService().showNotification(
+            tList[i]['id'],
+            tList[i]['task'],
+            int.parse(year),
+            int.parse(month),
+            int.parse(day),
+            int.parse(hour),
+            int.parse(minute));
+      }
+    }
   }
 
   checkLoadLogic() async {
@@ -318,6 +324,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           id: index.toString(),
           task: tList[index]["task"].toString(),
           pending: intToBool(tList[index]["pending"]),
+          schedule: tList[index]["schedule"],
         ),
       ),
       staggeredTileBuilder: (int index) => const StaggeredTile.fit(1),
@@ -333,8 +340,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     // TODO: implement initState
     // Firebase.initializeApp();
     super.initState();
-    initiateTasksDB();
     initiateNotesDB();
+    initiateTasksDB();
     universalFetchLogic();
     saveLastUsed();
     setState(() {
@@ -483,7 +490,13 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                         ),
                       )),
                   Visibility(
-                    visible: visible,
+                    visible: listWidget == 'notes'
+                        ? nList.isEmpty
+                            ? true
+                            : false
+                        : tList.isEmpty
+                            ? true
+                            : false,
                     child: Center(
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(1000),

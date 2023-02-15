@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
+import 'package:scribbles/classes/notificationservice.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../pages/home.dart';
@@ -35,6 +36,7 @@ class SimplifiedDeleteCard extends StatelessWidget {
     Future<void> deleteNote() async {
       var databasesPath = await getDatabasesPath();
       if(whatToDelete == "note") {
+        path = join(databasesPath, 'demo.db');
       }
       else {
         path = join(databasesPath, 'tasks.db');
@@ -48,6 +50,7 @@ class SimplifiedDeleteCard extends StatelessWidget {
       }
       else {
         database.rawDelete('DELETE FROM Tasks WHERE id = ?', [noteID]);
+        NotificationService().closeNotification(int.parse(noteID));
       }
       if (kDebugMode) {
         print('deleted');

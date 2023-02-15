@@ -60,7 +60,7 @@ class _TaskCreationPageState extends State<TaskCreationPage> {
         onCreate: (Database db, int version) async {
           // When creating the db, create the table
           await db.execute(
-              'CREATE TABLE IF NOT EXISTS Tasks (id INTEGER PRIMARY KEY, task NVARCHAR, theme NVARCHAR, time NVARCHAR, pending BOOLEAN)');
+              'CREATE TABLE IF NOT EXISTS Tasks (id INTEGER PRIMARY KEY, task NVARCHAR, theme NVARCHAR, time NVARCHAR, pending BOOLEAN, schedule NVARCHAR)');
         });
   }
   
@@ -69,8 +69,8 @@ class _TaskCreationPageState extends State<TaskCreationPage> {
     print(time);
     await database.transaction((txn) async {
       int id1 = await txn.rawInsert(
-          'INSERT INTO Tasks(task, theme, time, pending) VALUES(?, ?, ?, ?)',
-          [_taskFieldController.text, selectedColor, time, pending]);
+          'INSERT INTO Tasks(task, theme, time, pending, schedule) VALUES(?, ?, ?, ?, ?)',
+          [_taskFieldController.text, selectedColor, time, pending, "undefined"]);
       print('inserted1: $id1');
       Navigator.of(this.context).pushAndRemoveUntil(MaterialPageRoute(builder: (_) => const Home(true, "tasks")), (route) => false);
     });
@@ -90,14 +90,14 @@ class _TaskCreationPageState extends State<TaskCreationPage> {
           });
         },
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(3.5),
           child: Container(
-            width: size.height * .045,
-            height: size.height * .045,
+            width: size.height * .037,
+            height: size.height * .037,
             child: Center(
               child: Container(
-                width: size.height * .045,
-                height: size.height * .045,
+                width: size.height * .037,
+                height: size.height * .037,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(100),
                   color: Color(color),
@@ -170,8 +170,31 @@ class _TaskCreationPageState extends State<TaskCreationPage> {
                       mainAxisSize: MainAxisSize.max,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        Center(
+                          child: Padding(
+                              padding: EdgeInsets.fromLTRB(11, size.height * 0.01, 11, 0),
+                              child: RichText(
+                                textAlign: TextAlign.center,
+                                text: TextSpan(children: [
+                                  WidgetSpan(
+                                    child: Icon(
+                                      Icons.format_paint,
+                                      size: 15,
+                                      color: Color(int.parse(selectedColor),)
+                                    ),
+                                  ),
+                                  const TextSpan(
+                                      text: "  choose a note theme:",
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontFamily: "Rounded_Elegance",
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13)),
+                                ]),
+                              )),
+                        ),
                         Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 15.0),
+                          padding: const EdgeInsets.only(left: 15.0, top: 5, right: 15, bottom: 11),
                           child: Center(
                             child: SingleChildScrollView(
                                 physics: const BouncingScrollPhysics(),
@@ -201,7 +224,7 @@ class _TaskCreationPageState extends State<TaskCreationPage> {
                                   ),
                                 ),
                                 const TextSpan(
-                                    text: "  what's on your mind?",
+                                    text: "  what should i remind you?",
                                     style: TextStyle(
                                         color: Colors.black,
                                         fontFamily: "Rounded_Elegance",
@@ -210,12 +233,13 @@ class _TaskCreationPageState extends State<TaskCreationPage> {
                               ]),
                             )),
                         Padding(
-                          padding: const EdgeInsets.all(11.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 11.0),
                           child: AnimatedContainer(
+                            height: size.width * .35,
                             duration: const Duration(milliseconds: 355),
                             decoration: BoxDecoration(
                                 color: Color(int.parse(selectedColor)),
-                                borderRadius: BorderRadius.circular(15)),
+                                borderRadius: BorderRadius.circular(31)),
                             child: Center(
                               child: Material(
                                 color: Colors.transparent,
@@ -268,7 +292,7 @@ class _TaskCreationPageState extends State<TaskCreationPage> {
                                     decoration: BoxDecoration(
                                         color: Color(int.parse(selectedColor))
                                             .withOpacity(.15),
-                                        borderRadius: BorderRadius.circular(21)),
+                                        borderRadius: BorderRadius.circular(31)),
                                     child: Padding(
                                       padding: const EdgeInsets.all(15.0),
                                       child: Column(
@@ -321,7 +345,7 @@ class _TaskCreationPageState extends State<TaskCreationPage> {
                                     decoration: BoxDecoration(
                                         color: Color(int.parse(selectedColor))
                                             .withOpacity(.15),
-                                        borderRadius: BorderRadius.circular(21)),
+                                        borderRadius: BorderRadius.circular(31)),
                                     child: Padding(
                                       padding: const EdgeInsets.all(15.0),
                                       child: Column(
@@ -368,9 +392,9 @@ class _TaskCreationPageState extends State<TaskCreationPage> {
                     left: 0,
                     right: 0,
                     child: Card(
-                      color: Colors.orangeAccent,
+                      color: Color(int.parse(selectedColor)),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(7),
+                        borderRadius: BorderRadius.circular(15),
                       ),
                       child: SizedBox(
                         width: size.width,

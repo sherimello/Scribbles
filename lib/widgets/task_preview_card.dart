@@ -1,3 +1,5 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:scribbles/hero_transition_handler/custom_rect_tween.dart';
@@ -6,8 +8,10 @@ import 'package:scribbles/hero_transition_handler/models.dart';
 import 'package:scribbles/widgets/simplified_delete_card.dart';
 import 'package:sqflite/sqflite.dart';
 
+import '../classes/my_sharedpreferences.dart';
+
 class TaskPreviewCard extends StatefulWidget {
-  final String id, task, theme, time, taskID;
+  final String id, task, theme, time, taskID, schedule;
   final bool pending;
 
   const TaskPreviewCard(
@@ -17,7 +21,8 @@ class TaskPreviewCard extends StatefulWidget {
       required this.theme,
       required this.task,
       required this.pending,
-      required this.taskID})
+      required this.taskID,
+      required this.schedule})
       : super(key: key);
 
   @override
@@ -51,6 +56,30 @@ class _TaskPreviewCardState extends State<TaskPreviewCard> {
     });
   }
 
+  uploadDataToFirebase() async {
+    // Firebase.initializeApp();
+    String userName = await MySharedPreferences().getStringValue("userName");
+    final ref2 = FirebaseDatabase.instance.ref().child('tasks');
+
+    print(userName);
+    ref2
+        .child(userName)
+        .child((widget.time.replaceAll('\n', ' ')))
+        .set({
+          'task': widget.task.toString(),
+          'theme': widget.theme.toString(),
+          'time': widget.time.toString(),
+          'pending': isChecked == true ? "true" : "false",
+          'schedule': widget.schedule,
+        })
+        .asStream()
+        .listen((event) {}, onDone: () {
+          //........................
+        });
+  }
+
+  bool isLongPressed = false;
+
   @override
   Widget build(BuildContext context) {
     late String t1, t2, date;
@@ -59,8 +88,11 @@ class _TaskPreviewCardState extends State<TaskPreviewCard> {
         'jhasjkhdiuiashiudyhiausdoijasiojdojoasjioljdoiaiojsiodjoiasjiodjioajoidajsoijdojasiodjojaosjdojoias';
     t2 = "hello";
     date = '19-3-93';
-    return InkWell(
+    return GestureDetector(
       onLongPress: () {
+        setState(() {
+          isLongPressed = true;
+        });
         Navigator.of(context).push(HeroDialogRoute(
           bgColor: Color(int.parse(widget.theme)),
           builder: (context) => Center(
@@ -71,138 +103,151 @@ class _TaskPreviewCardState extends State<TaskPreviewCard> {
           // settings: const RouteSettings(),
         ));
       },
+      onLongPressCancel: () => setState(() {
+        isLongPressed = false;
+      }),
       onTap: () async {
-        setState(() {
-          isChecked = !isChecked;
-        });
-        print(isChecked);
-        print(widget.taskID);
-        await initiateDB().whenComplete(() => updateData(isChecked));
+        if (isLongPressed == false) {
+          setState(() {
+            isChecked = !isChecked;
+          });
+          uploadDataToFirebase();
+          print(isChecked);
+          print(widget.taskID);
+          await initiateDB().whenComplete(() => updateData(isChecked));
+        }
       },
       child: Hero(
         tag: widget.id,
         createRectTween: (begin, end) {
           return CustomRectTween(begin: begin!, end: end!);
         },
-        child: Container(
-            decoration: BoxDecoration(
-              color: isChecked
-                  ? Color(int.parse(widget.theme)).withOpacity(.19)
-                  : Color(int.parse(widget.theme)),
-              borderRadius: BorderRadius.circular(31),
-            ),
-            // color: Colors.teal[200],
-            // color: Colors.pink.withOpacity(.31),
-            // color: Colors.orange.withOpacity(.31),
-            // color: Colors.red.withOpacity(.31),
-            child: SingleChildScrollView(
-              child: Padding(
-                  padding: const EdgeInsets.all(15.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Checkbox(
-                          // materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5)),
-                          side: MaterialStateBorderSide.resolveWith(
-                            (states) => const BorderSide(
-                                width: 2.0, color: Colors.black),
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+              decoration: BoxDecoration(
+                color: isChecked
+                    ? Color(int.parse(widget.theme)).withOpacity(.19)
+                    : Color(int.parse(widget.theme)),
+                borderRadius: BorderRadius.circular(31),
+              ),
+              // color: Colors.teal[200],
+              // color: Colors.pink.withOpacity(.31),
+              // color: Colors.orange.withOpacity(.31),
+              // color: Colors.red.withOpacity(.31),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Padding(
+                    padding: const EdgeInsets.all(15.0),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Checkbox(
+                            // materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5)),
+                            side: MaterialStateBorderSide.resolveWith(
+                              (states) => const BorderSide(
+                                  width: 2.0, color: Colors.black),
+                            ),
+                            activeColor: Colors.black,
+                            checkColor: Color(int.parse(widget.theme)),
+                            value: isChecked,
+                            onChanged: (checkedState) async {
+                              setState(() {
+                                isChecked = checkedState!;
+                              });
+                              uploadDataToFirebase();
+                              await initiateDB().whenComplete(() {
+                                updateData(checkedState!);
+                              });
+                            }),
+                        Text.rich(TextSpan(children: [
+                          TextSpan(
+                            text: widget.task,
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 19,
+                                decoration: isChecked
+                                    ? TextDecoration.lineThrough
+                                    : TextDecoration.none,
+                                fontFamily: 'varela-round.regular'),
                           ),
-                          activeColor: Colors.black,
-                          checkColor: Color(int.parse(widget.theme)),
-                          value: isChecked,
-                          onChanged: (checkedState) async {
-                            setState(() {
-                              isChecked = checkedState!;
-                            });
-                            await initiateDB()
-                                .whenComplete(() => updateData(checkedState!));
-                          }),
-                      Text.rich(TextSpan(children: [
-                        TextSpan(
-                          text: widget.task,
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 19,
-                              decoration: isChecked
-                                  ? TextDecoration.lineThrough
-                                  : TextDecoration.none,
-                              fontFamily: 'varela-round.regular'),
-                        ),
-                        TextSpan(
-                          text: "\n${widget.time}",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black.withOpacity(.55),
-                              fontSize: 11,
-                              decoration: isChecked
-                                  ? TextDecoration.lineThrough
-                                  : TextDecoration.none,
-                              fontFamily: 'Rounded_Elegance'),
-                        ),
-                      ])),
-                    ],
-                  )
+                          TextSpan(
+                            text: "\n${widget.time}",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black.withOpacity(.55),
+                                fontSize: 11,
+                                decoration: isChecked
+                                    ? TextDecoration.lineThrough
+                                    : TextDecoration.none,
+                                fontFamily: 'Rounded_Elegance'),
+                          ),
+                        ])),
+                      ],
+                    )
 
-                  // SingleChildScrollView(
-                  //   child: Row(
-                  //     children: [
-                  //       Checkbox(
-                  //           shape:
-                  //       RoundedRectangleBorder(
-                  //           borderRadius:
-                  //           BorderRadius
-                  //               .circular(
-                  //               5)),
-                  //           side:
-                  //           MaterialStateBorderSide
-                  //               .resolveWith(
-                  //                 (states) =>
-                  //             const BorderSide(
-                  //                 width: 2.0,
-                  //                 color: Colors
-                  //                     .white),
-                  //           ),
-                  //           activeColor: Colors.white,
-                  //           checkColor: Color(int.parse(widget.theme)),
-                  //           value: isChecked,
-                  //           onChanged: (checkedState) async {
-                  //             setState(() {
-                  //               isChecked = checkedState!;
-                  //             });
-                  //             await initiateDB().whenComplete(() => updateData(checkedState!));
-                  //           }),
-                  //       Wrap(
-                  //         direction: Axis.vertical,
-                  //         children: [Text.rich(
-                  //           // t1,
-                  //           TextSpan(
-                  //             children: [
-                  //               TextSpan(
-                  //                 text: widget.task,
-                  //                 style: const TextStyle(
-                  //                     fontWeight: FontWeight.bold,
-                  //                     fontSize: 19,
-                  //                     fontFamily: 'varela-round.regular'),
-                  //               ),
-                  //               TextSpan(
-                  //                 text: "   ${widget.time}",
-                  //                 style: const TextStyle(
-                  //                     fontWeight: FontWeight.bold,
-                  //                     color: Colors.white54,
-                  //                     fontSize: 11,
-                  //                     fontFamily: 'Rounded_Elegance'),
-                  //               ),
-                  //             ]
-                  //           )
-                  //         ),]
-                  //       ),
-                  //     ],
-                  //   ),
-                  // ),
-                  ),
-            )),
+                    // SingleChildScrollView(
+                    //   child: Row(
+                    //     children: [
+                    //       Checkbox(
+                    //           shape:
+                    //       RoundedRectangleBorder(
+                    //           borderRadius:
+                    //           BorderRadius
+                    //               .circular(
+                    //               5)),
+                    //           side:
+                    //           MaterialStateBorderSide
+                    //               .resolveWith(
+                    //                 (states) =>
+                    //             const BorderSide(
+                    //                 width: 2.0,
+                    //                 color: Colors
+                    //                     .white),
+                    //           ),
+                    //           activeColor: Colors.white,
+                    //           checkColor: Color(int.parse(widget.theme)),
+                    //           value: isChecked,
+                    //           onChanged: (checkedState) async {
+                    //             setState(() {
+                    //               isChecked = checkedState!;
+                    //             });
+                    //             await initiateDB().whenComplete(() => updateData(checkedState!));
+                    //           }),
+                    //       Wrap(
+                    //         direction: Axis.vertical,
+                    //         children: [Text.rich(
+                    //           // t1,
+                    //           TextSpan(
+                    //             children: [
+                    //               TextSpan(
+                    //                 text: widget.task,
+                    //                 style: const TextStyle(
+                    //                     fontWeight: FontWeight.bold,
+                    //                     fontSize: 19,
+                    //                     fontFamily: 'varela-round.regular'),
+                    //               ),
+                    //               TextSpan(
+                    //                 text: "   ${widget.time}",
+                    //                 style: const TextStyle(
+                    //                     fontWeight: FontWeight.bold,
+                    //                     color: Colors.white54,
+                    //                     fontSize: 11,
+                    //                     fontFamily: 'Rounded_Elegance'),
+                    //               ),
+                    //             ]
+                    //           )
+                    //         ),]
+                    //       ),
+                    //     ],
+                    //   ),
+                    // ),
+                    ),
+              )),
+        ),
       ),
     );
   }

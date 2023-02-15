@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:scribbles/classes/my_sharedpreferences.dart';
+import 'package:scribbles/classes/task_map_for_cloud_fetch.dart';
 import 'package:scribbles/pages/upload_to_drive.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -29,11 +30,13 @@ class SyncFile extends StatefulWidget {
 
 class _SyncFileState extends State<SyncFile> {
   late String path;
-  late Database database;
-  late List<Map> list;
+  late Database database, database2;
+  late List<Map> list, list2;
   int size = 0;
   late String fetchedNotes, s = '\n\n';
   List<String> title = [], note = [], theme = [], time = [];
+  List<String> task = [], theme2 = [], time2 = [], schedule = [];
+  List<bool> pending = [];
   bool _isProgressVisible = false;
 
   Future<void> initiateDB() async {
@@ -47,7 +50,22 @@ class _SyncFileState extends State<SyncFile> {
       await db.execute(
           'CREATE TABLE IF NOT EXISTS Notes (id INTEGER PRIMARY KEY, title NVARCHAR, note NVARCHAR, theme NVARCHAR, time NVARCHAR)');
     });
-    list = (await database.rawQuery('SELECT * FROM Notes'));
+    getAllNotes();
+    // list = (await database.rawQuery('SELECT * FROM Notes'));
+  }
+
+  Future<void> initiateTaskDB() async {
+    // Get a location using getDatabasesPath
+    var databasesPath = await getDatabasesPath();
+    path = join(databasesPath, 'tasks.db');
+    // open the database
+    database2 = await openDatabase(path, version: 1,
+        onCreate: (Database db, int version) async {
+      // When creating the db, create the table
+      await db.execute(
+          'CREATE TABLE IF NOT EXISTS Tasks (id INTEGER PRIMARY KEY, task NVARCHAR, theme NVARCHAR, time NVARCHAR, pending BOOLEAN, schedule NVARCHAR)');
+    });
+    await getAllTasks();
   }
 
   String allNotes = '', divider = ",.,.,.,;';';';,.,.,.,";
@@ -57,7 +75,6 @@ class _SyncFileState extends State<SyncFile> {
   void initState() {
     // TODO: implement initState
     initiateDB();
-    getAllNotes();
     // _signOut();
     super.initState();
   }
@@ -69,6 +86,23 @@ class _SyncFileState extends State<SyncFile> {
         int id1 = await txn.rawInsert(
             'INSERT INTO Notes(title, note, theme, time) VALUES(?, ?, ?, ?)',
             [title[i], note[i], theme[i], time[i]]);
+        if (kDebugMode) {
+          print('inserted1: $id1');
+        }
+      }
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const Home(false, 'notes')),
+      );
+    });
+  }
+
+  Future<void> uploadTaskData(BuildContext context, List<String> task, List<String> theme, List<String> time, List<String> pending, List<String> schedule) async {
+    await database2.transaction((txn) async {
+      for (int i = 0; i < task.length; i++) {
+        int id1 = await txn.rawInsert(
+            'INSERT INTO Tasks(task, theme, time, pending, schedule) VALUES(?, ?, ?, ?, ?)',
+            [task[i], theme[i], time[i], pending[i], schedule[i]]);
         if (kDebugMode) {
           print('inserted1: $id1');
         }
@@ -92,6 +126,27 @@ class _SyncFileState extends State<SyncFile> {
           int id1 = await txn.rawInsert(
               'INSERT INTO Notes(title, note, theme, time) VALUES(?, ?, ?, ?)',
               [title[i], note[i], theme[i], time[i]]);
+          if (kDebugMode) {
+            print('inserted1: $id1');
+          }
+        }
+        // setState(() {
+        //   _isProgressVisible = false;
+        // });
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(builder: (context) => const Home(false, 'notes')),
+        // );
+      });
+    }
+
+    updateTaskDB() async {
+      print("kashem : ${task.length}");
+      await database2.transaction((txn) async {
+        for (int i = 0; i < task.length; i++) {
+          int id1 = await txn.rawInsert(
+              'INSERT INTO Tasks(task, theme, time, pending, schedule) VALUES(?, ?, ?, ?, ?)',
+              [task[i], theme2[i], time2[i], pending[i], schedule[i]]);
           if (kDebugMode) {
             print('inserted1: $id1');
           }
@@ -129,6 +184,108 @@ class _SyncFileState extends State<SyncFile> {
           'time': time[i].toString(),
         }).asStream();
       }
+      for (int i = 0; i < list2.length; i++) {
+        task.add(list2[i]['task']);
+        theme2.add(list2[i]['theme']);
+        time2.add(list2[i]['time']);
+        pending.add(list2[i]['pending'] == 0 ? false : true);
+        schedule.add(list2[i]['schedule']);
+      }
+      final ref2 = FirebaseDatabase.instance.ref().child('tasks');
+      for (int i = 0; i < list2.length; i++) {
+        ref2
+            .child(userName)
+            .child((list2[i]['time'].toString().replaceAll('\n', ' ')))
+            .set({
+          'task': task[i].toString(),
+          'theme': theme2[i].toString(),
+          'time': time2[i].toString(),
+          'pending': pending[i].toString(),
+          'schedule': schedule[i].toString(),
+        }).asStream();
+      }
+    }
+
+    Future<void> fetchNotesFromCloud() async {
+      title.clear();
+      note.clear();
+      theme.clear();
+      time.clear();
+
+      String userName = await MySharedPreferences().getStringValue("userName");
+
+      final List<User> listCloud = [];
+      final snapshot =
+          await FirebaseDatabase.instance.ref('notes').child(userName).get();
+      int i = 0;
+      final map = snapshot.value as Map<dynamic, dynamic>;
+
+      map.forEach((key, value) {
+        final user = User.fromMap(value);
+        listCloud.add(user);
+        title.add(user.title);
+        note.add(user.note);
+        theme.add(user.theme);
+        time.add(user.time);
+        print(listCloud[i].title);
+        i++;
+      });
+    }
+
+    Future<void> fetchTasksFromCloud() async {
+      task.clear();
+      theme2.clear();
+      time2.clear();
+      pending.clear();
+      schedule.clear();
+      String userName = await MySharedPreferences().getStringValue("userName");
+
+      final List<TaskMap> listCloud2 = [];
+      final snapshot =
+          await FirebaseDatabase.instance.ref('tasks').child(userName).get();
+      final map = snapshot.value as Map<dynamic, dynamic>;
+
+      map.forEach((key, value) {
+        final user = TaskMap.fromMap(value);
+        listCloud2.add(user);
+        // title.add(user.title);
+        task.add(user.task);
+        theme2.add(user.theme);
+        time2.add(user.time);
+        pending.add(user.pending);
+        schedule.add(user.schedule);
+        print(user.schedule);
+      });
+    }
+
+    Future<void> syncNotesAndTasksFromCloud() async {
+      task.clear();
+      time2.clear();
+      theme2.clear();
+      pending.clear();
+      schedule.clear();
+      await MySharedPreferences().containsKey("userName") == true
+          ? uploadDataToFirebase().whenComplete(() async => {
+                await database
+                    .execute('DELETE FROM Notes')
+                    .whenComplete(() => fetchNotesFromCloud().whenComplete(() {
+                          updateDB().whenComplete(() async {
+                            await database2
+                                .execute('DELETE FROM Tasks')
+                                .whenComplete(() async {
+                              await fetchTasksFromCloud();
+                              updateTaskDB();
+                            });
+                          });
+                        }))
+              })
+          : {
+              setState(() {
+                _isProgressVisible = false;
+              }),
+              message = "please enable \"Cloud Backup\" first...",
+              showCustomSnackBar()
+            };
     }
 
     return WillPopScope(
@@ -201,6 +358,7 @@ class _SyncFileState extends State<SyncFile> {
                                         // radius: 100,
                                         onTap: () async {
                                           getAllNotes();
+                                          getAllTasks();
                                           Navigator.of(context)
                                               .push(HeroDialogRoute(
                                             builder: (context) => Center(
@@ -330,6 +488,20 @@ class _SyncFileState extends State<SyncFile> {
                                                         " sorry no note(s) found to be synced...";
                                                     showCustomSnackBar();
                                                   }
+
+
+                                                  final File file2 = File(
+                                                      '${directory?.path}/tasks.csv');
+                                                  if (file2.existsSync()) {
+                                                    copyTaskCSVToDB("1", context);
+                                                  } else {
+                                                    message =
+                                                        " sorry no task(s) found to be synced...";
+                                                    showCustomSnackBar();
+                                                  }
+
+
+
                                                 },
                                                 child: RichText(
                                                   textAlign: TextAlign.center,
@@ -403,29 +575,7 @@ class _SyncFileState extends State<SyncFile> {
                                                   setState(() {
                                                     _isProgressVisible = true;
                                                   });
-                                                  await MySharedPreferences()
-                                                              .containsKey(
-                                                                  "userName") ==
-                                                          true
-                                                      ? uploadDataToFirebase()
-                                                          .whenComplete(
-                                                              () async => {
-                                                                    await database
-                                                                        .execute(
-                                                                            'DELETE FROM Notes')
-                                                                        .whenComplete(() =>
-                                                                            fetchNotesFromCloud().whenComplete(() =>
-                                                                                updateDB()))
-                                                                  })
-                                                      : {
-                                                          setState(() {
-                                                            _isProgressVisible =
-                                                                false;
-                                                          }),
-                                                          message =
-                                                              "please enable \"Cloud Backup\" first...",
-                                                          showCustomSnackBar()
-                                                        };
+                                                  syncNotesAndTasksFromCloud();
                                                 },
                                                 child: RichText(
                                                   textAlign: TextAlign.center,
@@ -573,8 +723,57 @@ class _SyncFileState extends State<SyncFile> {
         .whenComplete(() => uploadData(context, title, note, theme, time));
   }
 
+  Future<void> copyTaskCSVToDB(String key, BuildContext context) async {
+    List<String> task = [], schedule = [], theme = [], time = [], pending = [];
+    List<List<dynamic>> temp = [];
+
+    if (key == "1") {
+      final Directory? directory = Platform.isAndroid
+          ? await getExternalStorageDirectory() //FOR ANDROID
+          : await getApplicationSupportDirectory(); //FOR iOS
+      final File file = File('${directory?.path}/tasks.csv');
+
+      temp = await file
+          .openRead()
+          .transform(utf8.decoder)
+          .transform(
+            const CsvToListConverter(),
+          )
+          .toList();
+    }
+    if (key == "2") {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        allowedExtensions: ['csv'],
+        type: FileType.custom,
+      );
+      // if (result != null) {
+      String? path1 = result?.files.first.path;
+      final file = File(path1!).openRead();
+
+      temp = await file
+          .transform(utf8.decoder)
+          .transform(
+            const CsvToListConverter(),
+          )
+          .toList();
+    }
+    for (int i = 0; i < temp.length; i++) {
+      task.add(temp[i][1].toString());
+      theme.add(temp[i][2].toString());
+      time.add(temp[i][3].toString());
+      pending.add(temp[i][4].toString());
+      schedule.add(temp[i][5].toString());
+    }
+
+    initiateTaskDB()
+        .whenComplete(() => uploadTaskData(context, task, theme, time, pending, schedule));
+  }
+
   Future<void> getAllNotes() async {
-    list = (await database.rawQuery('SELECT * FROM Notes'));
+    list = await database.rawQuery('SELECT * FROM Notes');
+    await initiateTaskDB();
+
+
 
     for (int i = 0; i < list.length; i++) {
       allNotes += '\n' +
@@ -585,12 +784,16 @@ class _SyncFileState extends State<SyncFile> {
     }
   }
 
+  Future<void> getAllTasks() async {
+    list2 = (await database2.rawQuery('SELECT * FROM Tasks'));
+  }
+
   var fileAddress = "";
   late List<List<dynamic>> temp;
 
   void makeCSVAndSaveIt() async {
-    if (list.isEmpty) {
-      message = " sorry no note(s) to backup...";
+    if (list.isEmpty && list2.isEmpty) {
+      message = " sorry nothing to backup...";
       showCustomSnackBar();
       return;
     }
@@ -618,6 +821,35 @@ class _SyncFileState extends State<SyncFile> {
     fileAddress = '${directory?.path}/notes.csv';
 
     file.writeAsString(csv);
+
+
+
+
+    List<List<dynamic>> rows2 = [];
+    for (int i = 0; i < list2.length; i++) {
+//row refer to each column of a row in csv file and rows refer to each row in a file
+      List<dynamic> row = [];
+      row.add(list2[i]["id"].toString());
+      row.add(list2[i]["task"].toString());
+      row.add(list2[i]["theme"]);
+      row.add(list2[i]["time"].toString());
+      row.add(list2[i]["pending"].toString());
+      row.add(list2[i]["schedule"].toString());
+      rows2.add(row);
+    }
+
+    String csv2 = const ListToCsvConverter().convert(rows2);
+    temp = const CsvToListConverter().convert(csv2);
+
+    print(temp[0][2].toString());
+    final Directory? directory2 = Platform.isAndroid
+        ? await getExternalStorageDirectory() //FOR ANDROID
+        : await getApplicationSupportDirectory(); //FOR iOS
+
+    final File file2 = File('${directory2?.path}/tasks.csv');
+    fileAddress = '${directory2?.path}/tasks.csv';
+
+    file2.writeAsString(csv2);
     message = "  local backup successful...";
     showCustomSnackBar();
   }
@@ -631,32 +863,6 @@ class _SyncFileState extends State<SyncFile> {
       setState(() {
         v = false;
       });
-    });
-  }
-
-  fetchNotesFromCloud() async {
-    title.clear();
-    note.clear();
-    theme.clear();
-    time.clear();
-
-    String userName = await MySharedPreferences().getStringValue("userName");
-
-    final List<User> listCloud = [];
-    final snapshot =
-        await FirebaseDatabase.instance.ref('notes').child(userName).get();
-    int i = 0;
-    final map = snapshot.value as Map<dynamic, dynamic>;
-
-    map.forEach((key, value) {
-      final user = User.fromMap(value);
-      listCloud.add(user);
-      title.add(user.title);
-      note.add(user.note);
-      theme.add(user.theme);
-      time.add(user.time);
-      print(listCloud[i].title);
-      i++;
     });
   }
 }

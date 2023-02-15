@@ -73,7 +73,7 @@ class _NewNotePageState extends State<NewNotePage> {
     });
 
     noteFieldFocusNode.addListener(() {
-      if(noteFieldFocusNode.hasFocus && _searchFieldController.text.isEmpty) {
+      if (noteFieldFocusNode.hasFocus && _searchFieldController.text.isEmpty) {
         setState(() => _isTitleAdded = false);
       }
       if (!noteFieldFocusNode.hasFocus && _noteFieldController.text.isEmpty) {
@@ -94,7 +94,7 @@ class _NewNotePageState extends State<NewNotePage> {
 
     _searchFieldController.addListener(() {
       checkIfSaveButtonShouldBeSeen();
-      if(_searchFieldController.text != _noteFieldController.text) {
+      if (_searchFieldController.text != _noteFieldController.text) {
         setState(() => _isTitleAdded = true);
       }
     });
@@ -102,8 +102,8 @@ class _NewNotePageState extends State<NewNotePage> {
     _noteFieldController.addListener(() {
       checkIfSaveButtonShouldBeSeen();
 
-      if(!_isTitleAdded && _noteFieldController.text.length <= 11) {
-        setState((){
+      if (!_isTitleAdded && _noteFieldController.text.length <= 11) {
+        setState(() {
           _searchFieldController.text = _noteFieldController.text;
         });
       }
@@ -263,14 +263,14 @@ class _NewNotePageState extends State<NewNotePage> {
           });
         },
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(3.5),
           child: Container(
-            width: size.height * .045,
-            height: size.height * .045,
+            width: size.height * .037,
+            height: size.height * .037,
             child: Center(
               child: Container(
-                width: size.height * .045,
-                height: size.height * .045,
+                width: size.height * .037,
+                height: size.height * .037,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(100),
                   color: Color(color),
@@ -309,13 +309,13 @@ class _NewNotePageState extends State<NewNotePage> {
                           Navigator.pop(context, false);
                           // changeSaveButtonSize();
                         },
-                        child: const Align(
-                          alignment: Alignment(-1, 0),
+                        child: Align(
+                          alignment: const Alignment(-1, 0),
                           child: Padding(
-                            padding: EdgeInsets.only(right: 3.0),
+                            padding: const EdgeInsets.only(right: 3.0),
                             child: Icon(
                               Icons.arrow_back,
-                              color: Colors.black,
+                              color: searchBarColor,
                             ),
                           ),
                         ),
@@ -327,7 +327,8 @@ class _NewNotePageState extends State<NewNotePage> {
                           children: [
                             Expanded(
                               child: Padding(
-                                padding: const EdgeInsets.all(8.0),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 19.0),
                                 child: AnimatedContainer(
                                     curve: Curves.fastOutSlowIn,
                                     duration: const Duration(milliseconds: 351),
@@ -364,8 +365,7 @@ class _NewNotePageState extends State<NewNotePage> {
                                                 right: 15),
                                             hintText: "note title..."),
                                       ),
-                                    )
-                                ),
+                                    )),
                               ),
                             ),
                             Align(
@@ -400,7 +400,8 @@ class _NewNotePageState extends State<NewNotePage> {
                                                     context,
                                                     MaterialPageRoute(
                                                         builder: (context) =>
-                                                            const Home(true, 'notes')),
+                                                            const Home(
+                                                                true, 'notes')),
                                                   ))
                                           : Navigator.pop(context, false)
                                       : _noteFieldController.text.isNotEmpty &&
@@ -414,8 +415,8 @@ class _NewNotePageState extends State<NewNotePage> {
                                                       context,
                                                       MaterialPageRoute(
                                                           builder: (context) =>
-                                                              const Home(
-                                                                  true, 'notes')),
+                                                              const Home(true,
+                                                                  'notes')),
                                                     )
                                                   })
                                           : Navigator.pop(context, false);
@@ -433,14 +434,15 @@ class _NewNotePageState extends State<NewNotePage> {
                                       : saveButtonDimen,
                                   curve: Curves.fastOutSlowIn,
                                   child: Visibility(
-                                      visible: saveButtonDimen == 55 ? true : false,
+                                      visible:
+                                          saveButtonDimen == 55 ? true : false,
                                       child: Center(
                                           child: Icon(
                                         Icons.done_all,
                                         color: searchBarColor,
                                       ))),
                                   decoration: BoxDecoration(
-                                    color: Colors.white,
+                                    color: searchBarColor.withOpacity(.25),
                                     border: Border.all(
                                         color: Colors.grey.shade100, width: 1),
                                     borderRadius: BorderRadius.circular(17),
@@ -458,8 +460,7 @@ class _NewNotePageState extends State<NewNotePage> {
                   ),
                 ),
                 Padding(
-                    padding:
-                        EdgeInsets.fromLTRB(11, size.height * 0.025, 11, 0),
+                    padding: EdgeInsets.fromLTRB(11, size.height * 0.01, 11, 0),
                     child: RichText(
                       textAlign: TextAlign.center,
                       text: TextSpan(children: [
@@ -480,7 +481,7 @@ class _NewNotePageState extends State<NewNotePage> {
                       ]),
                     )),
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 11.0),
+                  padding: const EdgeInsets.symmetric(vertical: 7.0),
                   child: Center(
                     child: SingleChildScrollView(
                         physics: const BouncingScrollPhysics(),
@@ -502,26 +503,30 @@ class _NewNotePageState extends State<NewNotePage> {
                         )),
                   ),
                 ),
-                Padding(
-                    padding: EdgeInsets.fromLTRB(11, 8, 11, size.height * .025),
-                    child: RichText(
-                      text: TextSpan(children: [
-                        WidgetSpan(
-                          child: Icon(
-                            Icons.note,
-                            size: 15,
-                            color: searchBarColor,
+                Visibility(
+                  visible: false,
+                  child: Padding(
+                      padding:
+                          EdgeInsets.fromLTRB(31, 0, 11, size.height * .015),
+                      child: RichText(
+                        text: TextSpan(children: [
+                          WidgetSpan(
+                            child: Icon(
+                              Icons.note,
+                              size: 15,
+                              color: searchBarColor,
+                            ),
                           ),
-                        ),
-                        const TextSpan(
-                            text: "  what's on your mind?",
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontFamily: "Rounded_Elegance",
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13)),
-                      ]),
-                    )),
+                          const TextSpan(
+                              text: "  what's on your mind?",
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontFamily: "Rounded_Elegance",
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13)),
+                        ]),
+                      )),
+                ),
                 Flexible(
                     fit: FlexFit.tight,
                     child: SizedBox(

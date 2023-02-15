@@ -61,8 +61,8 @@ class _UploadToDriveState extends State<UploadToDrive> {
   bool v = false;
   String errorMessage = "";
 
-  late Database database;
-  late List<Map<String, Object?>> list;
+  late Database database, database2;
+  late List<Map<String, Object?>> list, list2;
 
 // Get a location using getDatabasesPath
   late String path;
@@ -83,15 +83,30 @@ class _UploadToDriveState extends State<UploadToDrive> {
     list = (await database.rawQuery('SELECT * FROM Notes'));
   }
 
+  Future<void> initiateTaskDB() async {
+    // Get a location using getDatabasesPath
+    var databasesPath = await getDatabasesPath();
+    path = join(databasesPath, 'tasks.db');
+    // open the database
+    database2 = await openDatabase(path, version: 1,
+        onCreate: (Database db, int version) async {
+      // When creating the db, create the table
+      await db.execute(
+          'CREATE TABLE IF NOT EXISTS Tasks (id INTEGER PRIMARY KEY, task NVARCHAR, theme NVARCHAR, time NVARCHAR, pending BOOLEAN, schedule NVARCHAR)');
+    });
+    list2 = (await database2.rawQuery('SELECT * FROM Tasks'));
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    initiateDB().whenComplete(() => makeCSVAndSaveIt().whenComplete(() {
-          setState(() {
-            visible = true;
-          });
-        }));
+    initiateDB().whenComplete(() =>
+        initiateTaskDB().whenComplete(() => makeCSVAndSaveIt().whenComplete(() {
+              setState(() {
+                visible = true;
+              });
+            })));
     // makeCSVAndSaveIt();
   }
 
@@ -164,8 +179,8 @@ class _UploadToDriveState extends State<UploadToDrive> {
                                 if (list.isNotEmpty) {
                                   final box =
                                       context.findRenderObject() as RenderBox?;
-                                  Share.shareFiles([fileAddress],
-                                      subject: 'notes.csv',
+                                  Share.shareFiles([fileAddress1, fileAddress2],
+                                      subject: 'notes and task.zip',
                                       sharePositionOrigin:
                                           box!.localToGlobal(Offset.zero) &
                                               box.size);
@@ -268,7 +283,7 @@ class _UploadToDriveState extends State<UploadToDrive> {
     );
   }
 
-  var fileAddress = "";
+  var fileAddress1 = "", fileAddress2 = "";
   late List<List<dynamic>> temp;
 
   Future<void> makeCSVAndSaveIt() async {
@@ -306,8 +321,34 @@ class _UploadToDriveState extends State<UploadToDrive> {
         : await getApplicationSupportDirectory(); //FOR iOS
 
     final File file = File('${directory?.path}/notes.csv');
-    fileAddress = '${directory?.path}/notes.csv';
+    fileAddress1 = '${directory?.path}/notes.csv';
 
     file.writeAsString(csv);
+
+    List<List<dynamic>> rows2 = [];
+    for (int i = 0; i < list2.length; i++) {
+//row refer to each column of a row in csv file and rows refer to each row in a file
+      List<dynamic> row = [];
+      row.add(list2[i]["id"].toString());
+      row.add(list2[i]["task"].toString());
+      row.add(list2[i]["theme"]);
+      row.add(list2[i]["time"].toString());
+      row.add(list2[i]["pending"].toString());
+      row.add(list2[i]["schedule"].toString());
+      rows2.add(row);
+    }
+
+    String csv2 = const ListToCsvConverter().convert(rows2);
+    temp = const CsvToListConverter().convert(csv2);
+
+    print(temp[0][2].toString());
+    final Directory? directory2 = Platform.isAndroid
+        ? await getExternalStorageDirectory() //FOR ANDROID
+        : await getApplicationSupportDirectory(); //FOR iOS
+
+    final File file2 = File('${directory2?.path}/tasks.csv');
+    fileAddress2 = '${directory2?.path}/tasks.csv';
+
+    file2.writeAsString(csv2);
   }
 }
