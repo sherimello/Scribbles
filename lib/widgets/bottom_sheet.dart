@@ -2,6 +2,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:scribbles/classes/my_sharedpreferences.dart';
+import 'package:scribbles/pages/home.dart';
 import 'package:scribbles/pages/new_note_page_design.dart';
 import 'package:scribbles/pages/sync_file.dart';
 import 'package:scribbles/pages/task_creation_page.dart';
@@ -45,28 +46,48 @@ class _TestState extends State<Test> {
     GoogleSignInAccount _currentUser;
 
     void signOut() {
-      _googleSignIn.disconnect().whenComplete(() =>
-          {print("signed out"), MySharedPreferences().removeValue("userName")});
+      _googleSignIn
+          .disconnect()
+          .whenComplete(() => {
+                print("signed out"),
+                MySharedPreferences().removeValue("userName")
+              })
+          .whenComplete(() => Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (_) => const Home(false, "notes")),
+              (route) => false));
     }
 
     Future<void> signIn() async {
       try {
         await _googleSignIn.signIn();
         _currentUser = _googleSignIn.currentUser!;
-        userNode =
-            _currentUser.email.substring(0, _currentUser.email.indexOf('@'));
+        MySharedPreferences()
+            .setStringValue("profilePicture", _currentUser.photoUrl.toString());
+        userNode = _currentUser.email
+            .substring(0, _currentUser.email.indexOf('@'))
+            .replaceAll('.', 'dot')
+            .replaceAll('#', 'hash')
+            .replaceAll('\$', 'dollar')
+            .replaceAll('[', 'leftThirdBracket')
+            .replaceAll(']', 'rightThirdBracket');
+        MySharedPreferences().setStringValue("userName", userNode);
         print(userNode);
         _googleSignIn.onCurrentUserChanged.listen((event) {
           _currentUser = event!;
         });
-        _googleSignIn.signInSilently();
+        _googleSignIn.signInSilently().whenComplete(() =>
+            Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (_) => const Home(false, "notes")),
+                (route) => false));
       } catch (e) {
         MySharedPreferences().setStringValue("isCloudBackupOn", "0");
         setState(() {
           isSwitched = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text("error signing in : $e"),
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text("user sign in denied!"),
         ));
       }
     }
