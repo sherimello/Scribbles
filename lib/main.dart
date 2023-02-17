@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:scribbles/classes/my_sharedpreferences.dart';
 import 'package:scribbles/pages/home.dart';
 import 'package:scribbles/widgets/testwidget.dart';
 import 'package:timezone/data/latest.dart' as tz;
@@ -11,6 +12,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await NotificationService().initNotification();
   await Firebase.initializeApp();
+  MySharedPreferences().setStringValue("version", "1.5");
   runApp(const MyApp());
 }
 

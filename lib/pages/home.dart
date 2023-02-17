@@ -12,8 +12,10 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart';
 import 'package:scribbles/classes/my_sharedpreferences.dart';
+import 'package:scribbles/pages/task_creation_page.dart';
 import 'package:scribbles/widgets/bottom_sheet.dart';
 import 'package:scribbles/widgets/note_preview_card.dart';
+import 'package:scribbles/widgets/update_prompt.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../classes/note_map_for_cloud_fetch.dart';
@@ -21,6 +23,7 @@ import '../classes/notificationservice.dart';
 import '../hero_transition_handler/custom_rect_tween.dart';
 import '../hero_transition_handler/hero_dialog_route.dart';
 import '../widgets/task_preview_card.dart';
+import 'new_note_page_design.dart';
 
 class Home extends StatefulWidget {
   final bool shouldCloudSync;
@@ -55,6 +58,31 @@ class _HomeState extends State<Home>
   late String path, profilePicture = "";
   int nSize = 0, tSize = 0;
   bool _isLoading = false;
+
+  checkForUpdates() async {
+    if (await MySharedPreferences().containsKey("disable update auto prompt") ==
+        false) {
+      var snapshot = await FirebaseDatabase.instance
+          .ref('app update')
+          .child("version code")
+          .get();
+      if (snapshot.value.toString() != "1.5") {
+        snapshot = await FirebaseDatabase.instance
+            .ref('app update')
+            .child("url")
+            .get()
+            .whenComplete(() {
+          Navigator.of(this.context).push(HeroDialogRoute(
+            builder: (context) => Center(
+              child: UpdatePrompt(
+                url: snapshot.value.toString(),
+              ),
+            ),
+          ));
+        });
+      }
+    }
+  }
 
   Future<void> initiateTasksDB() async {
     // Get a location using getDatabasesPath
@@ -306,15 +334,15 @@ class _HomeState extends State<Home>
               Padding(
             padding: index == 0 || index == 1
                 ? EdgeInsets.only(
-                    top: 56 + MediaQuery.of(context).size.width * .05)
+                    top: 22 + MediaQuery.of(context).size.width * .125)
                 : EdgeInsets.zero,
             child: NotePreviewCard(
-                time: nList[index]['time'].toString(),
-                theme: nList[index]["theme"].toString(),
-                noteID: nList[index]["id"].toString(),
-                id: index.toString(),
-                title: nList[index]["title"].toString(),
-                note: nList[index]["note"].toString()),
+                time: nList[nList.length - 1 - index]['time'].toString(),
+                theme: nList[nList.length - 1 - index]["theme"].toString(),
+                noteID: nList[nList.length - 1 - index]["id"].toString(),
+                id: (nList.length - 1 - index).toString(),
+                title: nList[nList.length - 1 - index]["title"].toString(),
+                note: nList[nList.length - 1 - index]["note"].toString()),
           ),
           staggeredTileBuilder: (int index) => const StaggeredTile.fit(1),
           mainAxisSpacing: 0.0,
@@ -337,13 +365,13 @@ class _HomeState extends State<Home>
             ? EdgeInsets.only(top: 56 + MediaQuery.of(context).size.width * .05)
             : EdgeInsets.zero,
         child: TaskPreviewCard(
-          time: tList[index]['time'].toString(),
-          theme: tList[index]["theme"].toString(),
-          taskID: tList[index]["id"].toString(),
-          id: index.toString(),
-          task: tList[index]["task"].toString(),
-          pending: intToBool(tList[index]["pending"]),
-          schedule: tList[index]["schedule"],
+          time: tList[tList.length - 1 - index]['time'].toString(),
+          theme: tList[tList.length - 1 - index]["theme"].toString(),
+          taskID: tList[tList.length - 1 - index]["id"].toString(),
+          id: (tList.length - 1 - index).toString(),
+          task: tList[tList.length - 1 - index]["task"].toString(),
+          pending: intToBool(tList[tList.length - 1 - index]["pending"]),
+          schedule: tList[tList.length - 1 - index]["schedule"],
         ),
       ),
       staggeredTileBuilder: (int index) => const StaggeredTile.fit(1),
@@ -384,6 +412,7 @@ class _HomeState extends State<Home>
     // TODO: implement initState
     // Firebase.initializeApp();
     super.initState();
+    checkForUpdates();
     checkIfUserLoggedIn();
     // requestPermission();
     initiateNotesDB();
@@ -505,37 +534,100 @@ class _HomeState extends State<Home>
                   Positioned(
                       bottom: 21,
                       right: 11,
-                      child: Hero(
-                        tag: '000',
-                        createRectTween: (begin, end) {
-                          return CustomRectTween(begin: begin!, end: end!);
-                        },
-                        child: Material(
-                          color: Colors.black,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(100000),
-                          ),
-                          child: SizedBox(
-                            width: 71,
-                            height: 71,
-                            child: IconButton(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            Material(
+                              shadowColor: Colors.black,
+                              elevation: 11,
                               color: Colors.black,
-                              onPressed: () async {
-                                await requestPermission() == true
-                                    ? Navigator.of(context)
-                                        .push(HeroDialogRoute(
-                                        builder: (context) => Center(
-                                          child: Test(nList),
-                                        ),
-                                      ))
-                                    : null;
-                              },
-                              icon: const Icon(
-                                Icons.menu,
-                                color: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(1000),
+                              ),
+                              child: SizedBox(
+                                width: size.width * .13,
+                                height: size.width * .13,
+                                child: IconButton(
+                                  color: Colors.black,
+                                  onPressed: () async {
+                                    await requestPermission() == true
+                                        ? {
+                                            if (listWidget == 'notes')
+                                              {
+                                                Navigator.of(context)
+                                                    .push(HeroDialogRoute(
+                                                  builder: (context) =>
+                                                      const Center(
+                                                    child: NewNotePage(
+                                                        '000', '000', ""),
+                                                  ),
+                                                  // settings: const RouteSettings(),
+                                                ))
+                                              }
+                                            else
+                                              {
+                                                Navigator.of(context)
+                                                    .push(HeroDialogRoute(
+                                                  builder: (context) =>
+                                                      const Center(
+                                                    child:
+                                                        TaskCreationPage("000"),
+                                                  ),
+                                                  // settings: const RouteSettings(),
+                                                ))
+                                              }
+                                          }
+                                        : null;
+                                  },
+                                  icon: Icon(
+                                    Icons.add,
+                                    color: Colors.white,
+                                    size: size.width * .049,
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
+                            SizedBox(
+                              height: size.height * .0075,
+                            ),
+                            Hero(
+                              tag: '000',
+                              createRectTween: (begin, end) {
+                                return CustomRectTween(
+                                    begin: begin!, end: end!);
+                              },
+                              child: Material(
+                                elevation: 11,
+                                shadowColor: Colors.black,
+                                color: Colors.black,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(1000),
+                                ),
+                                child: SizedBox(
+                                  width: size.width * .13,
+                                  height: size.width * .13,
+                                  child: IconButton(
+                                    color: Colors.black,
+                                    onPressed: () async {
+                                      await requestPermission() == true
+                                          ? Navigator.of(context)
+                                              .push(HeroDialogRoute(
+                                              builder: (context) => Center(
+                                                child: Test(nList),
+                                              ),
+                                            ))
+                                          : null;
+                                    },
+                                    icon: Icon(
+                                      Icons.menu,
+                                      color: Colors.white,
+                                      size: size.width * .049,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       )),
                   Visibility(
@@ -570,8 +662,8 @@ class _HomeState extends State<Home>
                     Visibility(
                       visible: showProfilePicture ? true : false,
                       child: Container(
-                        width: 34 + MediaQuery.of(context).size.width * .05,
-                        height: 34 + MediaQuery.of(context).size.width * .05,
+                        width: size.width * .125,
+                        height: size.width * .125,
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(1000),
                             color: Colors.black),
@@ -583,17 +675,20 @@ class _HomeState extends State<Home>
                     ),
                     Container(
                       width: showProfilePicture
-                          ? size.width -
-                              size.width * .1 -
-                              79 +
-                              MediaQuery.of(context).size.width * .05
+                          ? size.width - size.width * .245
+                          // ? size.width -
+                          //     size.width * .1 -
+                          //     79 +
+                          //     MediaQuery.of(context).size.width * .05
                           : size.width - size.width * .1,
+                      height: size.width * .125,
                       decoration: BoxDecoration(
                           color: Colors.black,
                           borderRadius: BorderRadius.circular(100)),
                       child: Padding(
-                        padding: const EdgeInsets.all(11.0),
+                        padding: EdgeInsets.all(size.width * .01),
                         child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             GestureDetector(
@@ -607,17 +702,27 @@ class _HomeState extends State<Home>
                               }),
                               child: Container(
                                 width: showProfilePicture
-                                    ? MediaQuery.of(context).size.width * .5 -
-                                        (size.width * .05 +
-                                            16.5 +
-                                            ((39 +
-                                                    MediaQuery.of(context)
-                                                            .size
-                                                            .width *
-                                                        .05) *
-                                                .5))
+                                    ? ((size.width -
+                                                size.width * .245 -
+                                                size.width * .02) *
+                                            .5) -
+                                        size.width * .005
+                                    // ? MediaQuery
+                                    // .of(context)
+                                    // .size
+                                    // .width * .5 -
+                                    // (size.width * .05 +
+                                    //     11 +
+                                    //     ((39 +
+                                    //         MediaQuery
+                                    //             .of(context)
+                                    //             .size
+                                    //             .width *
+                                    //             .05) *
+                                    //         .5))
                                     : MediaQuery.of(context).size.width * .5 -
-                                        (size.width * .05 + 16.5),
+                                        (size.width * .05 + 11),
+                                height: size.width * .05 + 18,
                                 decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(100),
                                     color: isNotesPressed
@@ -628,37 +733,38 @@ class _HomeState extends State<Home>
                                   padding: const EdgeInsets.all(7.0),
                                   child: Text.rich(
                                     TextSpan(
-                                        style: TextStyle(
-                                            height: 0,
-                                            color: isNotesPressed
-                                                ? Colors.white
-                                                : Colors.black,
-                                            fontSize: size.width * .031,
-                                            fontFamily: "Rounded_Elegance",
-                                            fontWeight: FontWeight.bold),
-                                        children: [
-                                          WidgetSpan(
-                                              child: Icon(
-                                                Icons.note_outlined,
-                                                size: size.width * .05,
-                                                color: isNotesPressed
-                                                    ? Colors.white
-                                                    : Colors.black,
-                                              ),
-                                              alignment:
-                                                  PlaceholderAlignment.middle),
-                                          TextSpan(
-                                            text: "  notes",
-                                            style: TextStyle(
-                                                height: 0,
-                                                color: isNotesPressed
-                                                    ? Colors.white
-                                                    : Colors.black,
-                                                fontSize: size.width * .031,
-                                                fontFamily: "Rounded_Elegance",
-                                                fontWeight: FontWeight.bold),
-                                          )
-                                        ]),
+                                      style: TextStyle(
+                                          height: 0,
+                                          color: isNotesPressed
+                                              ? Colors.white
+                                              : Colors.black,
+                                          fontSize: size.width * .031,
+                                          fontFamily: "Rounded_Elegance",
+                                          fontWeight: FontWeight.bold),
+                                      children: [
+                                        WidgetSpan(
+                                            child: Icon(
+                                              Icons.note_outlined,
+                                              size: size.width * .05,
+                                              color: isNotesPressed
+                                                  ? Colors.white
+                                                  : Colors.black,
+                                            ),
+                                            alignment:
+                                                PlaceholderAlignment.bottom),
+                                        TextSpan(
+                                          text: "  notes",
+                                          style: TextStyle(
+                                              height: 0,
+                                              color: isNotesPressed
+                                                  ? Colors.white
+                                                  : Colors.black,
+                                              fontSize: size.width * .031,
+                                              fontFamily: "Rounded_Elegance",
+                                              fontWeight: FontWeight.bold),
+                                        )
+                                      ],
+                                    ),
                                     textAlign: TextAlign.center,
                                   ),
                                 ),
@@ -675,17 +781,27 @@ class _HomeState extends State<Home>
                               }),
                               child: Container(
                                 width: showProfilePicture
-                                    ? MediaQuery.of(context).size.width * .5 -
-                                        (size.width * .05 +
-                                            16.5 +
-                                            ((39 +
-                                                    MediaQuery.of(context)
-                                                            .size
-                                                            .width *
-                                                        .05) *
-                                                .5))
+                                    ? ((size.width -
+                                                size.width * .245 -
+                                                size.width * .02) *
+                                            .5) -
+                                        size.width * .005
+                                    // ? MediaQuery
+                                    // .of(context)
+                                    // .size
+                                    // .width * .5 -
+                                    // (size.width * .05 +
+                                    //     11 +
+                                    //     ((39 +
+                                    //         MediaQuery
+                                    //             .of(context)
+                                    //             .size
+                                    //             .width *
+                                    //             .05) *
+                                    //         .5))
                                     : MediaQuery.of(context).size.width * .5 -
-                                        (size.width * .05 + 16.5),
+                                        (size.width * .05 + 11),
+                                height: size.width * .05 + 18,
                                 decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(100),
                                     color: isNotesPressed
@@ -714,7 +830,7 @@ class _HomeState extends State<Home>
                                                     : Colors.black,
                                               ),
                                               alignment:
-                                                  PlaceholderAlignment.middle),
+                                                  PlaceholderAlignment.bottom),
                                           TextSpan(
                                             text: "  tasks",
                                             style: TextStyle(

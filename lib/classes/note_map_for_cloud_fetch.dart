@@ -12,8 +12,12 @@ class User {
     return User(
       note: map['note'] ?? '',
       title: map['title'] ?? '',
-      theme: map['theme'] ?? '',
+      theme: map['theme'].toString(),
+      // theme: double.tryParse(map['theme'].toString()) != null ? "0xfff7a221" : map['theme'],
       time: map['time'] ?? '',
     );
+  }
+  bool isNumeric(String s) {
+    return double.tryParse(s) != null;
   }
 }

@@ -7,6 +7,7 @@ import 'package:scribbles/pages/new_note_page_design.dart';
 import 'package:scribbles/pages/sync_file.dart';
 import 'package:scribbles/pages/task_creation_page.dart';
 import 'package:scribbles/widgets/animated_date_time_picker.dart';
+import 'package:scribbles/widgets/update_prompt.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../hero_transition_handler/custom_rect_tween.dart';
@@ -107,6 +108,31 @@ class _TestState extends State<Test> {
             })
             .asStream()
             .listen((event) {}, onDone: () {});
+      }
+    }
+
+    checkForUpdates() async {
+      var snapshot = await FirebaseDatabase.instance
+          .ref('app update')
+          .child("version code")
+          .get();
+      if (snapshot.value.toString() != "1.5") {
+        snapshot = await FirebaseDatabase.instance
+            .ref('app update')
+            .child("url")
+            .get()
+            .whenComplete(() {
+          setState(() {
+            _isCloudSyncing = false;
+          });
+          Navigator.of(this.context).push(HeroDialogRoute(
+            builder: (context) => Center(
+              child: UpdatePrompt(
+                url: snapshot.value.toString(),
+              ),
+            ),
+          ));
+        });
       }
     }
 
@@ -247,6 +273,48 @@ class _TestState extends State<Test> {
                                     onTap: () {
                                       Navigator.of(context)
                                           .push(HeroDialogRoute(
+                                        // bgColor: const Color(0x00000000),
+                                        builder: (context) => const Center(
+                                          child: Profile(tag: '000'),
+                                        ),
+                                        // settings: const RouteSettings(),
+                                      ));
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: RichText(
+                                        textAlign: TextAlign.center,
+                                        text: const TextSpan(
+                                          children: [
+                                            WidgetSpan(
+                                              child: Icon(
+                                                Icons.person_outline_rounded,
+                                                size: 21,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                            TextSpan(
+                                                text: "  profile",
+                                                style: TextStyle(
+                                                    fontFamily:
+                                                        'varela-round.regular',
+                                                    fontSize: 19,
+                                                    fontWeight:
+                                                        FontWeight.bold)),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: GestureDetector(
+                                    // splashColor: Colors.white,
+                                    // radius: 100,
+                                    onTap: () {
+                                      Navigator.of(context)
+                                          .push(HeroDialogRoute(
                                         builder: (context) => const Center(
                                           child: SyncFile('000'),
                                         ),
@@ -286,14 +354,10 @@ class _TestState extends State<Test> {
                                     // splashColor: Colors.white,
                                     // radius: 100,
                                     onTap: () {
-                                      Navigator.of(context)
-                                          .push(HeroDialogRoute(
-                                        // bgColor: const Color(0x00000000),
-                                        builder: (context) => const Center(
-                                          child: Profile(tag: '000'),
-                                        ),
-                                        // settings: const RouteSettings(),
-                                      ));
+                                      setState(() {
+                                        _isCloudSyncing = true;
+                                      });
+                                      checkForUpdates();
                                     },
                                     child: Padding(
                                       padding: const EdgeInsets.all(8.0),
@@ -309,7 +373,7 @@ class _TestState extends State<Test> {
                                               ),
                                             ),
                                             TextSpan(
-                                                text: "  profile",
+                                                text: "  check for updates",
                                                 style: TextStyle(
                                                     fontFamily:
                                                         'varela-round.regular',

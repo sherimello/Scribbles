@@ -293,55 +293,277 @@ class _NewNotePageState extends State<NewNotePage> {
       createRectTween: (begin, end) {
         return CustomRectTween(begin: begin!, end: end!);
       },
-      child: Scaffold(
-        body: Container(
-          color: const Color(0xffF8F0E3),
-          child: SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(11, 11, 11, 0),
-                  child: Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pop(context, false);
-                          // changeSaveButtonSize();
-                        },
-                        child: Align(
-                          alignment: const Alignment(-1, 0),
-                          child: Padding(
-                            padding: const EdgeInsets.only(right: 3.0),
-                            child: Icon(
-                              Icons.arrow_back,
-                              color: searchBarColor,
+      child: SafeArea(
+        child: Scaffold(
+          body: SingleChildScrollView(
+            child: Container(
+              height: size.height - MediaQuery.of(context).padding.top,
+              width: size.width,
+              color: const Color(0xffF8F0E3),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(11, 11, 11, 0),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.pop(context, false);
+                            // changeSaveButtonSize();
+                          },
+                          child: Align(
+                            alignment: const Alignment(-1, 0),
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 3.0),
+                              child: Icon(
+                                Icons.arrow_back,
+                                color: searchBarColor,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      Expanded(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 19.0),
-                                child: AnimatedContainer(
+                        Expanded(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.max,
+                            children: [
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 19.0),
+                                  child: AnimatedContainer(
+                                      curve: Curves.fastOutSlowIn,
+                                      duration: const Duration(milliseconds: 351),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(17),
+                                        color: searchBarColor,
+                                      ),
+                                      // boxShadow: boxShadow(21, 3, 3, Colors.grey.shade300, Colors.grey.shade300)),
+                                      child: Center(
+                                        child: TextField(
+                                          focusNode: myFocusNode2,
+                                          controller: _searchFieldController,
+                                          textAlign: TextAlign.center,
+                                          style: const TextStyle(
+                                              color: Colors.white,
+                                              fontFamily: "Rounded_Elegance",
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 13),
+                                          decoration: const InputDecoration(
+                                              hintStyle: TextStyle(
+                                                  color: Colors.white,
+                                                  fontFamily: "Rounded_Elegance",
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.bold),
+                                              border: InputBorder.none,
+                                              focusedBorder: InputBorder.none,
+                                              enabledBorder: InputBorder.none,
+                                              errorBorder: InputBorder.none,
+                                              disabledBorder: InputBorder.none,
+                                              contentPadding: EdgeInsets.only(
+                                                  left: 15,
+                                                  bottom: 11,
+                                                  top: 11,
+                                                  right: 15),
+                                              hintText: "note title..."),
+                                        ),
+                                      )),
+                                ),
+                              ),
+                              Align(
+                                alignment: const Alignment(1, 0),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    // hideSaveButton();
+
+                                    String cdate2 =
+                                        DateFormat("EEEEE, MMMM dd, yyyy")
+                                            .format(DateTime.now());
+                                    //output:  August, 27, 2021
+
+                                    String tdata = DateFormat("hh:mm:ss a")
+                                        .format(DateTime.now());
+                                    // output: 07:38:57 PM
+                                    time = cdate2 + "\n" + tdata;
+                                    if (kDebugMode) {
+                                      print(time);
+                                    }
+
+                                    widget.id != "000"
+                                        ? (initNote !=
+                                                        _noteFieldController
+                                                            .text ||
+                                                    initTitle !=
+                                                        _searchFieldController
+                                                            .text) ||
+                                                selectedColor != initColor
+                                            ? updateData().whenComplete(
+                                                () => Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                          builder: (context) =>
+                                                              const Home(
+                                                                  true, 'notes')),
+                                                    ))
+                                            : Navigator.pop(context, false)
+                                        : _noteFieldController.text.isNotEmpty &&
+                                                _searchFieldController
+                                                    .text.isNotEmpty
+                                            ? insertData(
+                                                    _searchFieldController.text,
+                                                    _noteFieldController.text)
+                                                .whenComplete(() => {
+                                                      Navigator.push(
+                                                        context,
+                                                        MaterialPageRoute(
+                                                            builder: (context) =>
+                                                                const Home(true,
+                                                                    'notes')),
+                                                      )
+                                                    })
+                                            : Navigator.pop(context, false);
+                                  },
+                                  child: AnimatedContainer(
+                                    width: _isNoteInUpdateMode
+                                        ? size.height * .055 > 65
+                                            ? 65
+                                            : size.height * .065
+                                        : saveButtonDimen,
+                                    height: _isNoteInUpdateMode
+                                        ? size.height * .065 > 65
+                                            ? 65
+                                            : size.height * .065
+                                        : saveButtonDimen,
                                     curve: Curves.fastOutSlowIn,
-                                    duration: const Duration(milliseconds: 351),
+                                    child: Visibility(
+                                        visible:
+                                            saveButtonDimen == 55 ? true : false,
+                                        child: Center(
+                                            child: Icon(
+                                          Icons.done_all,
+                                          color: searchBarColor,
+                                        ))),
                                     decoration: BoxDecoration(
+                                      color: searchBarColor.withOpacity(.25),
+                                      border: Border.all(
+                                          color: Colors.grey.shade100, width: 1),
                                       borderRadius: BorderRadius.circular(17),
-                                      color: searchBarColor,
                                     ),
-                                    // boxShadow: boxShadow(21, 3, 3, Colors.grey.shade300, Colors.grey.shade300)),
-                                    child: Center(
+                                    // boxShadow: boxShadow(
+                                    //     9, 3, 3, Colors.grey, Colors.white)),
+                                    duration: const Duration(milliseconds: 195),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                      padding: EdgeInsets.fromLTRB(11, size.height * 0.01, 11, 0),
+                      child: RichText(
+                        textAlign: TextAlign.center,
+                        text: TextSpan(children: [
+                          WidgetSpan(
+                            child: Icon(
+                              Icons.format_paint,
+                              size: 15,
+                              color: searchBarColor,
+                            ),
+                          ),
+                          const TextSpan(
+                              text: "  choose a note theme:",
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontFamily: "Rounded_Elegance",
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13)),
+                        ]),
+                      )),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 7.0),
+                    child: Center(
+                      child: SingleChildScrollView(
+                          physics: const BouncingScrollPhysics(),
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              // colorNamedColorPalette("0xfff7a221"),
+                              // colorNamedColorPalette("0xffb44c4b"),
+                              // colorNamedColorPalette("0xffd2ad7e"),
+                              // colorNamedColorPalette("0xff02708b"),
+                              // colorNamedColorPalette("0xffe78848"),
+                              roundedColorPalette(0xffe78848),
+                              roundedColorPalette(0xffb44c4b),
+                              roundedColorPalette(0xffd2ad7e),
+                              roundedColorPalette(0xfff7a221),
+                              roundedColorPalette(0xff02708b),
+                            ],
+                          )),
+                    ),
+                  ),
+                  Visibility(
+                    visible: false,
+                    child: Padding(
+                        padding:
+                            EdgeInsets.fromLTRB(31, 0, 11, size.height * .015),
+                        child: RichText(
+                          text: TextSpan(children: [
+                            WidgetSpan(
+                              child: Icon(
+                                Icons.note,
+                                size: 15,
+                                color: searchBarColor,
+                              ),
+                            ),
+                            const TextSpan(
+                                text: "  what's on your mind?",
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontFamily: "Rounded_Elegance",
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13)),
+                          ]),
+                        )),
+                  ),
+                  Flexible(
+                      fit: FlexFit.tight,
+                      child: SizedBox(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(11, 0, 11, 11),
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _isNoteCardActive = true;
+                                noteFieldFocusNode.requestFocus();
+                                /////////////////////////////////////////////////////////////////////////////////////
+                              });
+                            },
+                            child: AnimatedContainer(
+                              curve: Curves.fastOutSlowIn,
+                              duration: const Duration(milliseconds: 751),
+                              decoration: BoxDecoration(
+                                color: searchBarColor,
+                                borderRadius: BorderRadius.circular(31),
+                                // boxShadow: boxShadow(7, 7, 7, Colors.grey, Colors.white)
+                              ),
+                              child: Stack(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(9.5),
+                                    child: Visibility(
+                                      visible: _isNoteCardActive,
                                       child: TextField(
-                                        focusNode: myFocusNode2,
-                                        controller: _searchFieldController,
-                                        textAlign: TextAlign.center,
+                                        focusNode: noteFieldFocusNode,
+                                        controller: _noteFieldController,
+                                        keyboardType: TextInputType.multiline,
+                                        maxLines: 1000000,
                                         style: const TextStyle(
                                             color: Colors.white,
                                             fontFamily: "Rounded_Elegance",
@@ -349,9 +571,10 @@ class _NewNotePageState extends State<NewNotePage> {
                                             fontSize: 13),
                                         decoration: const InputDecoration(
                                             hintStyle: TextStyle(
-                                                color: Colors.white,
+                                                color: Colors.white54,
                                                 fontFamily: "Rounded_Elegance",
-                                                fontSize: 15,
+                                                fontSize: 13,
+                                                fontStyle: FontStyle.italic,
                                                 fontWeight: FontWeight.bold),
                                             border: InputBorder.none,
                                             focusedBorder: InputBorder.none,
@@ -363,281 +586,64 @@ class _NewNotePageState extends State<NewNotePage> {
                                                 bottom: 11,
                                                 top: 11,
                                                 right: 15),
-                                            hintText: "note title..."),
+                                            hintText: "so it was 19/3/1993..."),
                                       ),
-                                    )),
-                              ),
-                            ),
-                            Align(
-                              alignment: const Alignment(1, 0),
-                              child: GestureDetector(
-                                onTap: () {
-                                  // hideSaveButton();
-
-                                  String cdate2 =
-                                      DateFormat("EEEEE, MMMM dd, yyyy")
-                                          .format(DateTime.now());
-                                  //output:  August, 27, 2021
-
-                                  String tdata = DateFormat("hh:mm:ss a")
-                                      .format(DateTime.now());
-                                  // output: 07:38:57 PM
-                                  time = cdate2 + "\n" + tdata;
-                                  if (kDebugMode) {
-                                    print(time);
-                                  }
-
-                                  widget.id != "000"
-                                      ? (initNote !=
-                                                      _noteFieldController
-                                                          .text ||
-                                                  initTitle !=
-                                                      _searchFieldController
-                                                          .text) ||
-                                              selectedColor != initColor
-                                          ? updateData().whenComplete(
-                                              () => Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                        builder: (context) =>
-                                                            const Home(
-                                                                true, 'notes')),
-                                                  ))
-                                          : Navigator.pop(context, false)
-                                      : _noteFieldController.text.isNotEmpty &&
-                                              _searchFieldController
-                                                  .text.isNotEmpty
-                                          ? insertData(
-                                                  _searchFieldController.text,
-                                                  _noteFieldController.text)
-                                              .whenComplete(() => {
-                                                    Navigator.push(
-                                                      context,
-                                                      MaterialPageRoute(
-                                                          builder: (context) =>
-                                                              const Home(true,
-                                                                  'notes')),
-                                                    )
-                                                  })
-                                          : Navigator.pop(context, false);
-                                },
-                                child: AnimatedContainer(
-                                  width: _isNoteInUpdateMode
-                                      ? size.height * .055 > 65
-                                          ? 65
-                                          : size.height * .065
-                                      : saveButtonDimen,
-                                  height: _isNoteInUpdateMode
-                                      ? size.height * .065 > 65
-                                          ? 65
-                                          : size.height * .065
-                                      : saveButtonDimen,
-                                  curve: Curves.fastOutSlowIn,
-                                  child: Visibility(
-                                      visible:
-                                          saveButtonDimen == 55 ? true : false,
+                                    ),
+                                  ),
+                                  Visibility(
+                                    visible: !_isNoteCardActive,
+                                    child: const SizedBox.expand(
                                       child: Center(
-                                          child: Icon(
-                                        Icons.done_all,
-                                        color: searchBarColor,
-                                      ))),
-                                  decoration: BoxDecoration(
-                                    color: searchBarColor.withOpacity(.25),
-                                    border: Border.all(
-                                        color: Colors.grey.shade100, width: 1),
-                                    borderRadius: BorderRadius.circular(17),
+                                        child: Text(
+                                          "Tap to start writing!",
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                              fontSize: 21,
+                                              fontFamily: "Rounded_Elegance",
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white),
+                                        ),
+                                        // child: Column(
+                                        //   mainAxisAlignment:
+                                        //       MainAxisAlignment.center,
+                                        //   children: [
+                                        //     Padding(
+                                        //       padding: const EdgeInsets.all(13.0),
+                                        //       child: ClipRRect(
+                                        //           borderRadius:
+                                        //               BorderRadius.circular(
+                                        //                   1000.0),
+                                        //           child: Image.asset(
+                                        //             "lib/assets/images/tap.gif",
+                                        //             color: searchBarColor,
+                                        //             colorBlendMode:
+                                        //                 BlendMode.screen,
+                                        //             width: size.width * .15,
+                                        //             height: size.width * .15,
+                                        //             fit: BoxFit.cover,
+                                        //           )),
+                                        //     ),
+                                        //     const Text(
+                                        //       "Tap to start writing!",
+                                        //       style: TextStyle(
+                                        //           fontSize: 17,
+                                        //           fontFamily: "Rounded_Elegance",
+                                        //           fontWeight: FontWeight.bold,
+                                        //           color: Colors.white),
+                                        //     ),
+                                        //   ],
+                                        // ),
+                                      ),
+                                    ),
                                   ),
-                                  // boxShadow: boxShadow(
-                                  //     9, 3, 3, Colors.grey, Colors.white)),
-                                  duration: const Duration(milliseconds: 195),
-                                ),
+                                ],
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                    padding: EdgeInsets.fromLTRB(11, size.height * 0.01, 11, 0),
-                    child: RichText(
-                      textAlign: TextAlign.center,
-                      text: TextSpan(children: [
-                        WidgetSpan(
-                          child: Icon(
-                            Icons.format_paint,
-                            size: 15,
-                            color: searchBarColor,
                           ),
                         ),
-                        const TextSpan(
-                            text: "  choose a note theme:",
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontFamily: "Rounded_Elegance",
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13)),
-                      ]),
-                    )),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 7.0),
-                  child: Center(
-                    child: SingleChildScrollView(
-                        physics: const BouncingScrollPhysics(),
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            // colorNamedColorPalette("0xfff7a221"),
-                            // colorNamedColorPalette("0xffb44c4b"),
-                            // colorNamedColorPalette("0xffd2ad7e"),
-                            // colorNamedColorPalette("0xff02708b"),
-                            // colorNamedColorPalette("0xffe78848"),
-                            roundedColorPalette(0xffe78848),
-                            roundedColorPalette(0xffb44c4b),
-                            roundedColorPalette(0xffd2ad7e),
-                            roundedColorPalette(0xfff7a221),
-                            roundedColorPalette(0xff02708b),
-                          ],
-                        )),
-                  ),
-                ),
-                Visibility(
-                  visible: false,
-                  child: Padding(
-                      padding:
-                          EdgeInsets.fromLTRB(31, 0, 11, size.height * .015),
-                      child: RichText(
-                        text: TextSpan(children: [
-                          WidgetSpan(
-                            child: Icon(
-                              Icons.note,
-                              size: 15,
-                              color: searchBarColor,
-                            ),
-                          ),
-                          const TextSpan(
-                              text: "  what's on your mind?",
-                              style: TextStyle(
-                                  color: Colors.black,
-                                  fontFamily: "Rounded_Elegance",
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13)),
-                        ]),
                       )),
-                ),
-                Flexible(
-                    fit: FlexFit.tight,
-                    child: SizedBox(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(11, 0, 11, 11),
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _isNoteCardActive = true;
-                              noteFieldFocusNode.requestFocus();
-                              /////////////////////////////////////////////////////////////////////////////////////
-                            });
-                          },
-                          child: AnimatedContainer(
-                            curve: Curves.fastOutSlowIn,
-                            duration: const Duration(milliseconds: 751),
-                            decoration: BoxDecoration(
-                              color: searchBarColor,
-                              borderRadius: BorderRadius.circular(31),
-                              // boxShadow: boxShadow(7, 7, 7, Colors.grey, Colors.white)
-                            ),
-                            child: Stack(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(9.5),
-                                  child: Visibility(
-                                    visible: _isNoteCardActive,
-                                    child: TextField(
-                                      focusNode: noteFieldFocusNode,
-                                      controller: _noteFieldController,
-                                      keyboardType: TextInputType.multiline,
-                                      maxLines: 1000000,
-                                      style: const TextStyle(
-                                          color: Colors.white,
-                                          fontFamily: "Rounded_Elegance",
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 13),
-                                      decoration: const InputDecoration(
-                                          hintStyle: TextStyle(
-                                              color: Colors.white54,
-                                              fontFamily: "Rounded_Elegance",
-                                              fontSize: 13,
-                                              fontStyle: FontStyle.italic,
-                                              fontWeight: FontWeight.bold),
-                                          border: InputBorder.none,
-                                          focusedBorder: InputBorder.none,
-                                          enabledBorder: InputBorder.none,
-                                          errorBorder: InputBorder.none,
-                                          disabledBorder: InputBorder.none,
-                                          contentPadding: EdgeInsets.only(
-                                              left: 15,
-                                              bottom: 11,
-                                              top: 11,
-                                              right: 15),
-                                          hintText: "so it was 19/3/1993..."),
-                                    ),
-                                  ),
-                                ),
-                                Visibility(
-                                  visible: !_isNoteCardActive,
-                                  child: const SizedBox.expand(
-                                    child: Center(
-                                      child: Text(
-                                        "Tap to start writing!",
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                            fontSize: 21,
-                                            fontFamily: "Rounded_Elegance",
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white),
-                                      ),
-                                      // child: Column(
-                                      //   mainAxisAlignment:
-                                      //       MainAxisAlignment.center,
-                                      //   children: [
-                                      //     Padding(
-                                      //       padding: const EdgeInsets.all(13.0),
-                                      //       child: ClipRRect(
-                                      //           borderRadius:
-                                      //               BorderRadius.circular(
-                                      //                   1000.0),
-                                      //           child: Image.asset(
-                                      //             "lib/assets/images/tap.gif",
-                                      //             color: searchBarColor,
-                                      //             colorBlendMode:
-                                      //                 BlendMode.screen,
-                                      //             width: size.width * .15,
-                                      //             height: size.width * .15,
-                                      //             fit: BoxFit.cover,
-                                      //           )),
-                                      //     ),
-                                      //     const Text(
-                                      //       "Tap to start writing!",
-                                      //       style: TextStyle(
-                                      //           fontSize: 17,
-                                      //           fontFamily: "Rounded_Elegance",
-                                      //           fontWeight: FontWeight.bold,
-                                      //           color: Colors.white),
-                                      //     ),
-                                      //   ],
-                                      // ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    )),
-              ],
+                ],
+              ),
             ),
           ),
         ),
