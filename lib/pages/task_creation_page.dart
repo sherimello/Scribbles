@@ -12,6 +12,7 @@ import 'package:path/path.dart';
 
 class TaskCreationPage extends StatefulWidget {
   final String tag;
+
   const TaskCreationPage(this.tag, {Key? key}) : super(key: key);
 
   @override
@@ -30,13 +31,11 @@ class _TaskCreationPageState extends State<TaskCreationPage> {
 
   bool v = false;
 
-
   @override
   void initState() {
     super.initState();
     initiateDB();
-    _taskFieldController.addListener(() {
-    });
+    _taskFieldController.addListener(() {});
   }
 
   void showCustomSnackBar() {
@@ -58,21 +57,28 @@ class _TaskCreationPageState extends State<TaskCreationPage> {
     // open the database
     database = await openDatabase(path, version: 1,
         onCreate: (Database db, int version) async {
-          // When creating the db, create the table
-          await db.execute(
-              'CREATE TABLE IF NOT EXISTS Tasks (id INTEGER PRIMARY KEY, task NVARCHAR, theme NVARCHAR, time NVARCHAR, pending BOOLEAN, schedule NVARCHAR)');
-        });
+      // When creating the db, create the table
+      await db.execute(
+          'CREATE TABLE IF NOT EXISTS Tasks (id INTEGER PRIMARY KEY, task NVARCHAR, theme NVARCHAR, time NVARCHAR, pending BOOLEAN, schedule NVARCHAR)');
+    });
   }
-  
-  Future<void> insertData(String time, bool pending) async {
 
+  Future<void> insertData(String time, bool pending) async {
     print(time);
     await database.transaction((txn) async {
       int id1 = await txn.rawInsert(
           'INSERT INTO Tasks(task, theme, time, pending, schedule) VALUES(?, ?, ?, ?, ?)',
-          [_taskFieldController.text, selectedColor, time, pending, "undefined"]);
+          [
+            _taskFieldController.text,
+            selectedColor,
+            time,
+            pending,
+            "undefined"
+          ]);
       print('inserted1: $id1');
-      Navigator.of(this.context).pushAndRemoveUntil(MaterialPageRoute(builder: (_) => const Home(true, "tasks")), (route) => false);
+      Navigator.of(this.context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const Home(true, "tasks")),
+          (route) => false);
     });
   }
 
@@ -168,20 +174,21 @@ class _TaskCreationPageState extends State<TaskCreationPage> {
                   child: SingleChildScrollView(
                     child: Column(
                       mainAxisSize: MainAxisSize.max,
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Center(
                           child: Padding(
-                              padding: EdgeInsets.fromLTRB(11, size.height * 0.01, 11, 0),
+                              padding: EdgeInsets.fromLTRB(
+                                  11, size.height * 0.01, 11, 0),
                               child: RichText(
                                 textAlign: TextAlign.center,
                                 text: TextSpan(children: [
                                   WidgetSpan(
-                                    child: Icon(
-                                      Icons.format_paint,
-                                      size: 15,
-                                      color: Color(int.parse(selectedColor),)
-                                    ),
+                                    child: Icon(Icons.format_paint,
+                                        size: 15,
+                                        color: Color(
+                                          int.parse(selectedColor),
+                                        )),
                                   ),
                                   const TextSpan(
                                       text: "  choose a note theme:",
@@ -194,13 +201,15 @@ class _TaskCreationPageState extends State<TaskCreationPage> {
                               )),
                         ),
                         Padding(
-                          padding: const EdgeInsets.only(left: 15.0, top: 5, right: 15, bottom: 11),
+                          padding: const EdgeInsets.only(
+                              left: 15.0, top: 5, right: 15, bottom: 11),
                           child: Center(
                             child: SingleChildScrollView(
                                 physics: const BouncingScrollPhysics(),
                                 scrollDirection: Axis.horizontal,
                                 child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
                                   children: [
                                     roundedColorPalette(0xffe78848),
                                     roundedColorPalette(0xffb44c4b),
@@ -212,7 +221,7 @@ class _TaskCreationPageState extends State<TaskCreationPage> {
                           ),
                         ),
                         Padding(
-                            padding: const EdgeInsets.all(11),
+                            padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 31),
                             child: RichText(
                               textAlign: TextAlign.start,
                               text: TextSpan(children: [
@@ -263,122 +272,234 @@ class _TaskCreationPageState extends State<TaskCreationPage> {
                                       errorBorder: InputBorder.none,
                                       disabledBorder: InputBorder.none,
                                       contentPadding: EdgeInsets.only(
-                                          left: 15, bottom: 11, top: 11, right: 15),
+                                          left: 15,
+                                          bottom: 11,
+                                          top: 11,
+                                          right: 15),
                                       hintText: "write task here..."),
                                 ),
                               ),
                             ),
                           ),
                         ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.fromLTRB(11, 11, 5.5, 11),
-                                child: InkWell(
-                                  onTap: (){
-                                    _taskFieldController.text.isEmpty ? showCustomSnackBar() :
-                                    Navigator.of(context)
-                                        .push(HeroDialogRoute(
+                        Padding(
+                          padding: const EdgeInsets.all(11),
+                          child: InkWell(
+                            onTap: () {
+                              _taskFieldController.text.isEmpty
+                                  ? showCustomSnackBar()
+                                  : Navigator.of(context).push(HeroDialogRoute(
+                                bgColor: Colors.transparent,
                                       builder: (context) => Center(
-                                        child: AnimatedDateTimePicker("000", _taskFieldController.text, selectedColor, MediaQuery.of(context).size),
+                                        child: AnimatedDateTimePicker(
+                                            "000",
+                                            _taskFieldController.text,
+                                            selectedColor,
+                                            MediaQuery.of(context).size,
+                                        "once"
+                                        ),
                                         // child: AnimatedDateTimePicker(),
                                       ),
                                       // settings: const RouteSettings(),
                                     ));
-                                  },
-                                  child: AnimatedContainer(
-                                    duration: const Duration(milliseconds: 355),
-                                    decoration: BoxDecoration(
-                                        color: Color(int.parse(selectedColor))
-                                            .withOpacity(.15),
-                                        borderRadius: BorderRadius.circular(31)),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(15.0),
-                                      child: Column(
-                                        children: [
-                                          Icon(
-                                            Icons.alarm_on_outlined,
-                                            size: imageSize,
-                                            color: Color(int.parse(selectedColor))
-                                                .withOpacity(1),
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.only(top: 11.0),
-                                            child: const Text(
-                                              "scheduled task",
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                color: Colors.black,
-                                                fontFamily: "Rounded_Elegance",
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Expanded(
+                            },
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 355),
+                              decoration: BoxDecoration(
+                                  color: Color(int.parse(selectedColor))
+                                      .withOpacity(.15),
+                                  borderRadius: BorderRadius.circular(31)),
                               child: Padding(
-                                padding: const EdgeInsets.fromLTRB(5.5, 11, 11, 11),
-                                child: InkWell(
-                                  onTap: () async {
-                                    String cdate2 =
-                                    DateFormat("EEEEE, MMMM dd, yyyy")
-                                        .format(DateTime.now());
-                                    //output:  August, 27, 2021
+                                padding: const EdgeInsets.all(15.0),
+                                child: Text.rich(
+                                  TextSpan(children: [
+                                    WidgetSpan(
+                                        child: Icon(
+                                          Icons.alarm_on_outlined,
+                                          size: size.width * .065,
+                                          color: Color(int.parse(selectedColor))
+                                              .withOpacity(1),
+                                        ),
+                                        alignment: PlaceholderAlignment.middle),
+                                    TextSpan(
+                                      text: "  schedule task",
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontFamily: "Rounded_Elegance",
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: size.width * .035),
+                                    )
+                                  ]),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 11),
+                          child: InkWell(
+                            onTap: () async {
+                              String cdate2 = DateFormat("EEEEE, MMMM dd, yyyy")
+                                  .format(DateTime.now());
+                              //output:  August, 27, 2021
 
-                                    String tdata = DateFormat("hh:mm:ss a")
-                                        .format(DateTime.now());
-                                    // output: 07:38:57 PM
-                                    time = cdate2 + "\n" + tdata;
+                              String tdata = DateFormat("hh:mm:ss a")
+                                  .format(DateTime.now());
+                              // output: 07:38:57 PM
+                              time = cdate2 + "\n" + tdata;
 
-                                    _taskFieldController.text.isEmpty ? showCustomSnackBar() :
-                                    initiateDB().whenComplete(() => insertData(time, false));
-                                  },
-                                  child: AnimatedContainer(
-                                    duration: const Duration(milliseconds: 355),
-                                    decoration: BoxDecoration(
-                                        color: Color(int.parse(selectedColor))
-                                            .withOpacity(.15),
-                                        borderRadius: BorderRadius.circular(31)),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(15.0),
-                                      child: Column(
-                                        children: [
-                                          Icon(
-                                            Icons.alarm_off,
-                                            size: imageSize,
+                              _taskFieldController.text.isEmpty
+                                  ? showCustomSnackBar()
+                                  : initiateDB().whenComplete(
+                                      () => insertData(time, false));
+                            },
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 355),
+                              decoration: BoxDecoration(
+                                  color: Color(int.parse(selectedColor))
+                                      .withOpacity(.15),
+                                  borderRadius: BorderRadius.circular(31)),
+                              child: Padding(
+                                  padding: const EdgeInsets.all(15.0),
+                                  child: Text.rich(
+                                    TextSpan(children: [
+                                      WidgetSpan(
+                                          child: Icon(
+                                            Icons.alarm_off_outlined,
+                                            size: size.width * .065,
+                                            color:
+                                                Color(int.parse(selectedColor))
+                                                    .withOpacity(1),
+                                          ),
+                                          alignment:
+                                              PlaceholderAlignment.middle),
+                                      TextSpan(
+                                        text: "  do not schedule task",
+                                        style: TextStyle(
+                                            color: Colors.black,
+                                            fontFamily: "Rounded_Elegance",
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: size.width * .035),
+                                      )
+                                    ]),
+                                    textAlign: TextAlign.center,
+                                  )),
+                            ),
+                          ),
+                        ),
+                        Visibility(
+                          visible: false,
+                          child: Padding(
+                            padding: const EdgeInsets.all(11),
+                            child: InkWell(
+                              onTap: () {
+                                _taskFieldController.text.isEmpty
+                                    ? showCustomSnackBar()
+                                    : Navigator.of(context).push(HeroDialogRoute(
+                                  bgColor: Colors.transparent,
+                                  builder: (context) => Center(
+                                    child: AnimatedDateTimePicker(
+                                        "000",
+                                        _taskFieldController.text,
+                                        selectedColor,
+                                        MediaQuery.of(context).size,
+                                        "daily")
+                                    // child: AnimatedDateTimePicker(),
+                                  ),
+                                  // settings: const RouteSettings(),
+                                ));
+                              },
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 355),
+                                decoration: BoxDecoration(
+                                    color: Color(int.parse(selectedColor))
+                                        .withOpacity(.15),
+                                    borderRadius: BorderRadius.circular(31)),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(15.0),
+                                  child: Text.rich(
+                                    TextSpan(children: [
+                                      WidgetSpan(
+                                          child: Icon(
+                                            Icons.done_all_rounded,
+                                            size: size.width * .065,
                                             color: Color(int.parse(selectedColor))
                                                 .withOpacity(1),
                                           ),
-                                          Padding(
-                                            padding: const EdgeInsets.only(top: 11.0),
-                                            child: GestureDetector(
-                                              onTap: () {},
-                                              child: const Text(
-                                                "non-scheduled",
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                  color: Colors.black,
-                                                  fontFamily: "Rounded_Elegance",
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
+                                          alignment: PlaceholderAlignment.middle),
+                                      TextSpan(
+                                        text: "  remind daily",
+                                        style: TextStyle(
+                                            color: Colors.black,
+                                            fontFamily: "Rounded_Elegance",
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: size.width * .035),
+                                      )
+                                    ]),
+                                    textAlign: TextAlign.center,
                                   ),
                                 ),
                               ),
                             ),
-                          ],
+                          ),
+                        ),
+                        Visibility(
+                          visible: false,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 11),
+                            child: InkWell(
+                              onTap: () {
+                                _taskFieldController.text.isEmpty
+                                    ? showCustomSnackBar()
+                                    : Navigator.of(context).push(HeroDialogRoute(
+                                  bgColor: Colors.transparent,
+                                  builder: (context) => Center(
+                                      child: AnimatedDateTimePicker(
+                                          "000",
+                                          _taskFieldController.text,
+                                          selectedColor,
+                                          MediaQuery.of(context).size,
+                                          "specific")
+                                    // child: AnimatedDateTimePicker(),
+                                  ),
+                                  // settings: const RouteSettings(),
+                                ));
+                              },
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 355),
+                                decoration: BoxDecoration(
+                                    color: Color(int.parse(selectedColor))
+                                        .withOpacity(.15),
+                                    borderRadius: BorderRadius.circular(31)),
+                                child: Padding(
+                                    padding: const EdgeInsets.all(15.0),
+                                    child: Text.rich(
+                                      TextSpan(children: [
+                                        WidgetSpan(
+                                            child: Icon(
+                                              Icons.calendar_month_rounded,
+                                              size: size.width * .065,
+                                              color:
+                                              Color(int.parse(selectedColor))
+                                                  .withOpacity(1),
+                                            ),
+                                            alignment:
+                                            PlaceholderAlignment.middle),
+                                        TextSpan(
+                                          text: "  on specific days",
+                                          style: TextStyle(
+                                              color: Colors.black,
+                                              fontFamily: "Rounded_Elegance",
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: size.width * .035),
+                                        )
+                                      ]),
+                                      textAlign: TextAlign.center,
+                                    )),
+                              ),
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -415,12 +536,9 @@ class _TaskCreationPageState extends State<TaskCreationPage> {
                                     text: "   " + message,
                                     style: TextStyle(
                                         color: Colors.white,
-                                        fontFamily:
-                                        'varela-round.regular',
-                                        fontSize:
-                                        size.height * .017,
-                                        fontWeight:
-                                        FontWeight.bold)),
+                                        fontFamily: 'varela-round.regular',
+                                        fontSize: size.height * .017,
+                                        fontWeight: FontWeight.bold)),
                               ],
                             ),
                           ),

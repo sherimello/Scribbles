@@ -309,7 +309,8 @@ class _SyncFileState extends State<SyncFile> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(31),
                     ),
-                    color: const Color(0xffF8F0E3),
+                    // color: const Color(0xffF8F0E3),
+                    color: const Color(0xff000000),
                     child: SizedBox(
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 0.0),
@@ -329,12 +330,13 @@ class _SyncFileState extends State<SyncFile> {
                                           8, 19.0, 8, 8),
                                       child: RichText(
                                         textAlign: TextAlign.center,
-                                        text: const TextSpan(
+                                        text: TextSpan(
                                           children: [
                                             WidgetSpan(
+                                              alignment: PlaceholderAlignment.middle,
                                               child: Icon(
                                                 Icons.cloud_upload_outlined,
-                                                size: 17,
+                                                size: size.width * .039,
                                                 color: Colors.orangeAccent,
                                               ),
                                             ),
@@ -344,7 +346,7 @@ class _SyncFileState extends State<SyncFile> {
                                                     color: Colors.orangeAccent,
                                                     fontFamily:
                                                         'varela-round.regular',
-                                                    fontSize: 17,
+                                                    fontSize: size.width * .035,
                                                     fontWeight:
                                                         FontWeight.bold)),
                                           ],
@@ -361,6 +363,7 @@ class _SyncFileState extends State<SyncFile> {
                                           getAllTasks();
                                           Navigator.of(context)
                                               .push(HeroDialogRoute(
+                                            bgColor: Colors.transparent,
                                             builder: (context) => Center(
                                                 child: UploadToDrive(
                                                     string: widget.string,
@@ -374,22 +377,23 @@ class _SyncFileState extends State<SyncFile> {
                                               const EdgeInsets.only(top: 11.0),
                                           child: RichText(
                                             textAlign: TextAlign.center,
-                                            text: const TextSpan(
+                                            text: TextSpan(
                                               children: [
                                                 WidgetSpan(
                                                   child: Icon(
                                                     Icons.add_to_drive,
-                                                    size: 19,
-                                                    color: Colors.black,
+                                                    size: size.width * .045,
+                                                    color: Colors.white,
                                                   ),
+                                                  alignment: PlaceholderAlignment.middle
                                                 ),
                                                 TextSpan(
                                                     text: "  to Google Drive",
                                                     style: TextStyle(
-                                                        color: Colors.black,
+                                                        color: Colors.white,
                                                         fontFamily:
                                                             'varela-round.regular',
-                                                        fontSize: 21,
+                                                        fontSize: size.width * .045,
                                                         fontWeight:
                                                             FontWeight.bold)),
                                               ],
@@ -411,25 +415,25 @@ class _SyncFileState extends State<SyncFile> {
                                           makeCSVAndSaveIt();
                                         },
                                         child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
+                                          padding: const EdgeInsets.only(bottom: 8.0),
                                           child: RichText(
                                             textAlign: TextAlign.center,
-                                            text: const TextSpan(
+                                            text: TextSpan(
                                               children: [
                                                 WidgetSpan(
                                                   child: Icon(
                                                     Icons.phone_android,
-                                                    size: 19,
-                                                    color: Colors.black,
+                                                    size: size.width * .045,
+                                                    color: Colors.white,
                                                   ),
                                                 ),
                                                 TextSpan(
                                                     text: "  locally",
                                                     style: TextStyle(
-                                                        color: Colors.black,
+                                                        color: Colors.white,
                                                         fontFamily:
                                                             'varela-round.regular',
-                                                        fontSize: 21,
+                                                        fontSize: size.width * .045,
                                                         fontWeight:
                                                             FontWeight.bold)),
                                               ],
@@ -439,15 +443,15 @@ class _SyncFileState extends State<SyncFile> {
                                       ),
                                     ),
                                     Padding(
-                                      padding: const EdgeInsets.only(top: 8.0),
+                                      padding: EdgeInsets.only(top: size.width * .1),
                                       child: RichText(
                                         textAlign: TextAlign.center,
-                                        text: const TextSpan(
+                                        text: TextSpan(
                                           children: [
                                             WidgetSpan(
                                               child: Icon(
                                                 Icons.sync,
-                                                size: 17,
+                                                size: size.width * .039,
                                                 color: Colors.orangeAccent,
                                               ),
                                             ),
@@ -457,7 +461,7 @@ class _SyncFileState extends State<SyncFile> {
                                                     color: Colors.orangeAccent,
                                                     fontFamily:
                                                         'varela-round.regular',
-                                                    fontSize: 17,
+                                                    fontSize: size.width * .035,
                                                     fontWeight:
                                                         FontWeight.bold)),
                                           ],
@@ -505,13 +509,13 @@ class _SyncFileState extends State<SyncFile> {
                                                 },
                                                 child: RichText(
                                                   textAlign: TextAlign.center,
-                                                  text: const TextSpan(
+                                                  text: TextSpan(
                                                     children: [
                                                       WidgetSpan(
                                                         child: Icon(
                                                           Icons.data_usage,
-                                                          size: 21,
-                                                          color: Colors.black,
+                                                          size: size.width * .045,
+                                                          color: Colors.white,
                                                         ),
                                                       ),
                                                       TextSpan(
@@ -519,10 +523,10 @@ class _SyncFileState extends State<SyncFile> {
                                                               "  from app data",
                                                           style: TextStyle(
                                                               color:
-                                                                  Colors.black,
+                                                                  Colors.white,
                                                               fontFamily:
                                                                   'varela-round.regular',
-                                                              fontSize: 21,
+                                                              fontSize: size.width * .045,
                                                               fontWeight:
                                                                   FontWeight
                                                                       .bold)),
@@ -534,30 +538,30 @@ class _SyncFileState extends State<SyncFile> {
                                             Padding(
                                               padding:
                                                   const EdgeInsets.fromLTRB(
-                                                      8, 3.0, 8, 19),
+                                                      8, 3.0, 8, 8),
                                               child: GestureDetector(
                                                 onTap: () async {
                                                   copyCSVToDB("2", context);
                                                 },
                                                 child: RichText(
                                                   textAlign: TextAlign.center,
-                                                  text: const TextSpan(
+                                                  text: TextSpan(
                                                     children: [
                                                       WidgetSpan(
                                                         child: Icon(
                                                           Icons.folder_open,
-                                                          size: 21,
-                                                          color: Colors.black,
+                                                          size: size.width * .045,
+                                                          color: Colors.white,
                                                         ),
                                                       ),
                                                       TextSpan(
                                                           text: "  choose file",
                                                           style: TextStyle(
                                                               color:
-                                                                  Colors.black,
+                                                                  Colors.white,
                                                               fontFamily:
                                                                   'varela-round.regular',
-                                                              fontSize: 21,
+                                                              fontSize: size.width * .045,
                                                               fontWeight:
                                                                   FontWeight
                                                                       .bold)),
@@ -569,7 +573,7 @@ class _SyncFileState extends State<SyncFile> {
                                             Padding(
                                               padding:
                                                   const EdgeInsets.fromLTRB(
-                                                      8, 3.0, 8, 19),
+                                                      8, 0, 8, 19),
                                               child: GestureDetector(
                                                 onTap: () async {
                                                   setState(() {
@@ -579,24 +583,24 @@ class _SyncFileState extends State<SyncFile> {
                                                 },
                                                 child: RichText(
                                                   textAlign: TextAlign.center,
-                                                  text: const TextSpan(
+                                                  text: TextSpan(
                                                     children: [
                                                       WidgetSpan(
                                                         child: Icon(
                                                           Icons
                                                               .cloud_download_outlined,
-                                                          size: 21,
-                                                          color: Colors.black,
+                                                          size: size.width * .045,
+                                                          color: Colors.white,
                                                         ),
                                                       ),
                                                       TextSpan(
                                                           text: "  from cloud",
                                                           style: TextStyle(
                                                               color:
-                                                                  Colors.black,
+                                                                  Colors.white,
                                                               fontFamily:
                                                                   'varela-round.regular',
-                                                              fontSize: 21,
+                                                              fontSize: size.width * .045,
                                                               fontWeight:
                                                                   FontWeight
                                                                       .bold)),

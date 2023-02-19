@@ -88,6 +88,9 @@ class _TaskPreviewCardState extends State<TaskPreviewCard> {
         'jhasjkhdiuiashiudyhiausdoijasiojdojoasjioljdoiaiojsiodjoiasjiodjioajoidajsoijdojasiodjojaosjdojoias';
     t2 = "hello";
     date = '19-3-93';
+
+    var size = MediaQuery.of(context).size;
+
     return GestureDetector(
       onLongPress: () {
         setState(() {
@@ -138,15 +141,19 @@ class _TaskPreviewCardState extends State<TaskPreviewCard> {
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Checkbox(
+                  padding: const EdgeInsets.all(15.0),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: size.width * .057,
+                        height: size.width * .057,
+                        child: Checkbox(
                             // materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5)),
+                                borderRadius: BorderRadius.circular(500)),
                             side: MaterialStateBorderSide.resolveWith(
                               (states) => const BorderSide(
                                   width: 2.0, color: Colors.black),
@@ -163,89 +170,42 @@ class _TaskPreviewCardState extends State<TaskPreviewCard> {
                                 updateData(checkedState!);
                               });
                             }),
-                        Text.rich(TextSpan(children: [
-                          TextSpan(
-                            text: widget.task,
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 19,
-                                decoration: isChecked
-                                    ? TextDecoration.lineThrough
-                                    : TextDecoration.none,
-                                fontFamily: 'varela-round.regular'),
-                          ),
-                          TextSpan(
-                            text: "\n${widget.time}",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black.withOpacity(.55),
-                                fontSize: 11,
-                                decoration: isChecked
-                                    ? TextDecoration.lineThrough
-                                    : TextDecoration.none,
-                                fontFamily: 'Rounded_Elegance'),
-                          ),
-                        ])),
-                      ],
-                    )
-
-                    // SingleChildScrollView(
-                    //   child: Row(
-                    //     children: [
-                    //       Checkbox(
-                    //           shape:
-                    //       RoundedRectangleBorder(
-                    //           borderRadius:
-                    //           BorderRadius
-                    //               .circular(
-                    //               5)),
-                    //           side:
-                    //           MaterialStateBorderSide
-                    //               .resolveWith(
-                    //                 (states) =>
-                    //             const BorderSide(
-                    //                 width: 2.0,
-                    //                 color: Colors
-                    //                     .white),
-                    //           ),
-                    //           activeColor: Colors.white,
-                    //           checkColor: Color(int.parse(widget.theme)),
-                    //           value: isChecked,
-                    //           onChanged: (checkedState) async {
-                    //             setState(() {
-                    //               isChecked = checkedState!;
-                    //             });
-                    //             await initiateDB().whenComplete(() => updateData(checkedState!));
-                    //           }),
-                    //       Wrap(
-                    //         direction: Axis.vertical,
-                    //         children: [Text.rich(
-                    //           // t1,
-                    //           TextSpan(
-                    //             children: [
-                    //               TextSpan(
-                    //                 text: widget.task,
-                    //                 style: const TextStyle(
-                    //                     fontWeight: FontWeight.bold,
-                    //                     fontSize: 19,
-                    //                     fontFamily: 'varela-round.regular'),
-                    //               ),
-                    //               TextSpan(
-                    //                 text: "   ${widget.time}",
-                    //                 style: const TextStyle(
-                    //                     fontWeight: FontWeight.bold,
-                    //                     color: Colors.white54,
-                    //                     fontSize: 11,
-                    //                     fontFamily: 'Rounded_Elegance'),
-                    //               ),
-                    //             ]
-                    //           )
-                    //         ),]
-                    //       ),
-                    //     ],
-                    //   ),
-                    // ),
-                    ),
+                      ),
+                      SizedBox(
+                        width: 15,
+                      ),
+                      SizedBox(
+                        width: size.width - size.width * .057 - 67,
+                        child: Text.rich(TextSpan(
+                            style: TextStyle(height: 0),
+                            children: [
+                              TextSpan(
+                                text: widget.task,
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 19,
+                                    decoration: isChecked
+                                        ? TextDecoration.lineThrough
+                                        : TextDecoration.none,
+                                    fontFamily: 'varela-round.regular'),
+                              ),
+                              TextSpan(
+                                text: "\n${widget.time}",
+                                style: TextStyle(
+                                    height: 0,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black.withOpacity(.55),
+                                    fontSize: 11,
+                                    decoration: isChecked
+                                        ? TextDecoration.lineThrough
+                                        : TextDecoration.none,
+                                    fontFamily: 'Rounded_Elegance'),
+                              ),
+                            ])),
+                      ),
+                    ],
+                  ),
+                ),
               )),
         ),
       ),

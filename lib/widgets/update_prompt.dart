@@ -5,9 +5,9 @@ import '../classes/my_sharedpreferences.dart';
 import '../hero_transition_handler/custom_rect_tween.dart';
 
 class UpdatePrompt extends StatefulWidget {
-  final String url;
+  final String url, title, content, negativeButtonText;
 
-  const UpdatePrompt({Key? key, required this.url}) : super(key: key);
+  const UpdatePrompt({Key? key, required this.url, required this.title, required this.content, required this.negativeButtonText}) : super(key: key);
 
   @override
   State<UpdatePrompt> createState() => _UpdatePromptState();
@@ -57,7 +57,7 @@ class _UpdatePromptState extends State<UpdatePrompt> {
                           Padding(
                             padding: const EdgeInsets.all(11.0),
                             child: Text(
-                              'NEW UPDATE FOUND',
+                              widget.title,
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                   fontFamily: 'varela-round.regular',
@@ -68,7 +68,7 @@ class _UpdatePromptState extends State<UpdatePrompt> {
                           Padding(
                             padding: const EdgeInsets.all(11.0),
                             child: Text(
-                              'wanna stay up to date?',
+                              widget.content,
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                   fontFamily: 'Rounded_Elegance',
@@ -95,13 +95,13 @@ class _UpdatePromptState extends State<UpdatePrompt> {
                                           borderRadius:
                                           BorderRadius.circular(11)),
                                       // function used to perform after pressing the button
-                                      child: const Padding(
-                                        padding: EdgeInsets.symmetric(
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
                                             horizontal: 11.0, vertical: 7),
                                         child: Text(
-                                          'cancel',
+                                          widget.negativeButtonText,
                                           textAlign: TextAlign.center,
-                                          style: TextStyle(
+                                          style: const TextStyle(
                                               height: 0,
                                               color: Colors.white,
                                               fontFamily:
@@ -111,33 +111,36 @@ class _UpdatePromptState extends State<UpdatePrompt> {
                                       ),
                                     ),
                                   ),
-                                  SizedBox(
+                                  const SizedBox(
                                     width: 17,
                                   ),
-                                  GestureDetector(
-                                    onTap: () =>
-                                        setState(() {
-                                          launchURL();
-                                        }),
-                                    child: Container(
-                                      // FlatButton widget is used to make a text to work like a button
-                                      decoration: BoxDecoration(
-                                          color: Colors.black,
-                                          borderRadius:
-                                          BorderRadius.circular(11)),
-                                      // function used to perform after pressing the button
-                                      child: const Padding(
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 11.0, vertical: 7),
-                                        child: Text(
-                                          'download',
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                              height: 0,
-                                              color: Colors.white,
-                                              fontFamily:
-                                              'varela-round.regular',
-                                              fontWeight: FontWeight.bold),
+                                  Visibility(
+                                    visible: widget.negativeButtonText == 'great!' ? false : true,
+                                    child: GestureDetector(
+                                      onTap: () =>
+                                          setState(() {
+                                            launchURL();
+                                          }),
+                                      child: Container(
+                                        // FlatButton widget is used to make a text to work like a button
+                                        decoration: BoxDecoration(
+                                            color: Colors.black,
+                                            borderRadius:
+                                            BorderRadius.circular(11)),
+                                        // function used to perform after pressing the button
+                                        child: const Padding(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 11.0, vertical: 7),
+                                          child: Text(
+                                            'download',
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                                height: 0,
+                                                color: Colors.white,
+                                                fontFamily:
+                                                'varela-round.regular',
+                                                fontWeight: FontWeight.bold),
+                                          ),
                                         ),
                                       ),
                                     ),

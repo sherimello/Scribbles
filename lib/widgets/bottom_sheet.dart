@@ -129,12 +129,31 @@ class _TestState extends State<Test> {
             builder: (context) => Center(
               child: UpdatePrompt(
                 url: snapshot.value.toString(),
+                title: 'NEW UPDATE FOUND',
+                content: 'wanna stay up to date?',
+                negativeButtonText: 'download',
               ),
             ),
           ));
         });
+      } else {
+        setState(() {
+          _isCloudSyncing = false;
+        });
+        Navigator.of(this.context).push(HeroDialogRoute(
+          builder: (context) => Center(
+            child: UpdatePrompt(
+              url: snapshot.value.toString(),
+              title: 'LOOKING GREAT!',
+              content: 'you have the latest version installed',
+              negativeButtonText: 'great!',
+            ),
+          ),
+        ));
       }
     }
+
+    var size = MediaQuery.of(context).size;
 
     return AbsorbPointer(
       absorbing: _isCloudSyncing,
@@ -176,48 +195,97 @@ class _TestState extends State<Test> {
                                         ),
                                       )),
                                 ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: GestureDetector(
-                                    // splashColor: Colors.white,
-                                    // radius: 100,
-                                    onTap: () {
-                                      Navigator.of(context)
-                                          .push(HeroDialogRoute(
-                                        builder: (context) => const Center(
-                                          child: NewNotePage('000', '000', ""),
-                                        ),
-                                        // settings: const RouteSettings(),
-                                      ));
-                                      // Navigator.removeRoute(
-                                      //   context,
-                                      //   MaterialPageRoute(
-                                      //     builder: (BuildContext context) => const Home(),
-                                      //   ),
-                                      // );
-                                    },
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: RichText(
-                                        textAlign: TextAlign.center,
-                                        text: const TextSpan(
-                                          children: [
-                                            WidgetSpan(
-                                              child: Icon(
-                                                Icons.post_add,
-                                                size: 19,
-                                                color: Colors.white,
+                                Visibility(
+                                  visible: false,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: GestureDetector(
+                                      // splashColor: Colors.white,
+                                      // radius: 100,
+                                      onTap: () {
+                                        Navigator.of(context)
+                                            .push(HeroDialogRoute(
+                                          builder: (context) => const Center(
+                                            child:
+                                                NewNotePage('000', '000', ""),
+                                          ),
+                                          // settings: const RouteSettings(),
+                                        ));
+                                        // Navigator.removeRoute(
+                                        //   context,
+                                        //   MaterialPageRoute(
+                                        //     builder: (BuildContext context) => const Home(),
+                                        //   ),
+                                        // );
+                                      },
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: RichText(
+                                          textAlign: TextAlign.center,
+                                          text: const TextSpan(
+                                            children: [
+                                              WidgetSpan(
+                                                child: Icon(
+                                                  Icons.post_add,
+                                                  size: 19,
+                                                  color: Colors.white,
+                                                ),
                                               ),
-                                            ),
-                                            TextSpan(
-                                                text: "  create new note",
-                                                style: TextStyle(
-                                                    fontFamily:
-                                                        'varela-round.regular',
-                                                    fontSize: 21,
-                                                    fontWeight:
-                                                        FontWeight.bold)),
-                                          ],
+                                              TextSpan(
+                                                  text: "  create new note",
+                                                  style: TextStyle(
+                                                      fontFamily:
+                                                          'varela-round.regular',
+                                                      fontSize: 21,
+                                                      fontWeight:
+                                                          FontWeight.bold)),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Visibility(
+                                  visible: false,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: GestureDetector(
+                                      // splashColor: Colors.white,
+                                      // radius: 100,
+                                      onTap: () {
+                                        Navigator.of(context)
+                                            .push(HeroDialogRoute(
+                                          builder: (context) => const Center(
+                                            child: TaskCreationPage("000"),
+                                            // child: AnimatedDateTimePicker(),
+                                          ),
+                                          // settings: const RouteSettings(),
+                                        ));
+                                      },
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: RichText(
+                                          textAlign: TextAlign.center,
+                                          text: const TextSpan(
+                                            children: [
+                                              WidgetSpan(
+                                                child: Icon(
+                                                  Icons.add_task_rounded,
+                                                  size: 21,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                              TextSpan(
+                                                  text: "  create new task",
+                                                  style: TextStyle(
+                                                      fontFamily:
+                                                          'varela-round.regular',
+                                                      fontSize: 19,
+                                                      fontWeight:
+                                                          FontWeight.bold)),
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -231,49 +299,7 @@ class _TestState extends State<Test> {
                                     onTap: () {
                                       Navigator.of(context)
                                           .push(HeroDialogRoute(
-                                        builder: (context) => const Center(
-                                          child: TaskCreationPage("000"),
-                                          // child: AnimatedDateTimePicker(),
-                                        ),
-                                        // settings: const RouteSettings(),
-                                      ));
-                                    },
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: RichText(
-                                        textAlign: TextAlign.center,
-                                        text: const TextSpan(
-                                          children: [
-                                            WidgetSpan(
-                                              child: Icon(
-                                                Icons.add_task_rounded,
-                                                size: 21,
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                            TextSpan(
-                                                text: "  create new task",
-                                                style: TextStyle(
-                                                    fontFamily:
-                                                        'varela-round.regular',
-                                                    fontSize: 19,
-                                                    fontWeight:
-                                                        FontWeight.bold)),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: GestureDetector(
-                                    // splashColor: Colors.white,
-                                    // radius: 100,
-                                    onTap: () {
-                                      Navigator.of(context)
-                                          .push(HeroDialogRoute(
-                                        // bgColor: const Color(0x00000000),
+                                        bgColor: Colors.transparent,
                                         builder: (context) => const Center(
                                           child: Profile(tag: '000'),
                                         ),
@@ -284,12 +310,12 @@ class _TestState extends State<Test> {
                                       padding: const EdgeInsets.all(8.0),
                                       child: RichText(
                                         textAlign: TextAlign.center,
-                                        text: const TextSpan(
+                                        text: TextSpan(
                                           children: [
                                             WidgetSpan(
                                               child: Icon(
                                                 Icons.person_outline_rounded,
-                                                size: 21,
+                                                size: size.width * .045,
                                                 color: Colors.white,
                                               ),
                                             ),
@@ -298,7 +324,7 @@ class _TestState extends State<Test> {
                                                 style: TextStyle(
                                                     fontFamily:
                                                         'varela-round.regular',
-                                                    fontSize: 19,
+                                                    fontSize: size.width * .045,
                                                     fontWeight:
                                                         FontWeight.bold)),
                                           ],
@@ -315,6 +341,7 @@ class _TestState extends State<Test> {
                                     onTap: () {
                                       Navigator.of(context)
                                           .push(HeroDialogRoute(
+                                        bgColor: Colors.transparent,
                                         builder: (context) => const Center(
                                           child: SyncFile('000'),
                                         ),
@@ -325,12 +352,12 @@ class _TestState extends State<Test> {
                                       padding: const EdgeInsets.all(8.0),
                                       child: RichText(
                                         textAlign: TextAlign.center,
-                                        text: const TextSpan(
+                                        text: TextSpan(
                                           children: [
                                             WidgetSpan(
                                               child: Icon(
                                                 Icons.sync,
-                                                size: 21,
+                                                size: size.width * .045,
                                                 color: Colors.white,
                                               ),
                                             ),
@@ -339,7 +366,7 @@ class _TestState extends State<Test> {
                                                 style: TextStyle(
                                                     fontFamily:
                                                         'varela-round.regular',
-                                                    fontSize: 19,
+                                                    fontSize: size.width * .045,
                                                     fontWeight:
                                                         FontWeight.bold)),
                                           ],
@@ -363,12 +390,12 @@ class _TestState extends State<Test> {
                                       padding: const EdgeInsets.all(8.0),
                                       child: RichText(
                                         textAlign: TextAlign.center,
-                                        text: const TextSpan(
+                                        text: TextSpan(
                                           children: [
                                             WidgetSpan(
                                               child: Icon(
                                                 Icons.person_outline_rounded,
-                                                size: 21,
+                                                size: size.width * .045,
                                                 color: Colors.white,
                                               ),
                                             ),
@@ -377,7 +404,7 @@ class _TestState extends State<Test> {
                                                 style: TextStyle(
                                                     fontFamily:
                                                         'varela-round.regular',
-                                                    fontSize: 19,
+                                                    fontSize: size.width * .045,
                                                     fontWeight:
                                                         FontWeight.bold)),
                                           ],
@@ -455,7 +482,7 @@ class _TestState extends State<Test> {
                                             child: Center(
                                               child: Column(
                                                 mainAxisSize: MainAxisSize.min,
-                                                children: const [
+                                                children: [
                                                   Text("Cloud Backup",
                                                       textAlign:
                                                           TextAlign.center,
@@ -463,10 +490,11 @@ class _TestState extends State<Test> {
                                                           color: Colors.white,
                                                           fontFamily:
                                                               'varela-round.regular',
-                                                          fontSize: 19,
+                                                          fontSize:
+                                                              size.width * .045,
                                                           fontWeight:
                                                               FontWeight.bold)),
-                                                  Flexible(
+                                                  const Flexible(
                                                     child: Text(
                                                         "(automatically backs up notes everytime you open the app)",
                                                         overflow: TextOverflow

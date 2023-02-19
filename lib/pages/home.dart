@@ -76,6 +76,9 @@ class _HomeState extends State<Home>
             builder: (context) => Center(
               child: UpdatePrompt(
                 url: snapshot.value.toString(),
+                title: 'NEW UPDATE FOUND',
+                content: 'wanna stay up to date?',
+                negativeButtonText: 'download',
               ),
             ),
           ));
@@ -265,7 +268,8 @@ class _HomeState extends State<Home>
             int.parse(month),
             int.parse(day),
             int.parse(hour),
-            int.parse(minute));
+            int.parse(minute),
+            "once");
       }
     }
   }
@@ -687,19 +691,25 @@ class _HomeState extends State<Home>
                           borderRadius: BorderRadius.circular(100)),
                       child: Padding(
                         padding: EdgeInsets.all(size.width * .01),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        child: Stack(
                           children: [
-                            GestureDetector(
-                              onTap: () => setState(() {
-                                listWidget = 'notes';
-                                if (!isNotesPressed) {
-                                  initiateNotesDB()
-                                      .whenComplete(() => showNotesData());
-                                  isNotesPressed = !isNotesPressed;
-                                }
-                              }),
+                            AnimatedPositioned(
+                              curve: Curves.easeOutCubic,
+                              duration: const Duration(milliseconds: 455),
+                              left: isNotesPressed
+                                  ? 0
+                                  : showProfilePicture
+                                      ? ((size.width -
+                                                  size.width * .245 -
+                                                  size.width * .02) *
+                                              .5) +
+                                          size.width * .005
+                                      : ((size.width -
+                                                  size.width * .1 -
+                                                  size.width * .02) *
+                                              .5) +
+                                          size.width * .005,
+                              height: size.width * .105,
                               child: Container(
                                 width: showProfilePicture
                                     ? ((size.width -
@@ -707,146 +717,183 @@ class _HomeState extends State<Home>
                                                 size.width * .02) *
                                             .5) -
                                         size.width * .005
-                                    // ? MediaQuery
-                                    // .of(context)
-                                    // .size
-                                    // .width * .5 -
-                                    // (size.width * .05 +
-                                    //     11 +
-                                    //     ((39 +
-                                    //         MediaQuery
-                                    //             .of(context)
-                                    //             .size
-                                    //             .width *
-                                    //             .05) *
-                                    //         .5))
-                                    : MediaQuery.of(context).size.width * .5 -
-                                        (size.width * .05 + 11),
+                                    : ((size.width -
+                                                size.width * .1 -
+                                                size.width * .02) *
+                                            .5) -
+                                        size.width * .005,
                                 height: size.width * .05 + 18,
                                 decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(100),
-                                    color: isNotesPressed
-                                        ? const Color(0xffF8F0E3)
-                                            .withOpacity(.19)
-                                        : const Color(0xffF8F0E3)),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(7.0),
-                                  child: Text.rich(
-                                    TextSpan(
-                                      style: TextStyle(
-                                          height: 0,
-                                          color: isNotesPressed
-                                              ? Colors.white
-                                              : Colors.black,
-                                          fontSize: size.width * .031,
-                                          fontFamily: "Rounded_Elegance",
-                                          fontWeight: FontWeight.bold),
-                                      children: [
-                                        WidgetSpan(
-                                            child: Icon(
-                                              Icons.note_outlined,
-                                              size: size.width * .05,
-                                              color: isNotesPressed
-                                                  ? Colors.white
-                                                  : Colors.black,
-                                            ),
-                                            alignment:
-                                                PlaceholderAlignment.bottom),
+                                    borderRadius: BorderRadius.circular(1000),
+                                    color: const Color(0xffF8F0E3)),
+                              ),
+                            ),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                GestureDetector(
+                                  onTap: () => setState(() {
+                                    listWidget = 'notes';
+                                    if (!isNotesPressed) {
+                                      initiateNotesDB()
+                                          .whenComplete(() => showNotesData());
+                                      isNotesPressed = !isNotesPressed;
+                                    }
+                                  }),
+                                  child: Container(
+                                    width: showProfilePicture
+                                        ? ((size.width -
+                                                    size.width * .245 -
+                                                    size.width * .02) *
+                                                .5) -
+                                            size.width * .005
+                                        : ((size.width -
+                                                    size.width * .1 -
+                                                    size.width * .02) *
+                                                .5) -
+                                            size.width * .005,
+                                    height: size.width * .05 + 18,
+                                    decoration: BoxDecoration(
+                                        borderRadius:
+                                            BorderRadius.circular(100),
+                                        color: isNotesPressed
+                                            ? const Color(0xffF8F0E3)
+                                                .withOpacity(0)
+                                            : const Color(0xffF8F0E3)
+                                                .withOpacity(.0)),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(7.0),
+                                      child: Text.rich(
                                         TextSpan(
-                                          text: "  notes",
                                           style: TextStyle(
                                               height: 0,
                                               color: isNotesPressed
-                                                  ? Colors.white
-                                                  : Colors.black,
-                                              fontSize: size.width * .031,
+                                                  ? Colors.black
+                                                  : Colors.white,
+                                              fontSize: isNotesPressed
+                                                  ? size.width * .037
+                                                  : size.width * .029,
                                               fontFamily: "Rounded_Elegance",
                                               fontWeight: FontWeight.bold),
-                                        )
-                                      ],
+                                          children: [
+                                            WidgetSpan(
+                                                child: Icon(
+                                                  isNotesPressed
+                                                      ? Icons.note_rounded
+                                                      : Icons.note_outlined,
+                                                  size: isNotesPressed
+                                                      ? size.width * .055
+                                                      : size.width * .05,
+                                                  color: isNotesPressed
+                                                      ? Colors.black
+                                                      : Colors.white,
+                                                ),
+                                                alignment: PlaceholderAlignment
+                                                    .bottom),
+                                            TextSpan(
+                                              text: "  notes",
+                                              style: TextStyle(
+                                                  height: 0,
+                                                  color: isNotesPressed
+                                                      ? Colors.black
+                                                      : Colors.white,
+                                                  fontSize: isNotesPressed
+                                                      ? size.width * .037
+                                                      : size.width * .029,
+                                                  fontFamily:
+                                                      "Rounded_Elegance",
+                                                  fontWeight: FontWeight.bold),
+                                            )
+                                          ],
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
                                     ),
-                                    textAlign: TextAlign.center,
                                   ),
                                 ),
-                              ),
-                            ),
-                            GestureDetector(
-                              onTap: () => setState(() {
-                                listWidget = 'tasks';
-                                if (isNotesPressed) {
-                                  initiateTasksDB()
-                                      .whenComplete(() => showTasksData());
-                                  isNotesPressed = false;
-                                }
-                              }),
-                              child: Container(
-                                width: showProfilePicture
-                                    ? ((size.width -
-                                                size.width * .245 -
-                                                size.width * .02) *
-                                            .5) -
-                                        size.width * .005
-                                    // ? MediaQuery
-                                    // .of(context)
-                                    // .size
-                                    // .width * .5 -
-                                    // (size.width * .05 +
-                                    //     11 +
-                                    //     ((39 +
-                                    //         MediaQuery
-                                    //             .of(context)
-                                    //             .size
-                                    //             .width *
-                                    //             .05) *
-                                    //         .5))
-                                    : MediaQuery.of(context).size.width * .5 -
-                                        (size.width * .05 + 11),
-                                height: size.width * .05 + 18,
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(100),
-                                    color: isNotesPressed
-                                        ? const Color(0xffF8F0E3)
-                                        : const Color(0xffF8F0E3)
-                                            .withOpacity(.19)),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(7.0),
-                                  child: Text.rich(
-                                    TextSpan(
-                                        style: TextStyle(
-                                            height: 0,
-                                            color: !isNotesPressed
-                                                ? Colors.white
-                                                : Colors.black,
-                                            fontFamily: "Rounded_Elegance",
-                                            fontSize: size.width * .031,
-                                            fontWeight: FontWeight.bold),
-                                        children: [
-                                          WidgetSpan(
-                                              child: Icon(
-                                                Icons.task_outlined,
-                                                size: size.width * .05,
-                                                color: !isNotesPressed
-                                                    ? Colors.white
-                                                    : Colors.black,
-                                              ),
-                                              alignment:
-                                                  PlaceholderAlignment.bottom),
-                                          TextSpan(
-                                            text: "  tasks",
+                                GestureDetector(
+                                  onTap: () => setState(() {
+                                    listWidget = 'tasks';
+                                    if (isNotesPressed) {
+                                      initiateTasksDB()
+                                          .whenComplete(() => showTasksData());
+                                      isNotesPressed = false;
+                                    }
+                                  }),
+                                  child: Container(
+                                    width: showProfilePicture
+                                        ? ((size.width -
+                                                    size.width * .245 -
+                                                    size.width * .02) *
+                                                .5) -
+                                            size.width * .005
+                                        : ((size.width -
+                                                    size.width * .1 -
+                                                    size.width * .02) *
+                                                .5) -
+                                            size.width * .005,
+                                    height: size.width * .05 + 18,
+                                    decoration: BoxDecoration(
+                                        borderRadius:
+                                            BorderRadius.circular(100),
+                                        color: isNotesPressed
+                                            ? const Color(0xffF8F0E3)
+                                                .withOpacity(.0)
+                                            : const Color(0xffF8F0E3)
+                                                .withOpacity(0)),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(7.0),
+                                      child: Text.rich(
+                                        TextSpan(
                                             style: TextStyle(
                                                 height: 0,
                                                 color: !isNotesPressed
-                                                    ? Colors.white
-                                                    : Colors.black,
-                                                fontSize: size.width * .031,
+                                                    ? Colors.black
+                                                    : Colors.white,
                                                 fontFamily: "Rounded_Elegance",
+                                                fontSize: isNotesPressed
+                                                    ? size.width * .029
+                                                    : size.width * .037,
                                                 fontWeight: FontWeight.bold),
-                                          )
-                                        ]),
-                                    textAlign: TextAlign.center,
+                                            children: [
+                                              WidgetSpan(
+                                                  child: Icon(
+                                                    isNotesPressed
+                                                        ? Icons.task_outlined
+                                                        : Icons.task_rounded,
+                                                    size: isNotesPressed
+                                                        ? size.width * .05
+                                                        : size.width * .055,
+                                                    color: !isNotesPressed
+                                                        ? Colors.black
+                                                        : Colors.white,
+                                                  ),
+                                                  alignment:
+                                                      PlaceholderAlignment
+                                                          .bottom),
+                                              TextSpan(
+                                                text: "  tasks",
+                                                style: TextStyle(
+                                                    height: 0,
+                                                    color: !isNotesPressed
+                                                        ? Colors.black
+                                                        : Colors.white,
+                                                    fontSize: isNotesPressed
+                                                        ? size.width * .029
+                                                        : size.width * .037,
+                                                    fontFamily:
+                                                        "Rounded_Elegance",
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              )
+                                            ]),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ),
+                              ],
                             ),
                           ],
                         ),

@@ -9,10 +9,11 @@ import '../hero_transition_handler/custom_rect_tween.dart';
 import '../pages/home.dart';
 
 class AnimatedDateTimePicker extends StatefulWidget {
-  final String tag, task, theme;
+  final String tag, task, theme, type;
   final Size size;
 
-  const AnimatedDateTimePicker(this.tag, this.task, this.theme, this.size,
+  const AnimatedDateTimePicker(
+      this.tag, this.task, this.theme, this.size, this.type,
       {Key? key})
       : super(key: key);
 
@@ -94,10 +95,17 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
   }
 
   Future<void> insertData(String time, bool pending) async {
-    String month = date.month.toString().length == 1 ? "0${date.month}" : date.month.toString();
-    String day = date.day.toString().length == 1 ? "0${date.day}" : date.day.toString();
-    String hour = hourValue ~/ 10.toString().length == 1 ? "0${hourValue ~/ 10}" : (hourValue ~/ 10).toString();
-    String minute = minuteValue.toInt().toString().length == 1 ? "0${minuteValue.toInt()}" : (minuteValue.toInt()).toString();
+    String month = date.month.toString().length == 1
+        ? "0${date.month}"
+        : date.month.toString();
+    String day =
+        date.day.toString().length == 1 ? "0${date.day}" : date.day.toString();
+    String hour = hourValue ~/ 10.toString().length == 1
+        ? "0${hourValue ~/ 10}"
+        : (hourValue ~/ 10).toString();
+    String minute = minuteValue.toInt().toString().length == 1
+        ? "0${minuteValue.toInt()}"
+        : (minuteValue.toInt()).toString();
     String schedule = "${date.year}|$month|$day|$hour|$minute";
     print(time);
     await database.transaction((txn) async {
@@ -162,7 +170,7 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
             color: Colors.transparent,
             child: Container(
               decoration: BoxDecoration(
-                  color: Colors.white, borderRadius: BorderRadius.circular(31)),
+                  color: Colors.black, borderRadius: BorderRadius.circular(31)),
               child: Stack(
                 children: [
                   SingleChildScrollView(
@@ -181,6 +189,18 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
                             padding: const EdgeInsets.all(11.0),
                             child: Stack(
                               children: [
+                                AnimatedOpacity(
+                                  duration: const Duration(milliseconds: 555),
+                                  opacity: skyTheme == const Color(0xff334760)
+                                      ? 1
+                                      : 0,
+                                  child: Image.asset(
+                                    'lib/assets/images/stars.png',
+                                    fit: BoxFit.cover,
+                                    width: size.width,
+                                    height: skyHeight + 31,
+                                  ),
+                                ),
                                 AnimatedPositioned(
                                     left: movementX,
                                     bottom: movementY,
@@ -192,6 +212,18 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
                                     ),
                                     duration:
                                         const Duration(milliseconds: 155)),
+                                AnimatedOpacity(
+                                  duration: const Duration(milliseconds: 555),
+                                  opacity: skyTheme == const Color(0xff334760)
+                                      ? 0
+                                      : 1,
+                                  child: Image.asset(
+                                    'lib/assets/images/clouds.png',
+                                    fit: BoxFit.cover,
+                                    width: size.width,
+                                    height: skyHeight + 31,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -205,8 +237,9 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
                               Text(
                                 hour == 0
                                     ? '12:'
-                                    : hour.toString().padLeft(2, '0') + ":",
+                                    : "${hour.toString().padLeft(2, '0')}:",
                                 style: TextStyle(
+                                    color: Colors.white,
                                     fontSize: isPortraitMode()
                                         ? size.width * .13
                                         : size.height * .13,
@@ -215,6 +248,7 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
                               Text(
                                 minuteValue.toInt().toString().padLeft(2, '0'),
                                 style: TextStyle(
+                                    color: Colors.white,
                                     fontSize: size.height > size.width
                                         ? size.width * .13
                                         : size.height * .13,
@@ -234,7 +268,8 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
                                                 BorderRadius.circular(5),
                                             color: isMorning
                                                 ? skyTheme
-                                                : skyTheme.withOpacity(.15)),
+                                                : Colors.white
+                                                    .withOpacity(.13)),
                                         child: Padding(
                                           padding: const EdgeInsets.all(3.0),
                                           child: AnimatedDefaultTextStyle(
@@ -243,17 +278,21 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
                                             style: isSkyColorDark()
                                                 ? TextStyle(
                                                     color: isMorning
-                                                        ? Colors.white
-                                                        : Colors.black
-                                                            .withOpacity(.15),
+                                                        ? skyTheme ==
+                                                                const Color(
+                                                                    0xff334760)
+                                                            ? Colors.white
+                                                            : Colors.black
+                                                        : Colors.white
+                                                            .withOpacity(.35),
                                                     fontWeight: FontWeight.bold,
                                                     fontFamily:
                                                         "varela-round.regular")
                                                 : TextStyle(
                                                     color: isMorning
                                                         ? Colors.black
-                                                        : Colors.black
-                                                            .withOpacity(.15),
+                                                        : Colors.white
+                                                            .withOpacity(.35),
                                                     fontWeight: FontWeight.bold,
                                                     fontFamily:
                                                         "varela-round.regular"),
@@ -274,7 +313,8 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
                                                 BorderRadius.circular(5),
                                             color: !isMorning
                                                 ? skyTheme
-                                                : skyTheme.withOpacity(.15)),
+                                                : Colors.white
+                                                    .withOpacity(.13)),
                                         child: Padding(
                                           padding: const EdgeInsets.all(3.0),
                                           child: AnimatedDefaultTextStyle(
@@ -283,17 +323,30 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
                                             style: isSkyColorDark()
                                                 ? TextStyle(
                                                     color: isMorning
-                                                        ? Colors.black
-                                                            .withOpacity(.15)
-                                                        : Colors.white,
+                                                        ? Colors.white
+                                                            .withOpacity(.35)
+                                                        : skyTheme ==
+                                                                const Color(
+                                                                    0xff334760)
+                                                            ? Colors.white
+                                                            : Colors.black,
+                                                    //
+                                                    // isMorning
+                                                    //     ? skyTheme == const Color(0xffffbf77) || skyTheme == Colors.lightBlueAccent ? Colors.black : Colors.white
+                                                    //         .withOpacity(.35)
+                                                    //     : Colors.white,
                                                     fontWeight: FontWeight.bold,
                                                     fontFamily:
                                                         "varela-round.regular")
                                                 : TextStyle(
                                                     color: isMorning
-                                                        ? Colors.black
-                                                            .withOpacity(.15)
-                                                        : Colors.black,
+                                                        ? Colors.white
+                                                            .withOpacity(.35)
+                                                        : skyTheme ==
+                                                                const Color(
+                                                                    0xff334760)
+                                                            ? Colors.white
+                                                            : Colors.black,
                                                     fontWeight: FontWeight.bold,
                                                     fontFamily:
                                                         "varela-round.regular"),
@@ -315,12 +368,12 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
                           child: SingleChildScrollView(
                             child: Row(
                               children: [
-                                const Text(
+                                Text(
                                   "hour:",
                                   style: TextStyle(
-                                      color: Colors.black,
+                                      color: Colors.white,
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 17,
+                                      fontSize: size.width * .037,
                                       fontFamily: "varela-round.regular"),
                                 ),
                                 Expanded(
@@ -438,12 +491,12 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
                           child: SingleChildScrollView(
                             child: Row(
                               children: [
-                                const Text(
+                                Text(
                                   "minute:",
                                   style: TextStyle(
-                                      color: Colors.black,
+                                      color: Colors.white,
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 17,
+                                      fontSize: size.width * .037,
                                       fontFamily: "varela-round.regular"),
                                 ),
                                 Expanded(
@@ -497,13 +550,15 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
                                 child: AnimatedDefaultTextStyle(
                                   duration: const Duration(milliseconds: 155),
                                   style: isSkyColorDark()
-                                      ? const TextStyle(
+                                      ? TextStyle(
                                           color: Colors.white,
                                           fontWeight: FontWeight.bold,
+                                          fontSize: size.width * .031,
                                           fontFamily: "varela-round.regular")
-                                      : const TextStyle(
+                                      : TextStyle(
                                           color: Colors.black,
                                           fontWeight: FontWeight.bold,
+                                          fontSize: size.width * .031,
                                           fontFamily: "varela-round.regular"),
                                   child: const Text(
                                     'change date',
@@ -538,36 +593,66 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
                               " " +
                               widget.task +
                               " ");
-                          NotificationService().showNotification(
-                              tempID[0]['id'],
-                              widget.task,
-                              date.year,
-                              date.month,
-                              date.day,
-                              hourValue ~/ 10,
-                              minuteValue.toInt()).whenComplete(() => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                const Home(
-                                    true, 'tasks')),
-                          ));
+                          NotificationService()
+                              .showNotification(
+                                  tempID[0]['id'],
+                                  widget.task,
+                                  date.year,
+                                  date.month,
+                                  date.day,
+                                  hourValue ~/ 10,
+                                  minuteValue.toInt(),
+                                  widget.type)
+                              .whenComplete(() => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const Home(true, 'tasks')),
+                                  ));
                         });
                       },
                       child: Container(
                         decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(1000),
-                            border:
-                                Border.all(width: 1.35, color: Colors.white),
-                            color: Colors.transparent),
-                        child: const Padding(
-                            padding: EdgeInsets.fromLTRB(8.0, 5, 8, 5),
-                            child: Text(
-                              'done scheduling',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontFamily: 'varela-round.regular',
-                                  fontWeight: FontWeight.bold),
+                          borderRadius: BorderRadius.circular(1000),
+                          border: Border.all(
+                            width: 1.35,
+                            color: skyTheme == const Color(0xff334760)
+                                ? Colors.white
+                                : Colors.black,
+                          ),
+                          color: skyTheme == const Color(0xff334760)
+                              ? Colors.white
+                              : Colors.black,
+                        ),
+                        child: Padding(
+                            padding: const EdgeInsets.all(7),
+                            child: Text.rich(
+                              TextSpan(
+                                  style: const TextStyle(height: 0),
+                                  children: [
+                                    WidgetSpan(
+                                        alignment: PlaceholderAlignment.middle,
+                                        child: Icon(
+                                          Icons.done_rounded,
+                                          size: size.width * .045,
+                                          color: skyTheme ==
+                                                  const Color(0xff334760)
+                                              ? Colors.black
+                                              : Colors.white,
+                                        )),
+                                    TextSpan(
+                                      text: '  done scheduling',
+                                      style: TextStyle(
+                                          height: 0,
+                                          fontSize: size.width * .031,
+                                          color: skyTheme ==
+                                                  const Color(0xff334760)
+                                              ? Colors.black
+                                              : Colors.white,
+                                          fontFamily: 'varela-round.regular',
+                                          fontWeight: FontWeight.bold),
+                                    )
+                                  ]),
                             )),
                       ),
                     ),
