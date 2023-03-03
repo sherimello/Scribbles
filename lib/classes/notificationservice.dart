@@ -122,7 +122,7 @@ class NotificationService {
           UILocalNotificationDateInterpretation.absoluteTime,
           androidAllowWhileIdle:
           true, // To show notification even when the app is closed
-          matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime // for daily notification at same time
+          matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime // for notification in specific days at same time
         );
       } catch (e) {
         if (kDebugMode) {

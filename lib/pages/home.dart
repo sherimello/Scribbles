@@ -7,9 +7,11 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide BoxDecoration, BoxShadow;
 import 'package:flutter_inset_box_shadow/flutter_inset_box_shadow.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl/intl.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart';
 import 'package:scribbles/classes/my_sharedpreferences.dart';
 import 'package:scribbles/pages/task_creation_page.dart';
@@ -60,13 +62,18 @@ class _HomeState extends State<Home>
   bool _isLoading = false;
 
   checkForUpdates() async {
-    if (await MySharedPreferences().containsKey("disable update auto prompt") ==
-        false) {
+    // if (await MySharedPreferences().containsKey("disable update auto prompt") ==
+    //     false) {
       var snapshot = await FirebaseDatabase.instance
           .ref('app update')
           .child("version code")
           .get();
-      if (snapshot.value.toString() != "1.5") {
+
+      PackageInfo packageInfo = await PackageInfo.fromPlatform();
+      String version = packageInfo.version;
+      print("hello: " + snapshot.value.toString());
+
+      if (snapshot.value.toString() != version) {
         snapshot = await FirebaseDatabase.instance
             .ref('app update')
             .child("url")
@@ -78,13 +85,13 @@ class _HomeState extends State<Home>
                 url: snapshot.value.toString(),
                 title: 'NEW UPDATE FOUND',
                 content: 'wanna stay up to date?',
-                negativeButtonText: 'download',
+                negativeButtonText: 'cancel',
               ),
             ),
           ));
         });
       }
-    }
+    // }
   }
 
   Future<void> initiateTasksDB() async {
@@ -249,7 +256,7 @@ class _HomeState extends State<Home>
 
   bindNotificationToTasks() {
     for (int i = 0; i < tList.length; i++) {
-      if (tList[i]['schedule'] != "undefined") {
+      if (tList[i]['schedule'] != "undefined" && tList[i]['schedule'].toString().length == 17) {
         String year = tList[i]["schedule"].toString().substring(0, 4);
         String month = tList[i]["schedule"].toString().substring(5, 7);
         String day = tList[i]["schedule"].toString().substring(8, 10);
@@ -366,8 +373,9 @@ class _HomeState extends State<Home>
           // list.isEmpty ? Container():
           Padding(
         padding: index == 0
-            ? EdgeInsets.only(top: 56 + MediaQuery.of(context).size.width * .05)
-            : EdgeInsets.zero,
+            ? EdgeInsets.only(
+                top: 56 + MediaQuery.of(context).size.width * .05, bottom: 2)
+            : EdgeInsets.symmetric(vertical: 2),
         child: TaskPreviewCard(
           time: tList[tList.length - 1 - index]['time'].toString(),
           theme: tList[tList.length - 1 - index]["theme"].toString(),
@@ -396,18 +404,26 @@ class _HomeState extends State<Home>
     }
   }
 
-  Future<bool> requestPermission() async {
+  Future<bool?> requestPermission() async {
     WidgetsFlutterBinding.ensureInitialized();
-    Future<bool> Pstatus =
-        AwesomeNotifications().requestPermissionToSendNotifications();
+    final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
+        FlutterLocalNotificationsPlugin().resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
+    final bool? granted = await androidImplementation?.requestPermission();
+    // setState(() {
+    //   _notificationsEnabled = granted ?? false;
+    // });
 
-    if (await Pstatus == true) {
+    // Future<bool> Pstatus =
+    //     AwesomeNotifications().requestPermissionToSendNotifications();
+
+    if (granted == true) {
       //permission granted...
     } else {
       requestPermission();
       // exit(1);
     }
-    return Pstatus;
+    return granted;
     // We didn't ask for permission yet or the permission has been denied before but not permanently.
   }
 

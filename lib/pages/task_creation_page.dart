@@ -29,7 +29,7 @@ class _TaskCreationPageState extends State<TaskCreationPage> {
   var selectedColor = "0xfff7a221";
   String message = "please, write a task first.";
 
-  bool v = false;
+  bool v = false, repeatToggle = false;
 
   @override
   void initState() {
@@ -221,7 +221,8 @@ class _TaskCreationPageState extends State<TaskCreationPage> {
                           ),
                         ),
                         Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 31),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 11, horizontal: 31),
                             child: RichText(
                               textAlign: TextAlign.start,
                               text: TextSpan(children: [
@@ -289,15 +290,14 @@ class _TaskCreationPageState extends State<TaskCreationPage> {
                               _taskFieldController.text.isEmpty
                                   ? showCustomSnackBar()
                                   : Navigator.of(context).push(HeroDialogRoute(
-                                bgColor: Colors.transparent,
+                                      bgColor: Colors.transparent,
                                       builder: (context) => Center(
                                         child: AnimatedDateTimePicker(
                                             "000",
                                             _taskFieldController.text,
                                             selectedColor,
                                             MediaQuery.of(context).size,
-                                        "once"
-                                        ),
+                                            "once"),
                                         // child: AnimatedDateTimePicker(),
                                       ),
                                       // settings: const RouteSettings(),
@@ -389,26 +389,27 @@ class _TaskCreationPageState extends State<TaskCreationPage> {
                           ),
                         ),
                         Visibility(
-                          visible: false,
+                          visible: repeatToggle,
                           child: Padding(
                             padding: const EdgeInsets.all(11),
                             child: InkWell(
                               onTap: () {
                                 _taskFieldController.text.isEmpty
                                     ? showCustomSnackBar()
-                                    : Navigator.of(context).push(HeroDialogRoute(
-                                  bgColor: Colors.transparent,
-                                  builder: (context) => Center(
-                                    child: AnimatedDateTimePicker(
-                                        "000",
-                                        _taskFieldController.text,
-                                        selectedColor,
-                                        MediaQuery.of(context).size,
-                                        "daily")
-                                    // child: AnimatedDateTimePicker(),
-                                  ),
-                                  // settings: const RouteSettings(),
-                                ));
+                                    : Navigator.of(context)
+                                        .push(HeroDialogRoute(
+                                        bgColor: Colors.transparent,
+                                        builder: (context) => Center(
+                                            child: AnimatedDateTimePicker(
+                                                "000",
+                                                _taskFieldController.text,
+                                                selectedColor,
+                                                MediaQuery.of(context).size,
+                                                "daily")
+                                            // child: AnimatedDateTimePicker(),
+                                            ),
+                                        // settings: const RouteSettings(),
+                                      ));
                               },
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 355),
@@ -424,10 +425,12 @@ class _TaskCreationPageState extends State<TaskCreationPage> {
                                           child: Icon(
                                             Icons.done_all_rounded,
                                             size: size.width * .065,
-                                            color: Color(int.parse(selectedColor))
-                                                .withOpacity(1),
+                                            color:
+                                                Color(int.parse(selectedColor))
+                                                    .withOpacity(1),
                                           ),
-                                          alignment: PlaceholderAlignment.middle),
+                                          alignment:
+                                              PlaceholderAlignment.middle),
                                       TextSpan(
                                         text: "  remind daily",
                                         style: TextStyle(
@@ -445,26 +448,27 @@ class _TaskCreationPageState extends State<TaskCreationPage> {
                           ),
                         ),
                         Visibility(
-                          visible: false,
+                          visible: repeatToggle,
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 11),
                             child: InkWell(
                               onTap: () {
                                 _taskFieldController.text.isEmpty
                                     ? showCustomSnackBar()
-                                    : Navigator.of(context).push(HeroDialogRoute(
-                                  bgColor: Colors.transparent,
-                                  builder: (context) => Center(
-                                      child: AnimatedDateTimePicker(
-                                          "000",
-                                          _taskFieldController.text,
-                                          selectedColor,
-                                          MediaQuery.of(context).size,
-                                          "specific")
-                                    // child: AnimatedDateTimePicker(),
-                                  ),
-                                  // settings: const RouteSettings(),
-                                ));
+                                    : Navigator.of(context)
+                                        .push(HeroDialogRoute(
+                                        bgColor: Colors.transparent,
+                                        builder: (context) => Center(
+                                            child: AnimatedDateTimePicker(
+                                                "000",
+                                                _taskFieldController.text,
+                                                selectedColor,
+                                                MediaQuery.of(context).size,
+                                                "specific")
+                                            // child: AnimatedDateTimePicker(),
+                                            ),
+                                        // settings: const RouteSettings(),
+                                      ));
                               },
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 355),
@@ -480,12 +484,12 @@ class _TaskCreationPageState extends State<TaskCreationPage> {
                                             child: Icon(
                                               Icons.calendar_month_rounded,
                                               size: size.width * .065,
-                                              color:
-                                              Color(int.parse(selectedColor))
+                                              color: Color(
+                                                      int.parse(selectedColor))
                                                   .withOpacity(1),
                                             ),
                                             alignment:
-                                            PlaceholderAlignment.middle),
+                                                PlaceholderAlignment.middle),
                                         TextSpan(
                                           text: "  on specific days",
                                           style: TextStyle(
@@ -500,6 +504,25 @@ class _TaskCreationPageState extends State<TaskCreationPage> {
                               ),
                             ),
                           ),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Switch(
+                                value: repeatToggle,
+                                activeColor: Color(int.parse(selectedColor)),
+                                onChanged: (v) {
+                                  setState(() {
+                                    repeatToggle = v;
+                                  });
+                                }),
+                            Text(
+                              "repeat",
+                              style: TextStyle(
+                                  fontFamily: "varela-round.regular",
+                                  fontWeight: FontWeight.bold),
+                            )
+                          ],
                         ),
                       ],
                     ),

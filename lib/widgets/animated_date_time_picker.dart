@@ -12,8 +12,8 @@ class AnimatedDateTimePicker extends StatefulWidget {
   final String tag, task, theme, type;
   final Size size;
 
-  const AnimatedDateTimePicker(
-      this.tag, this.task, this.theme, this.size, this.type,
+  const AnimatedDateTimePicker(this.tag, this.task, this.theme, this.size,
+      this.type,
       {Key? key})
       : super(key: key);
 
@@ -22,8 +22,12 @@ class AnimatedDateTimePicker extends StatefulWidget {
 }
 
 class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
-  double hourValue = 0.0, minuteValue = 0.0, movementX = 0, movementY = 0;
-  int hour = 0, minute = 0;
+  double hourValue = 0.0,
+      minuteValue = 0.0,
+      movementX = 0,
+      movementY = 0;
+  int hour = 0,
+      minute = 0;
   var image = 'lib/assets/images/moonn.png';
   var skyTheme = const Color(0xff334760);
   bool isMorning = true;
@@ -47,8 +51,8 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
       minuteValue = date.minute.toDouble();
 
       double skyHeight = isPortraitModeForInit()
-              ? widget.size.height * .17
-              : widget.size.width * .17,
+          ? widget.size.height * .17
+          : widget.size.width * .17,
           imageSize = isPortraitModeForInit()
               ? widget.size.height * .071
               : widget.size.width * .071;
@@ -57,25 +61,25 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
           ? image = 'lib/assets/images/suun.png'
           : image = 'lib/assets/images/moonn.png';
       (hourValue >= 60 && hourValue <= 70) ||
-              (hourValue >= 170 && hourValue <= 180)
+          (hourValue >= 170 && hourValue <= 180)
           ? skyTheme = const Color(0xffffbf77)
           : hourValue >= 70 && hourValue <= 160
-              ? skyTheme = Colors.lightBlueAccent
-              : skyTheme = const Color(0xff334760);
+          ? skyTheme = Colors.lightBlueAccent
+          : skyTheme = const Color(0xff334760);
 
       isPortraitModeForInit()
           ? movementX =
-              (((widget.size.width - 44 - imageSize) / 23)) * (hourValue / 10)
+          (((widget.size.width - 44 - imageSize) / 23)) * (hourValue / 10)
           : movementX =
-              (((widget.size.width - 44 - imageSize) / 23)) * (hourValue / 10);
+          (((widget.size.width - 44 - imageSize) / 23)) * (hourValue / 10);
       hourValue == 110 || hourValue == 120
           ? movementY = (((skyHeight - 22 - imageSize) / 10)) * 10
           : hourValue > 120
-              ? movementY = ((((skyHeight - 22 - imageSize) / 13)) * 13) -
-                  (((skyHeight - 22 - imageSize) / 11)) *
-                      ((hourValue / 10) - 12)
-              : movementY =
-                  (((skyHeight - 22 - imageSize) / 10)) * (hourValue / 10);
+          ? movementY = ((((skyHeight - 22 - imageSize) / 13)) * 13) -
+          (((skyHeight - 22 - imageSize) / 11)) *
+              ((hourValue / 10) - 12)
+          : movementY =
+          (((skyHeight - 22 - imageSize) / 10)) * (hourValue / 10);
     });
     print(hourValue);
     print(date);
@@ -88,22 +92,31 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
     // open the database
     database = await openDatabase(path, version: 1,
         onCreate: (Database db, int version) async {
-      // When creating the db, create the table
-      await db.execute(
-          'CREATE TABLE IF NOT EXISTS Tasks (id INTEGER PRIMARY KEY, task NVARCHAR, theme NVARCHAR, time NVARCHAR, pending INTEGER, schedule NVARCHAR)');
-    });
+          // When creating the db, create the table
+          await db.execute(
+              'CREATE TABLE IF NOT EXISTS Tasks (id INTEGER PRIMARY KEY, task NVARCHAR, theme NVARCHAR, time NVARCHAR, pending INTEGER, schedule NVARCHAR)');
+        });
   }
 
   Future<void> insertData(String time, bool pending) async {
-    String month = date.month.toString().length == 1
+    String month = date.month
+        .toString()
+        .length == 1
         ? "0${date.month}"
         : date.month.toString();
     String day =
-        date.day.toString().length == 1 ? "0${date.day}" : date.day.toString();
-    String hour = hourValue ~/ 10.toString().length == 1
+    date.day
+        .toString()
+        .length == 1 ? "0${date.day}" : date.day.toString();
+    String hour = hourValue ~/ 10
+        .toString()
+        .length == 1
         ? "0${hourValue ~/ 10}"
         : (hourValue ~/ 10).toString();
-    String minute = minuteValue.toInt().toString().length == 1
+    String minute = minuteValue
+        .toInt()
+        .toString()
+        .length == 1
         ? "0${minuteValue.toInt()}"
         : (minuteValue.toInt()).toString();
     String schedule = "${date.year}|$month|$day|$hour|$minute";
@@ -118,7 +131,9 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
 
   @override
   Widget build(BuildContext context) {
-    var size = MediaQuery.of(context).size;
+    var size = MediaQuery
+        .of(context)
+        .size;
     double sunMoonMovementWidth = size.width - 2 * (size.height * .0125);
 
     var myFormat = DateFormat('d-MM-yyyy');
@@ -182,7 +197,7 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
                           width: size.width,
                           height: skyHeight + 31,
                           decoration: BoxDecoration(
-                              // image: DecorationImage(image: const AssetImage('lib/assets/images/clouds.png'), opacity: .5, fit: BoxFit.cover, colorFilter: ColorFilter.mode(skyTheme, BlendMode.color)),
+                            // image: DecorationImage(image: const AssetImage('lib/assets/images/clouds.png'), opacity: .5, fit: BoxFit.cover, colorFilter: ColorFilter.mode(skyTheme, BlendMode.color)),
                               borderRadius: BorderRadius.circular(31),
                               color: skyTheme),
                           child: Padding(
@@ -211,7 +226,7 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
                                       width: imageSize,
                                     ),
                                     duration:
-                                        const Duration(milliseconds: 155)),
+                                    const Duration(milliseconds: 155)),
                                 AnimatedOpacity(
                                   duration: const Duration(milliseconds: 555),
                                   opacity: skyTheme == const Color(0xff334760)
@@ -262,14 +277,14 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
                                       padding: const EdgeInsets.all(1.5),
                                       child: AnimatedContainer(
                                         duration:
-                                            const Duration(milliseconds: 155),
+                                        const Duration(milliseconds: 155),
                                         decoration: BoxDecoration(
                                             borderRadius:
-                                                BorderRadius.circular(5),
+                                            BorderRadius.circular(5),
                                             color: isMorning
                                                 ? skyTheme
                                                 : Colors.white
-                                                    .withOpacity(.13)),
+                                                .withOpacity(.13)),
                                         child: Padding(
                                           padding: const EdgeInsets.all(3.0),
                                           child: AnimatedDefaultTextStyle(
@@ -277,25 +292,25 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
                                                 milliseconds: 155),
                                             style: isSkyColorDark()
                                                 ? TextStyle(
-                                                    color: isMorning
-                                                        ? skyTheme ==
-                                                                const Color(
-                                                                    0xff334760)
-                                                            ? Colors.white
-                                                            : Colors.black
-                                                        : Colors.white
-                                                            .withOpacity(.35),
-                                                    fontWeight: FontWeight.bold,
-                                                    fontFamily:
-                                                        "varela-round.regular")
+                                                color: isMorning
+                                                    ? skyTheme ==
+                                                    const Color(
+                                                        0xff334760)
+                                                    ? Colors.white
+                                                    : Colors.black
+                                                    : Colors.white
+                                                    .withOpacity(.35),
+                                                fontWeight: FontWeight.bold,
+                                                fontFamily:
+                                                "varela-round.regular")
                                                 : TextStyle(
-                                                    color: isMorning
-                                                        ? Colors.black
-                                                        : Colors.white
-                                                            .withOpacity(.35),
-                                                    fontWeight: FontWeight.bold,
-                                                    fontFamily:
-                                                        "varela-round.regular"),
+                                                color: isMorning
+                                                    ? Colors.black
+                                                    : Colors.white
+                                                    .withOpacity(.35),
+                                                fontWeight: FontWeight.bold,
+                                                fontFamily:
+                                                "varela-round.regular"),
                                             child: const Text(
                                               'am',
                                             ),
@@ -307,14 +322,14 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
                                       padding: const EdgeInsets.all(1.5),
                                       child: AnimatedContainer(
                                         duration:
-                                            const Duration(milliseconds: 155),
+                                        const Duration(milliseconds: 155),
                                         decoration: BoxDecoration(
                                             borderRadius:
-                                                BorderRadius.circular(5),
+                                            BorderRadius.circular(5),
                                             color: !isMorning
                                                 ? skyTheme
                                                 : Colors.white
-                                                    .withOpacity(.13)),
+                                                .withOpacity(.13)),
                                         child: Padding(
                                           padding: const EdgeInsets.all(3.0),
                                           child: AnimatedDefaultTextStyle(
@@ -322,34 +337,34 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
                                                 milliseconds: 155),
                                             style: isSkyColorDark()
                                                 ? TextStyle(
-                                                    color: isMorning
-                                                        ? Colors.white
-                                                            .withOpacity(.35)
-                                                        : skyTheme ==
-                                                                const Color(
-                                                                    0xff334760)
-                                                            ? Colors.white
-                                                            : Colors.black,
-                                                    //
-                                                    // isMorning
-                                                    //     ? skyTheme == const Color(0xffffbf77) || skyTheme == Colors.lightBlueAccent ? Colors.black : Colors.white
-                                                    //         .withOpacity(.35)
-                                                    //     : Colors.white,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontFamily:
-                                                        "varela-round.regular")
+                                                color: isMorning
+                                                    ? Colors.white
+                                                    .withOpacity(.35)
+                                                    : skyTheme ==
+                                                    const Color(
+                                                        0xff334760)
+                                                    ? Colors.white
+                                                    : Colors.black,
+                                                //
+                                                // isMorning
+                                                //     ? skyTheme == const Color(0xffffbf77) || skyTheme == Colors.lightBlueAccent ? Colors.black : Colors.white
+                                                //         .withOpacity(.35)
+                                                //     : Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                                fontFamily:
+                                                "varela-round.regular")
                                                 : TextStyle(
-                                                    color: isMorning
-                                                        ? Colors.white
-                                                            .withOpacity(.35)
-                                                        : skyTheme ==
-                                                                const Color(
-                                                                    0xff334760)
-                                                            ? Colors.white
-                                                            : Colors.black,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontFamily:
-                                                        "varela-round.regular"),
+                                                color: isMorning
+                                                    ? Colors.white
+                                                    .withOpacity(.35)
+                                                    : skyTheme ==
+                                                    const Color(
+                                                        0xff334760)
+                                                    ? Colors.white
+                                                    : Colors.black,
+                                                fontWeight: FontWeight.bold,
+                                                fontFamily:
+                                                "varela-round.regular"),
                                             child: const Text(
                                               'pm',
                                             ),
@@ -381,11 +396,11 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
                                     padding: const EdgeInsets.only(left: 11.0),
                                     child: AnimatedContainer(
                                       duration:
-                                          const Duration(milliseconds: 555),
+                                      const Duration(milliseconds: 555),
                                       decoration: BoxDecoration(
                                           color: skyTheme,
                                           borderRadius:
-                                              BorderRadius.circular(21)),
+                                          BorderRadius.circular(21)),
                                       child: Slider(
                                         activeColor: !isSkyColorDark()
                                             ? Colors.black
@@ -406,76 +421,76 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
                                             hourValue == 0
                                                 ? hour = 12
                                                 : (hourValue / 10) > 12
-                                                    ? hour =
-                                                        ((hourValue / 10) - 12)
-                                                            .toInt()
-                                                    : hour = hourValue ~/ 10;
+                                                ? hour =
+                                                ((hourValue / 10) - 12)
+                                                    .toInt()
+                                                : hour = hourValue ~/ 10;
 
                                             newHourValue >= 60 &&
-                                                    newHourValue <= 180
+                                                newHourValue <= 180
                                                 ? image =
-                                                    'lib/assets/images/suun.png'
+                                            'lib/assets/images/suun.png'
                                                 : image =
-                                                    'lib/assets/images/moonn.png';
+                                            'lib/assets/images/moonn.png';
                                             (newHourValue >= 60 &&
-                                                        newHourValue <= 70) ||
-                                                    (newHourValue >= 170 &&
-                                                        newHourValue <= 180)
+                                                newHourValue <= 70) ||
+                                                (newHourValue >= 170 &&
+                                                    newHourValue <= 180)
                                                 ? skyTheme =
-                                                    const Color(0xffffbf77)
+                                            const Color(0xffffbf77)
                                                 : newHourValue >= 70 &&
-                                                        newHourValue <= 160
-                                                    ? skyTheme =
-                                                        Colors.lightBlueAccent
-                                                    : skyTheme =
-                                                        const Color(0xff334760);
+                                                newHourValue <= 160
+                                                ? skyTheme =
+                                                Colors.lightBlueAccent
+                                                : skyTheme =
+                                            const Color(0xff334760);
 
                                             //for x-axis movement
                                             isPortraitMode()
                                                 ? movementX = (((size.width -
-                                                            44 -
-                                                            imageSize) /
-                                                        23)) *
-                                                    (newHourValue / 10)
+                                                44 -
+                                                imageSize) /
+                                                23)) *
+                                                (newHourValue / 10)
                                                 : movementX = (((size.width -
-                                                            44 -
-                                                            imageSize) /
-                                                        23)) *
-                                                    (newHourValue / 10);
+                                                44 -
+                                                imageSize) /
+                                                23)) *
+                                                (newHourValue / 10);
                                             newHourValue == 110 ||
-                                                    newHourValue == 120
+                                                newHourValue == 120
                                                 ? movementY = (((skyHeight -
-                                                            22 -
-                                                            imageSize) /
-                                                        10)) *
-                                                    10
+                                                22 -
+                                                imageSize) /
+                                                10)) *
+                                                10
                                                 : newHourValue > 120
-                                                    ? movementY = ((((skyHeight -
-                                                                    22 -
-                                                                    imageSize) /
-                                                                13)) *
-                                                            13) -
-                                                        (((skyHeight -
-                                                                    22 -
-                                                                    imageSize) /
-                                                                11)) *
-                                                            ((newHourValue /
-                                                                    10) -
-                                                                12)
-                                                    : movementY = (((skyHeight -
-                                                                22 -
-                                                                imageSize) /
-                                                            10)) *
-                                                        (newHourValue / 10);
+                                                ? movementY = ((((skyHeight -
+                                                22 -
+                                                imageSize) /
+                                                13)) *
+                                                13) -
+                                                (((skyHeight -
+                                                    22 -
+                                                    imageSize) /
+                                                    11)) *
+                                                    ((newHourValue /
+                                                        10) -
+                                                        12)
+                                                : movementY = (((skyHeight -
+                                                22 -
+                                                imageSize) /
+                                                10)) *
+                                                (newHourValue / 10);
                                           });
                                         },
                                         divisions: 23,
                                         label: hourValue == 0
                                             ? "12"
                                             : (hourValue / 10) > 12
-                                                ? ((hourValue / 10) - 12)
-                                                    .toString()
-                                                : (hourValue / 10).toString(),
+                                            ? ((hourValue / 10) - 12)
+                                            .toString()
+                                            : (hourValue / 10).toString(),
                                         min: 0,
                                         max: 230,
                                       ),
@@ -504,16 +519,16 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
                                     padding: const EdgeInsets.only(left: 11.0),
                                     child: AnimatedContainer(
                                       duration:
-                                          const Duration(milliseconds: 555),
+                                      const Duration(milliseconds: 555),
                                       decoration: BoxDecoration(
                                           color: skyTheme,
                                           borderRadius:
-                                              BorderRadius.circular(21)),
+                                          BorderRadius.circular(21)),
                                       child: Slider(
                                         activeColor:
-                                            skyTheme != const Color(0xff334760)
-                                                ? Colors.black
-                                                : Colors.white,
+                                        skyTheme != const Color(0xff334760)
+                                            ? Colors.black
+                                            : Colors.white,
                                         value: minuteValue,
                                         onChanged: (newMinuteValue) {
                                           HapticFeedback.lightImpact();
@@ -534,6 +549,198 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
                             ),
                           ),
                         ),
+
+                        const Padding(
+                          padding: EdgeInsets.only(top: 8.0),
+                          child: Text("schedule the reminder for:",
+                            textAlign: TextAlign.start,
+                            style: TextStyle(
+                            fontFamily: "varela-round.regular",
+                            color: Colors.white
+                          ),),
+                        ),
+
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 555),
+                                width: (size.width - 44) * .1,
+                                height: (size.width - 44) * .1,
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(1000),
+                                    color: skyTheme
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    "SA",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        height: 0,
+                                        color: Colors.white,
+                                        fontSize: (size.width - 44) * .033,
+                                        fontFamily: "veral-round.regular",
+                                        fontWeight: FontWeight.bold
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                width: (size.width - 44) * .3 / 17,
+                              ),
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 555),
+                                width: (size.width - 44) * .1,
+                                height: (size.width - 44) * .1,
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(1000),
+                                    color: skyTheme
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    "SU",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        height: 0,
+                                        color: Colors.white,
+                                        fontSize: (size.width - 44) * .033,
+                                        fontFamily: "veral-round.regular",
+                                        fontWeight: FontWeight.bold
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                width: (size.width - 44) * .3 / 17,
+                              ),
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 555),
+                                width: (size.width - 44) * .1,
+                                height: (size.width - 44) * .1,
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(1000),
+                                    color: skyTheme
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    "MO",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        height: 0,
+                                        color: Colors.white,
+                                        fontSize: (size.width - 44) * .033,
+                                        fontFamily: "veral-round.regular",
+                                        fontWeight: FontWeight.bold
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                width: (size.width - 44) * .3 / 17,
+                              ),
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 555),
+                                width: (size.width - 44) * .1,
+                                height: (size.width - 44) * .1,
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(1000),
+                                    color: skyTheme
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    "TU",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        height: 0,
+                                        color: Colors.white,
+                                        fontSize: (size.width - 44) * .033,
+                                        fontFamily: "veral-round.regular",
+                                        fontWeight: FontWeight.bold
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                width: (size.width - 44) * .3 / 17,
+                              ),
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 555),
+                                width: (size.width - 44) * .1,
+                                height: (size.width - 44) * .1,
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(1000),
+                                    color: skyTheme
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    "WE",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        height: 0,
+                                        color: Colors.white,
+                                        fontSize: (size.width - 44) * .033,
+                                        fontFamily: "veral-round.regular",
+                                        fontWeight: FontWeight.bold
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                width: (size.width - 44) * .3 / 17,
+                              ),
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 555),
+                                width: (size.width - 44) * .1,
+                                height: (size.width - 44) * .1,
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(1000),
+                                    color: skyTheme
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    "TH",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        height: 0,
+                                        color: Colors.white,
+                                        fontSize: (size.width - 44) * .033,
+                                        fontFamily: "veral-round.regular",
+                                        fontWeight: FontWeight.bold
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                width: (size.width - 44) * .3 / 17,
+                              ),
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 555),
+                                width: (size.width - 44) * .1,
+                                height: (size.width - 44) * .1,
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(1000),
+                                    color: skyTheme
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    "FR",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        height: 0,
+                                        color: Colors.white,
+                                        fontSize: (size.width - 44) * .033,
+                                        fontFamily: "veral-round.regular",
+                                        fontWeight: FontWeight.bold
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
                         Padding(
                           padding: const EdgeInsets.all(21.0),
                           child: GestureDetector(
@@ -551,15 +758,15 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
                                   duration: const Duration(milliseconds: 155),
                                   style: isSkyColorDark()
                                       ? TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: size.width * .031,
-                                          fontFamily: "varela-round.regular")
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: size.width * .031,
+                                      fontFamily: "varela-round.regular")
                                       : TextStyle(
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: size.width * .031,
-                                          fontFamily: "varela-round.regular"),
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: size.width * .031,
+                                      fontFamily: "varela-round.regular"),
                                   child: const Text(
                                     'change date',
                                   ),
@@ -581,7 +788,7 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
                         //output:  August, 27, 2021
 
                         String tdata =
-                            DateFormat("hh:mm:ss a").format(DateTime.now());
+                        DateFormat("hh:mm:ss a").format(DateTime.now());
                         // output: 07:38:57 PM
                         time = cdate2 + "\n" + tdata;
                         await initiateDB().whenComplete(() async {
@@ -595,20 +802,21 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
                               " ");
                           NotificationService()
                               .showNotification(
-                                  tempID[0]['id'],
-                                  widget.task,
-                                  date.year,
-                                  date.month,
-                                  date.day,
-                                  hourValue ~/ 10,
-                                  minuteValue.toInt(),
-                                  widget.type)
-                              .whenComplete(() => Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            const Home(true, 'tasks')),
-                                  ));
+                              tempID[0]['id'],
+                              widget.task,
+                              date.year,
+                              date.month,
+                              date.day,
+                              hourValue ~/ 10,
+                              minuteValue.toInt(),
+                              widget.type)
+                              .whenComplete(() =>
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                    const Home(true, 'tasks')),
+                              ));
                         });
                       },
                       child: Container(
@@ -636,7 +844,7 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
                                           Icons.done_rounded,
                                           size: size.width * .045,
                                           color: skyTheme ==
-                                                  const Color(0xff334760)
+                                              const Color(0xff334760)
                                               ? Colors.black
                                               : Colors.white,
                                         )),
@@ -646,7 +854,7 @@ class _AnimatedDateTimePickerState extends State<AnimatedDateTimePicker> {
                                           height: 0,
                                           fontSize: size.width * .031,
                                           color: skyTheme ==
-                                                  const Color(0xff334760)
+                                              const Color(0xff334760)
                                               ? Colors.black
                                               : Colors.white,
                                           fontFamily: 'varela-round.regular',

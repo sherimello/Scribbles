@@ -1,6 +1,7 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:scribbles/classes/my_sharedpreferences.dart';
 import 'package:scribbles/pages/home.dart';
 import 'package:scribbles/pages/new_note_page_design.dart';
@@ -116,7 +117,11 @@ class _TestState extends State<Test> {
           .ref('app update')
           .child("version code")
           .get();
-      if (snapshot.value.toString() != "1.5") {
+
+      PackageInfo packageInfo = await PackageInfo.fromPlatform();
+      String version = packageInfo.version;
+
+      if (snapshot.value.toString() != version) {
         snapshot = await FirebaseDatabase.instance
             .ref('app update')
             .child("url")
@@ -131,7 +136,7 @@ class _TestState extends State<Test> {
                 url: snapshot.value.toString(),
                 title: 'NEW UPDATE FOUND',
                 content: 'wanna stay up to date?',
-                negativeButtonText: 'download',
+                negativeButtonText: 'cancel',
               ),
             ),
           ));
